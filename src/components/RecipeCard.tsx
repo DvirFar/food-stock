@@ -12,7 +12,7 @@ interface RecipeCardProps {
 }
 
 export const RecipeCard = ({ recipe }: RecipeCardProps) => {
-  const totalTime = recipe.prepTime + recipe.cookTime;
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
   return (
     <Card className="transition-shadow hover:shadow-md cursor-pointer">

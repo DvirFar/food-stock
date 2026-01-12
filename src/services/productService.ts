@@ -1,87 +1,109 @@
-// Product service - handles all product-related operations
-// This will later connect to Oracle DB through the server API
+// Product service - handles all product-related operations using Supabase
 
+import { supabase } from '@/integrations/supabase/client';
 import { Product, DashboardStats, ProductCategory } from '@/types';
-import { mockProducts } from './mockData';
-
-// Simulated API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 class ProductService {
-  private products: Product[] = [...mockProducts];
-
   async getAll(): Promise<Product[]> {
-    await delay(100);
-    return [...this.products];
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    return (data || []) as Product[];
   }
 
   async getById(id: string): Promise<Product | undefined> {
-    await delay(50);
-    return this.products.find(p => p.id === id);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data as Product | undefined;
   }
 
-  async create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
-    await delay(100);
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.products.push(newProduct);
-    return newProduct;
+  async create(product: Omit<Product, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Product> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('products')
+      .insert({
+        ...product,
+        user_id: user.id,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as Product;
   }
 
   async update(id: string, updates: Partial<Product>): Promise<Product | undefined> {
-    await delay(100);
-    const index = this.products.findIndex(p => p.id === id);
-    if (index === -1) return undefined;
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
     
-    this.products[index] = {
-      ...this.products[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    return this.products[index];
+    if (error) throw error;
+    return data as Product | undefined;
   }
 
   async delete(id: string): Promise<boolean> {
-    await delay(100);
-    const index = this.products.findIndex(p => p.id === id);
-    if (index === -1) return false;
-    this.products.splice(index, 1);
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
     return true;
   }
 
   async getLowStock(): Promise<Product[]> {
-    await delay(50);
-    return this.products.filter(p => p.quantity < p.minQuantity);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    
+    // Filter products where quantity < min_quantity
+    return (data || []).filter((p: Product) => p.quantity < p.min_quantity) as Product[];
   }
 
   async getExpiringSoon(days: number = 3): Promise<Product[]> {
-    await delay(50);
     const now = new Date();
     const threshold = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
     
-    return this.products.filter(p => {
-      if (!p.expirationDate) return false;
-      const expDate = new Date(p.expirationDate);
-      return expDate <= threshold && expDate >= now;
-    });
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .not('expiration_date', 'is', null)
+      .lte('expiration_date', threshold.toISOString().split('T')[0])
+      .gte('expiration_date', now.toISOString().split('T')[0])
+      .order('expiration_date');
+    
+    if (error) throw error;
+    return (data || []) as Product[];
   }
 
   async getStats(): Promise<DashboardStats> {
-    await delay(50);
-    const lowStock = await this.getLowStock();
+    const products = await this.getAll();
+    const lowStock = products.filter(p => p.quantity < p.min_quantity);
     const expiring = await this.getExpiringSoon();
     
-    const categoryCounts = this.products.reduce((acc, p) => {
+    const categoryCounts = products.reduce((acc, p) => {
       acc[p.category] = (acc[p.category] || 0) + 1;
       return acc;
-    }, {} as Record<ProductCategory, number>);
+    }, {} as Partial<Record<ProductCategory, number>>);
 
     return {
-      totalProducts: this.products.length,
+      totalProducts: products.length,
       lowStockCount: lowStock.length,
       expiringCount: expiring.length,
       categoryCounts,

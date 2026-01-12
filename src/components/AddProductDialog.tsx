@@ -54,9 +54,9 @@ export const AddProductDialog = ({
         category,
         quantity: parseFloat(quantity),
         unit: unit.trim(),
-        minQuantity: parseFloat(minQuantity),
+        min_quantity: parseFloat(minQuantity),
         location,
-        expirationDate: expirationDate || undefined,
+        expiration_date: expirationDate || null,
       });
       
       onProductAdded(product);

@@ -28,9 +28,9 @@ export const ProductCard = ({
   onQuantityChange,
   onDelete,
 }: ProductCardProps) => {
-  const isLowStock = product.quantity < product.minQuantity;
-  const daysUntilExpiry = product.expirationDate 
-    ? differenceInDays(parseISO(product.expirationDate), new Date())
+  const isLowStock = product.quantity < product.min_quantity;
+  const daysUntilExpiry = product.expiration_date 
+    ? differenceInDays(parseISO(product.expiration_date), new Date())
     : null;
   const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 3 && daysUntilExpiry >= 0;
 
@@ -121,7 +121,7 @@ export const ProductCard = ({
           </div>
           
           <div className="text-right text-sm text-muted-foreground">
-            Min: {product.minQuantity}
+            Min: {product.min_quantity}
           </div>
         </div>
 
@@ -133,12 +133,12 @@ export const ProductCard = ({
               Low Stock
             </Badge>
           )}
-          {showExpiration && product.expirationDate && (
+          {showExpiration && product.expiration_date && (
             <Badge variant={isExpiringSoon ? 'secondary' : 'outline'}>
               <Clock className="h-3 w-3 mr-1" />
               {isExpiringSoon 
                 ? (daysUntilExpiry === 0 ? 'Expires today' : `Expires in ${daysUntilExpiry}d`)
-                : `Exp: ${format(parseISO(product.expirationDate), 'MMM d')}`
+                : `Exp: ${format(parseISO(product.expiration_date), 'MMM d')}`
               }
             </Badge>
           )}

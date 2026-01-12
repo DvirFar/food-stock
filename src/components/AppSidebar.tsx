@@ -3,21 +3,24 @@ import {
   Package, 
   ChefHat, 
   ShoppingCart,
-  Menu
+  LogOut
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const navItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
@@ -28,7 +31,13 @@ const navItems = [
 
 export const AppSidebar = () => {
   const { state } = useSidebar();
+  const { signOut, user } = useAuth();
   const isCollapsed = state === 'collapsed';
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out successfully');
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -66,6 +75,27 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        {user && (
+          <div className="flex flex-col gap-2">
+            {!isCollapsed && (
+              <p className="text-xs text-muted-foreground truncate px-2">
+                {user.email}
+              </p>
+            )}
+            <Button 
+              variant="ghost" 
+              size={isCollapsed ? "icon" : "sm"}
+              onClick={handleSignOut}
+              className="w-full justify-start"
+            >
+              <LogOut className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">Sign Out</span>}
+            </Button>
+          </div>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 };

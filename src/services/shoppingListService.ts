@@ -1,55 +1,70 @@
-// Shopping list service - manages shopping list operations
-// This will later connect to Oracle DB through the server API
+// Shopping list service - manages shopping list operations using Supabase
 
+import { supabase } from '@/integrations/supabase/client';
 import { ShoppingListItem, Product, ProductCategory } from '@/types';
-import { mockShoppingList } from './mockData';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 class ShoppingListService {
-  private items: ShoppingListItem[] = [...mockShoppingList];
-
   async getAll(): Promise<ShoppingListItem[]> {
-    await delay(100);
-    return [...this.items];
+    const { data, error } = await supabase
+      .from('shopping_list_items')
+      .select('*')
+      .order('added_at', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []) as ShoppingListItem[];
   }
 
-  async addItem(item: Omit<ShoppingListItem, 'id' | 'addedAt' | 'checked'>): Promise<ShoppingListItem> {
-    await delay(100);
-    const newItem: ShoppingListItem = {
-      ...item,
-      id: Date.now().toString(),
-      checked: false,
-      addedAt: new Date().toISOString(),
-    };
-    this.items.push(newItem);
-    return newItem;
+  async addItem(item: Omit<ShoppingListItem, 'id' | 'user_id' | 'added_at' | 'checked'>): Promise<ShoppingListItem> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('shopping_list_items')
+      .insert({
+        ...item,
+        user_id: user.id,
+        checked: false,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as ShoppingListItem;
   }
 
   async addFromLowStock(products: Product[]): Promise<ShoppingListItem[]> {
-    await delay(100);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Get existing items to avoid duplicates
+    const existingItems = await this.getAll();
     const newItems: ShoppingListItem[] = [];
     
     for (const product of products) {
-      // Check if item already exists
-      const exists = this.items.some(
-        i => i.productId === product.id && !i.checked
+      // Check if item already exists (not checked)
+      const exists = existingItems.some(
+        i => i.product_id === product.id && !i.checked
       );
       
       if (!exists) {
-        const neededQuantity = product.minQuantity - product.quantity;
-        const newItem: ShoppingListItem = {
-          id: Date.now().toString() + product.id,
-          productId: product.id,
-          name: product.name,
-          quantity: Math.max(neededQuantity, 1),
-          unit: product.unit,
-          category: product.category,
-          checked: false,
-          addedAt: new Date().toISOString(),
-        };
-        this.items.push(newItem);
-        newItems.push(newItem);
+        const neededQuantity = product.min_quantity - product.quantity;
+        
+        const { data, error } = await supabase
+          .from('shopping_list_items')
+          .insert({
+            user_id: user.id,
+            product_id: product.id,
+            name: product.name,
+            quantity: Math.max(neededQuantity, 1),
+            unit: product.unit,
+            category: product.category,
+            checked: false,
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        if (data) newItems.push(data as ShoppingListItem);
       }
     }
     
@@ -57,34 +72,56 @@ class ShoppingListService {
   }
 
   async toggleChecked(id: string): Promise<ShoppingListItem | undefined> {
-    await delay(50);
-    const index = this.items.findIndex(i => i.id === id);
-    if (index === -1) return undefined;
+    // First get the current state
+    const { data: current, error: fetchError } = await supabase
+      .from('shopping_list_items')
+      .select('checked')
+      .eq('id', id)
+      .maybeSingle();
     
-    this.items[index].checked = !this.items[index].checked;
-    return this.items[index];
+    if (fetchError) throw fetchError;
+    if (!current) return undefined;
+
+    const { data, error } = await supabase
+      .from('shopping_list_items')
+      .update({ checked: !current.checked })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data as ShoppingListItem | undefined;
   }
 
   async removeItem(id: string): Promise<boolean> {
-    await delay(50);
-    const index = this.items.findIndex(i => i.id === id);
-    if (index === -1) return false;
-    this.items.splice(index, 1);
+    const { error } = await supabase
+      .from('shopping_list_items')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
     return true;
   }
 
   async clearChecked(): Promise<void> {
-    await delay(100);
-    this.items = this.items.filter(i => !i.checked);
+    const { error } = await supabase
+      .from('shopping_list_items')
+      .delete()
+      .eq('checked', true);
+    
+    if (error) throw error;
   }
 
   async updateQuantity(id: string, quantity: number): Promise<ShoppingListItem | undefined> {
-    await delay(50);
-    const index = this.items.findIndex(i => i.id === id);
-    if (index === -1) return undefined;
+    const { data, error } = await supabase
+      .from('shopping_list_items')
+      .update({ quantity })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
     
-    this.items[index].quantity = quantity;
-    return this.items[index];
+    if (error) throw error;
+    return data as ShoppingListItem | undefined;
   }
 }
 
