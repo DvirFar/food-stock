@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Package, 
@@ -12,14 +11,18 @@ import {
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { shoppingListService } from '@/services/shoppingListService';
-import { Product, DashboardStats, categoryLabels } from '@/types';
+import { Product, DashboardStats } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
+import { ExpirationBarChart } from '@/components/dashboard/ExpirationBarChart';
+import { StockLevelChart } from '@/components/dashboard/StockLevelChart';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
   const [expiringProducts, setExpiringProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,12 +33,14 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsData, lowStock, expiring] = await Promise.all([
+      const [statsData, products, lowStock, expiring] = await Promise.all([
         productService.getStats(),
+        productService.getAll(),
         productService.getLowStock(),
         productService.getExpiringSoon(3),
       ]);
       setStats(statsData);
+      setAllProducts(products);
       setLowStockProducts(lowStock);
       setExpiringProducts(expiring);
     } catch (error) {
@@ -209,23 +214,12 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Category Overview */}
-      {stats && Object.keys(stats.categoryCounts).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Category Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(stats.categoryCounts).map(([category, count]) => (
-                <Badge key={category} variant="secondary" className="text-sm">
-                  {categoryLabels[category as keyof typeof categoryLabels]}: {count}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Charts Section */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {stats && <CategoryPieChart categoryCounts={stats.categoryCounts} />}
+        <ExpirationBarChart products={allProducts} />
+        <StockLevelChart products={allProducts} />
+      </div>
     </div>
   );
 };
