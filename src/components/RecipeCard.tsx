@@ -1,25 +1,55 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Clock, 
   Users,
-  ChefHat
+  ChefHat,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { Recipe } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RecipeCardProps {
   recipe: Recipe;
+  onEdit?: (recipe: Recipe) => void;
+  onDelete?: (recipe: Recipe) => void;
 }
 
-export const RecipeCard = ({ recipe }: RecipeCardProps) => {
+export const RecipeCard = ({ recipe, onEdit, onDelete }: RecipeCardProps) => {
+  const { user } = useAuth();
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+  const canModify = user && recipe.user_id === user.id;
 
   return (
-    <Card className="transition-shadow hover:shadow-md cursor-pointer">
+    <Card className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg leading-tight">{recipe.name}</CardTitle>
-          <ChefHat className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-1">
+            {canModify && onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onEdit(recipe)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {canModify && onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                onClick={() => onDelete(recipe)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+            <ChefHat className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          </div>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2">
           {recipe.description}

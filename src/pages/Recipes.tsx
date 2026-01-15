@@ -1,16 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Search, 
-  Clock, 
-  Users,
-  ChefHat
+  ChefHat,
+  Plus
 } from 'lucide-react';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { RecipeCard } from '@/components/RecipeCard';
+import { RecipeEditorDialog } from '@/components/RecipeEditorDialog';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Recipes = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -18,6 +30,10 @@ const Recipes = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
   useEffect(() => {
     loadRecipes();
@@ -45,7 +61,7 @@ const Recipes = () => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(r =>
         r.name.toLowerCase().includes(query) ||
-        r.description.toLowerCase().includes(query) ||
+        (r.description?.toLowerCase().includes(query)) ||
         r.ingredients.some(i => i.name.toLowerCase().includes(query))
       );
     }
@@ -69,6 +85,37 @@ const Recipes = () => {
     );
   };
 
+  const handleEdit = (recipe: Recipe) => {
+    setEditingRecipe(recipe);
+    setEditorOpen(true);
+  };
+
+  const handleDelete = (recipe: Recipe) => {
+    setRecipeToDelete(recipe);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!recipeToDelete) return;
+    
+    try {
+      await recipeService.delete(recipeToDelete.id);
+      toast.success('Recipe deleted');
+      loadRecipes();
+    } catch (error) {
+      console.error('Failed to delete recipe:', error);
+      toast.error('Failed to delete recipe');
+    } finally {
+      setDeleteDialogOpen(false);
+      setRecipeToDelete(null);
+    }
+  };
+
+  const handleNewRecipe = () => {
+    setEditingRecipe(null);
+    setEditorOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -80,11 +127,17 @@ const Recipes = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
-        <p className="text-muted-foreground">
-          Discover recipes you can make with your ingredients
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
+          <p className="text-muted-foreground">
+            Discover recipes you can make with your ingredients
+          </p>
+        </div>
+        <Button onClick={handleNewRecipe}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Recipe
+        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -136,7 +189,12 @@ const Recipes = () => {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map(recipe => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
@@ -147,6 +205,30 @@ const Recipes = () => {
           Showing {filteredRecipes.length} of {recipes.length} recipes
         </p>
       )}
+
+      {/* Recipe Editor Dialog */}
+      <RecipeEditorDialog
+        recipe={editingRecipe}
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        onSave={loadRecipes}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{recipeToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

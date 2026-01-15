@@ -2,6 +2,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Recipe, RecipeIngredient } from '@/types';
+import { Json } from '@/integrations/supabase/types';
+
+interface RecipeInput {
+  name: string;
+  description?: string | null;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  prep_time?: number | null;
+  cook_time?: number | null;
+  servings?: number;
+  tags?: string[];
+  is_public?: boolean;
+  image_url?: string | null;
+}
 
 class RecipeService {
   async getAll(): Promise<Recipe[]> {
@@ -37,6 +51,70 @@ class RecipeService {
       instructions: data.instructions || [],
       tags: data.tags || [],
     } as Recipe;
+  }
+
+  async create(recipe: RecipeInput): Promise<Recipe> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User must be authenticated to create recipes');
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .insert([{
+        name: recipe.name,
+        description: recipe.description,
+        prep_time: recipe.prep_time,
+        cook_time: recipe.cook_time,
+        servings: recipe.servings,
+        tags: recipe.tags,
+        is_public: recipe.is_public,
+        image_url: recipe.image_url,
+        instructions: recipe.instructions,
+        user_id: user.id,
+        ingredients: JSON.parse(JSON.stringify(recipe.ingredients)) as Json,
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return {
+      ...data,
+      ingredients: (data.ingredients as unknown as RecipeIngredient[]) || [],
+      instructions: data.instructions || [],
+      tags: data.tags || [],
+    } as Recipe;
+  }
+
+  async update(id: string, recipe: Partial<RecipeInput>): Promise<Recipe> {
+    const updateData: Record<string, unknown> = { ...recipe };
+    if (recipe.ingredients) {
+      updateData.ingredients = JSON.parse(JSON.stringify(recipe.ingredients)) as Json;
+    }
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return {
+      ...data,
+      ingredients: (data.ingredients as unknown as RecipeIngredient[]) || [],
+      instructions: data.instructions || [],
+      tags: data.tags || [],
+    } as Recipe;
+  }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
   }
 
   async searchByTag(tag: string): Promise<Recipe[]> {
