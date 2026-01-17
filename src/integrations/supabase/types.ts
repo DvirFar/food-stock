@@ -156,7 +156,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      recipes_public: {
+        Row: {
+          cook_time: number | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          ingredients: Json | null
+          instructions: string[] | null
+          is_public: boolean | null
+          name: string | null
+          prep_time: number | null
+          servings: number | null
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          ingredients?: Json | null
+          instructions?: string[] | null
+          is_public?: boolean | null
+          name?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Update: {
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          ingredients?: Json | null
+          instructions?: string[] | null
+          is_public?: boolean | null
+          name?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
