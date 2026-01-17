@@ -43,7 +43,7 @@ export const AddProductDialog = ({
     e.preventDefault();
     
     if (!name.trim() || !quantity || !unit.trim() || !minQuantity) {
-      toast.error('Please fill in all required fields');
+      toast.error('נא למלא את כל השדות הנדרשים');
       return;
     }
 
@@ -63,7 +63,7 @@ export const AddProductDialog = ({
       resetForm();
       onOpenChange(false);
     } catch (error) {
-      toast.error('Failed to add product');
+      toast.error('שגיאה בהוספת מוצר');
     } finally {
       setLoading(false);
     }
@@ -83,22 +83,22 @@ export const AddProductDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle>הוספת מוצר חדש</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">שם *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Milk"
+              placeholder="לדוגמה: חלב"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">קטגוריה</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as ProductCategory)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -112,7 +112,7 @@ export const AddProductDialog = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">מיקום</Label>
               <Select value={location} onValueChange={(v) => setLocation(v as StorageLocation)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -128,7 +128,7 @@ export const AddProductDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity *</Label>
+              <Label htmlFor="quantity">כמות *</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -136,24 +136,25 @@ export const AddProductDialog = ({
                 min="0"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder="e.g., 2"
+                placeholder="לדוגמה: 2"
+                dir="ltr"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unit">Unit *</Label>
+              <Label htmlFor="unit">יחידה *</Label>
               <Input
                 id="unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                placeholder="e.g., liters"
+                placeholder="לדוגמה: ליטר"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="minQuantity">Min Quantity *</Label>
+              <Label htmlFor="minQuantity">כמות מינימום *</Label>
               <Input
                 id="minQuantity"
                 type="number"
@@ -161,27 +162,29 @@ export const AddProductDialog = ({
                 min="0"
                 value={minQuantity}
                 onChange={(e) => setMinQuantity(e.target.value)}
-                placeholder="e.g., 1"
+                placeholder="לדוגמה: 1"
+                dir="ltr"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expirationDate">Expiration Date</Label>
+              <Label htmlFor="expirationDate">תאריך תפוגה</Label>
               <Input
                 id="expirationDate"
                 type="date"
                 value={expirationDate}
                 onChange={(e) => setExpirationDate(e.target.value)}
+                dir="ltr"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+          <div className="flex justify-start gap-2 pt-4">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Product'}
+              {loading ? 'מוסיף...' : 'הוסף מוצר'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              ביטול
             </Button>
           </div>
         </form>

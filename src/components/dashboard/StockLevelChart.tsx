@@ -25,7 +25,7 @@ export const StockLevelChart = ({ products }: StockLevelChartProps) => {
 
   const chartConfig: ChartConfig = {
     percentage: { 
-      label: 'Stock Level %',
+      label: 'רמת מלאי %',
       color: 'hsl(var(--chart-1))'
     },
   };
@@ -34,11 +34,11 @@ export const StockLevelChart = ({ products }: StockLevelChartProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Stock Levels</CardTitle>
-          <CardDescription>Current stock vs minimum required</CardDescription>
+          <CardTitle className="text-base">רמות מלאי</CardTitle>
+          <CardDescription>מלאי נוכחי מול מינימום נדרש</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[200px]">
-          <p className="text-muted-foreground text-sm">No products yet</p>
+          <p className="text-muted-foreground text-sm">אין עדיין מוצרים</p>
         </CardContent>
       </Card>
     );
@@ -47,8 +47,8 @@ export const StockLevelChart = ({ products }: StockLevelChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Stock Levels</CardTitle>
-        <CardDescription>Percentage of minimum required stock</CardDescription>
+        <CardTitle className="text-base">רמות מלאי</CardTitle>
+        <CardDescription>אחוז מהמלאי המינימלי הנדרש</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[200px] w-full">
@@ -88,7 +88,7 @@ export const StockLevelChart = ({ products }: StockLevelChartProps) => {
             <Bar 
               dataKey="percentage" 
               radius={[0, 4, 4, 0]}
-              name="Stock Level"
+              name="רמת מלאי"
             >
               {stockData.map((entry, index) => (
                 <Cell 

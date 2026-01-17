@@ -23,10 +23,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const navItems = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard },
-  { title: 'Products', url: '/products', icon: Package },
-  { title: 'Recipes', url: '/recipes', icon: ChefHat },
-  { title: 'Shopping List', url: '/shopping-list', icon: ShoppingCart },
+  { title: 'לוח בקרה', url: '/', icon: LayoutDashboard },
+  { title: 'מוצרים', url: '/products', icon: Package },
+  { title: 'מתכונים', url: '/recipes', icon: ChefHat },
+  { title: 'רשימת קניות', url: '/shopping-list', icon: ShoppingCart },
 ];
 
 export const AppSidebar = () => {
@@ -36,18 +36,18 @@ export const AppSidebar = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Signed out successfully');
+    toast.success('התנתקת בהצלחה');
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" side="right">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Package className="h-5 w-5" />
           </div>
           {!isCollapsed && (
-            <span className="font-semibold text-lg">FridgeStock</span>
+            <span className="font-semibold text-lg">מלאי מזון</span>
           )}
         </div>
       </SidebarHeader>
@@ -91,7 +91,7 @@ export const AppSidebar = () => {
               className="w-full justify-start"
             >
               <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Sign Out</span>}
+              {!isCollapsed && <span className="me-2">התנתק</span>}
             </Button>
           </div>
         )}

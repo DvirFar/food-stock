@@ -9,11 +9,10 @@ interface AppLayoutProps {
 export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
+      <div className="min-h-screen flex w-full" dir="rtl">
         <SidebarInset>
           <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
+            <SidebarTrigger className="-me-1" />
             <Separator orientation="vertical" className="h-6" />
             <div className="flex-1" />
           </header>
@@ -21,6 +20,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             {children}
           </main>
         </SidebarInset>
+        <AppSidebar />
       </div>
     </SidebarProvider>
   );

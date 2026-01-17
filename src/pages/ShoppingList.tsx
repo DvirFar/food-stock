@@ -28,7 +28,7 @@ const ShoppingList = () => {
       const data = await shoppingListService.getAll();
       setItems(data);
     } catch (error) {
-      toast.error('Failed to load shopping list');
+      toast.error('שגיאה בטעינת רשימת הקניות');
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ const ShoppingList = () => {
         );
       }
     } catch (error) {
-      toast.error('Failed to update item');
+      toast.error('שגיאה בעדכון פריט');
     }
   };
 
@@ -51,9 +51,9 @@ const ShoppingList = () => {
     try {
       await shoppingListService.removeItem(id);
       setItems(prev => prev.filter(item => item.id !== id));
-      toast.success('Item removed');
+      toast.success('הפריט הוסר');
     } catch (error) {
-      toast.error('Failed to remove item');
+      toast.error('שגיאה בהסרת פריט');
     }
   };
 
@@ -61,9 +61,9 @@ const ShoppingList = () => {
     try {
       await shoppingListService.clearChecked();
       setItems(prev => prev.filter(item => !item.checked));
-      toast.success('Checked items cleared');
+      toast.success('הפריטים המסומנים נמחקו');
     } catch (error) {
-      toast.error('Failed to clear items');
+      toast.error('שגיאה במחיקת פריטים');
     }
   };
 
@@ -71,18 +71,18 @@ const ShoppingList = () => {
     try {
       const lowStock = await productService.getLowStock();
       if (lowStock.length === 0) {
-        toast.info('No low stock items to add');
+        toast.info('אין פריטים במלאי נמוך להוספה');
         return;
       }
       const added = await shoppingListService.addFromLowStock(lowStock);
       if (added.length > 0) {
         setItems(prev => [...prev, ...added]);
-        toast.success(`Added ${added.length} items from low stock`);
+        toast.success(`נוספו ${added.length} פריטים ממלאי נמוך`);
       } else {
-        toast.info('All low stock items already in list');
+        toast.info('כל הפריטים במלאי נמוך כבר ברשימה');
       }
     } catch (error) {
-      toast.error('Failed to add items');
+      toast.error('שגיאה בהוספת פריטים');
     }
   };
 
@@ -101,7 +101,7 @@ const ShoppingList = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">טוען...</div>
       </div>
     );
   }
@@ -111,23 +111,23 @@ const ShoppingList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Shopping List</h1>
+          <h1 className="text-3xl font-bold tracking-tight">רשימת קניות</h1>
           <p className="text-muted-foreground">
             {uncheckedCount > 0 
-              ? `${uncheckedCount} items to buy`
-              : 'All items checked!'
+              ? `${uncheckedCount} פריטים לקנייה`
+              : 'כל הפריטים סומנו!'
             }
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleAddLowStockItems}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Low Stock
+            <Plus className="h-4 w-4 me-2" />
+            הוסף מלאי נמוך
           </Button>
           {checkedCount > 0 && (
             <Button variant="secondary" onClick={handleClearChecked}>
-              <Check className="h-4 w-4 mr-2" />
-              Clear Checked ({checkedCount})
+              <Check className="h-4 w-4 me-2" />
+              נקה מסומנים ({checkedCount})
             </Button>
           )}
         </div>
@@ -138,13 +138,13 @@ const ShoppingList = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Your shopping list is empty</h3>
+            <h3 className="text-lg font-medium mb-2">רשימת הקניות ריקה</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Add items from low stock products or create manually
+              הוסף פריטים ממלאי נמוך או צור ידנית
             </p>
             <Button onClick={handleAddLowStockItems}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Low Stock Items
+              <Plus className="h-4 w-4 me-2" />
+              הוסף פריטים ממלאי נמוך
             </Button>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ const ShoppingList = () => {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ListChecks className="h-5 w-5" />
                   {categoryLabels[category as keyof typeof categoryLabels]}
-                  <Badge variant="secondary" className="ml-auto">
+                  <Badge variant="secondary" className="ms-auto">
                     {categoryItems.filter(i => !i.checked).length} / {categoryItems.length}
                   </Badge>
                 </CardTitle>
@@ -175,7 +175,7 @@ const ShoppingList = () => {
                     />
                     <div className={`flex-1 ${item.checked ? 'line-through' : ''}`}>
                       <span className="font-medium">{item.name}</span>
-                      <span className="text-muted-foreground ml-2">
+                      <span className="text-muted-foreground me-2">
                         {item.quantity} {item.unit}
                       </span>
                     </div>
@@ -200,11 +200,11 @@ const ShoppingList = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Total items:</span>
+              <span className="text-muted-foreground">סה"כ פריטים:</span>
               <span className="font-medium">{items.length}</span>
             </div>
             <div className="flex justify-between items-center text-sm mt-2">
-              <span className="text-muted-foreground">Completed:</span>
+              <span className="text-muted-foreground">הושלמו:</span>
               <span className="font-medium text-primary">{checkedCount}</span>
             </div>
           </CardContent>

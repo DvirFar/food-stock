@@ -75,21 +75,21 @@ export interface DashboardStats {
 
 // Category display configuration
 export const categoryLabels: Record<ProductCategory, string> = {
-  dairy: 'Dairy',
-  meat: 'Meat & Poultry',
-  vegetables: 'Vegetables',
-  fruits: 'Fruits',
-  grains: 'Grains',
-  frozen: 'Frozen',
-  beverages: 'Beverages',
-  condiments: 'Condiments',
-  snacks: 'Snacks',
-  other: 'Other',
+  dairy: 'מוצרי חלב',
+  meat: 'בשר ועופות',
+  vegetables: 'ירקות',
+  fruits: 'פירות',
+  grains: 'דגנים',
+  frozen: 'קפואים',
+  beverages: 'משקאות',
+  condiments: 'תבלינים ורטבים',
+  snacks: 'חטיפים',
+  other: 'אחר',
 };
 
 export const locationLabels: Record<StorageLocation, string> = {
-  fridge: 'Fridge',
-  freezer: 'Freezer',
-  pantry: 'Pantry',
-  counter: 'Counter',
+  fridge: 'מקרר',
+  freezer: 'מקפיא',
+  pantry: 'מזווה',
+  counter: 'משטח',
 };

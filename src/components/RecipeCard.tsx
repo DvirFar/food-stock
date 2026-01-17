@@ -60,17 +60,17 @@ export const RecipeCard = ({ recipe, onEdit, onDelete }: RecipeCardProps) => {
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            <span>{totalTime} min</span>
+            <span>{totalTime} דק׳</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{recipe.servings} servings</span>
+            <span>{recipe.servings} מנות</span>
           </div>
         </div>
 
         {/* Ingredients Preview */}
         <div className="mb-4">
-          <p className="text-sm font-medium mb-2">Ingredients:</p>
+          <p className="text-sm font-medium mb-2">מרכיבים:</p>
           <div className="flex flex-wrap gap-1">
             {recipe.ingredients.slice(0, 4).map((ing, idx) => (
               <Badge key={idx} variant="outline" className="text-xs">
@@ -79,7 +79,7 @@ export const RecipeCard = ({ recipe, onEdit, onDelete }: RecipeCardProps) => {
             ))}
             {recipe.ingredients.length > 4 && (
               <Badge variant="outline" className="text-xs">
-                +{recipe.ingredients.length - 4} more
+                +{recipe.ingredients.length - 4} נוספים
               </Badge>
             )}
           </div>

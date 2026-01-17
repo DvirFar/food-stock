@@ -100,11 +100,11 @@ const Recipes = () => {
     
     try {
       await recipeService.delete(recipeToDelete.id);
-      toast.success('Recipe deleted');
+      toast.success('המתכון נמחק');
       loadRecipes();
     } catch (error) {
       console.error('Failed to delete recipe:', error);
-      toast.error('Failed to delete recipe');
+      toast.error('שגיאה במחיקת מתכון');
     } finally {
       setDeleteDialogOpen(false);
       setRecipeToDelete(null);
@@ -119,7 +119,7 @@ const Recipes = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">טוען...</div>
       </div>
     );
   }
@@ -129,14 +129,14 @@ const Recipes = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
+          <h1 className="text-3xl font-bold tracking-tight">מתכונים</h1>
           <p className="text-muted-foreground">
-            Discover recipes you can make with your ingredients
+            גלה מתכונים שתוכל להכין עם המרכיבים שלך
           </p>
         </div>
         <Button onClick={handleNewRecipe}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Recipe
+          <Plus className="h-4 w-4 me-2" />
+          מתכון חדש
         </Button>
       </div>
 
@@ -145,12 +145,12 @@ const Recipes = () => {
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search recipes or ingredients..."
+                placeholder="חפש מתכונים או מרכיבים..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="ps-10"
               />
             </div>
             
@@ -177,11 +177,11 @@ const Recipes = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ChefHat className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No recipes found</h3>
+            <h3 className="text-lg font-medium mb-2">לא נמצאו מתכונים</h3>
             <p className="text-muted-foreground text-center">
               {recipes.length === 0
-                ? "No recipes in the database yet"
-                : "Try adjusting your search or filters"
+                ? "אין עדיין מתכונים במערכת"
+                : "נסה לשנות את החיפוש או הסינון"
               }
             </p>
           </CardContent>
@@ -202,7 +202,7 @@ const Recipes = () => {
       {/* Results count */}
       {filteredRecipes.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">
-          Showing {filteredRecipes.length} of {recipes.length} recipes
+          מציג {filteredRecipes.length} מתוך {recipes.length} מתכונים
         </p>
       )}
 
@@ -218,14 +218,14 @@ const Recipes = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+            <AlertDialogTitle>מחיקת מתכון</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{recipeToDelete?.name}"? This action cannot be undone.
+              האם אתה בטוח שברצונך למחוק את "{recipeToDelete?.name}"? פעולה זו לא ניתנת לביטול.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>מחק</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

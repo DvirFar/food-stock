@@ -65,7 +65,7 @@ export const RecipeEditorDialog = ({
     setPrepTime(0);
     setCookTime(0);
     setServings(4);
-    setIngredients([{ name: '', quantity: 1, unit: 'units' }]);
+    setIngredients([{ name: '', quantity: 1, unit: 'יחידות' }]);
     setInstructions(['']);
     setTags([]);
     setNewTag('');
@@ -73,7 +73,7 @@ export const RecipeEditorDialog = ({
   };
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { name: '', quantity: 1, unit: 'units' }]);
+    setIngredients([...ingredients, { name: '', quantity: 1, unit: 'יחידות' }]);
   };
 
   const updateIngredient = (index: number, field: keyof RecipeIngredient, value: string | number) => {
@@ -116,7 +116,7 @@ export const RecipeEditorDialog = ({
     e.preventDefault();
     
     if (!name.trim()) {
-      toast.error('Please enter a recipe name');
+      toast.error('נא להזין שם מתכון');
       return;
     }
 
@@ -124,12 +124,12 @@ export const RecipeEditorDialog = ({
     const validInstructions = instructions.filter(i => i.trim());
 
     if (validIngredients.length === 0) {
-      toast.error('Please add at least one ingredient');
+      toast.error('נא להוסיף לפחות מרכיב אחד');
       return;
     }
 
     if (validInstructions.length === 0) {
-      toast.error('Please add at least one instruction');
+      toast.error('נא להוסיף לפחות הוראת הכנה אחת');
       return;
     }
 
@@ -150,17 +150,17 @@ export const RecipeEditorDialog = ({
 
       if (isEditing && recipe) {
         await recipeService.update(recipe.id, recipeData);
-        toast.success('Recipe updated successfully');
+        toast.success('המתכון עודכן בהצלחה');
       } else {
         await recipeService.create(recipeData);
-        toast.success('Recipe created successfully');
+        toast.success('המתכון נוצר בהצלחה');
       }
 
       onSave();
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save recipe:', error);
-      toast.error('Failed to save recipe');
+      toast.error('שגיאה בשמירת מתכון');
     } finally {
       setLoading(false);
     }
@@ -170,63 +170,66 @@ export const RecipeEditorDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Recipe' : 'New Recipe'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'עריכת מתכון' : 'מתכון חדש'}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="name">Recipe Name *</Label>
+              <Label htmlFor="name">שם המתכון *</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Spaghetti Carbonara"
+                placeholder="לדוגמה: ספגטי קרבונרה"
               />
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">תיאור</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="A brief description of the dish..."
+                placeholder="תיאור קצר של המנה..."
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="prepTime">Prep Time (min)</Label>
+              <Label htmlFor="prepTime">זמן הכנה (דק׳)</Label>
               <Input
                 id="prepTime"
                 type="number"
                 min={0}
                 value={prepTime}
                 onChange={(e) => setPrepTime(parseInt(e.target.value) || 0)}
+                dir="ltr"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cookTime">Cook Time (min)</Label>
+              <Label htmlFor="cookTime">זמן בישול (דק׳)</Label>
               <Input
                 id="cookTime"
                 type="number"
                 min={0}
                 value={cookTime}
                 onChange={(e) => setCookTime(parseInt(e.target.value) || 0)}
+                dir="ltr"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="servings">Servings</Label>
+              <Label htmlFor="servings">מנות</Label>
               <Input
                 id="servings"
                 type="number"
                 min={1}
                 value={servings}
                 onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+                dir="ltr"
               />
             </div>
 
@@ -238,17 +241,17 @@ export const RecipeEditorDialog = ({
                 onChange={(e) => setIsPublic(e.target.checked)}
                 className="h-4 w-4"
               />
-              <Label htmlFor="isPublic" className="cursor-pointer">Make recipe public</Label>
+              <Label htmlFor="isPublic" className="cursor-pointer">הפוך לציבורי</Label>
             </div>
           </div>
 
           {/* Ingredients */}
           <div className="space-y-3">
-            <Label>Ingredients *</Label>
+            <Label>מרכיבים *</Label>
             {ingredients.map((ing, idx) => (
               <div key={idx} className="flex gap-2 items-start">
                 <Input
-                  placeholder="Ingredient name"
+                  placeholder="שם מרכיב"
                   value={ing.name}
                   onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
                   className="flex-1"
@@ -260,9 +263,10 @@ export const RecipeEditorDialog = ({
                   value={ing.quantity}
                   onChange={(e) => updateIngredient(idx, 'quantity', parseFloat(e.target.value) || 0)}
                   className="w-20"
+                  dir="ltr"
                 />
                 <Input
-                  placeholder="unit"
+                  placeholder="יחידה"
                   value={ing.unit}
                   onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
                   className="w-24"
@@ -279,13 +283,13 @@ export const RecipeEditorDialog = ({
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
-              <Plus className="h-4 w-4 mr-1" /> Add Ingredient
+              <Plus className="h-4 w-4 me-1" /> הוסף מרכיב
             </Button>
           </div>
 
           {/* Instructions */}
           <div className="space-y-3">
-            <Label>Instructions *</Label>
+            <Label>הוראות הכנה *</Label>
             {instructions.map((inst, idx) => (
               <div key={idx} className="flex gap-2 items-start">
                 <span className="text-sm font-medium text-muted-foreground mt-2 w-6">
@@ -294,7 +298,7 @@ export const RecipeEditorDialog = ({
                 <Textarea
                   value={inst}
                   onChange={(e) => updateInstruction(idx, e.target.value)}
-                  placeholder={`Step ${idx + 1}...`}
+                  placeholder={`שלב ${idx + 1}...`}
                   rows={2}
                   className="flex-1"
                 />
@@ -310,16 +314,16 @@ export const RecipeEditorDialog = ({
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addInstruction}>
-              <Plus className="h-4 w-4 mr-1" /> Add Step
+              <Plus className="h-4 w-4 me-1" /> הוסף שלב
             </Button>
           </div>
 
           {/* Tags */}
           <div className="space-y-3">
-            <Label>Tags</Label>
+            <Label>תגיות</Label>
             <div className="flex gap-2">
               <Input
-                placeholder="Add a tag..."
+                placeholder="הוסף תגית..."
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => {
@@ -331,7 +335,7 @@ export const RecipeEditorDialog = ({
                 className="flex-1"
               />
               <Button type="button" variant="outline" onClick={addTag}>
-                Add
+                הוסף
               </Button>
             </div>
             {tags.length > 0 && (
@@ -349,12 +353,12 @@ export const RecipeEditorDialog = ({
             )}
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+          <DialogFooter className="flex-row-reverse gap-2">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : isEditing ? 'Update Recipe' : 'Create Recipe'}
+              {loading ? 'שומר...' : isEditing ? 'עדכן מתכון' : 'צור מתכון'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              ביטול
             </Button>
           </DialogFooter>
         </form>
