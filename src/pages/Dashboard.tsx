@@ -56,20 +56,20 @@ const Dashboard = () => {
     try {
       const added = await shoppingListService.addFromLowStock(lowStockProducts);
       if (added.length > 0) {
-        toast.success(`Added ${added.length} items to shopping list`);
+        toast.success(`נוספו ${added.length} פריטים לרשימת הקניות`);
         navigate('/shopping-list');
       } else {
-        toast.info('All low stock items are already in your shopping list');
+        toast.info('כל הפריטים החסרים כבר ברשימת הקניות');
       }
     } catch (error) {
-      toast.error('Failed to add items to shopping list');
+      toast.error('שגיאה בהוספת פריטים לרשימת הקניות');
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">טוען...</div>
       </div>
     );
   }
@@ -78,9 +78,9 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">לוח בקרה</h1>
         <p className="text-muted-foreground">
-          Overview of your food stock and alerts
+          סקירה כללית של מלאי המזון והתראות
         </p>
       </div>
 
@@ -88,20 +88,20 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">סה"כ מוצרים</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalProducts || 0}</div>
             <p className="text-xs text-muted-foreground">
-              items in stock
+              פריטים במלאי
             </p>
           </CardContent>
         </Card>
 
         <Card className={stats?.lowStockCount ? 'border-destructive/50' : ''}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">מלאי נמוך</CardTitle>
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
@@ -109,14 +109,14 @@ const Dashboard = () => {
               {stats?.lowStockCount || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              items below minimum
+              מתחת למינימום
             </p>
           </CardContent>
         </Card>
 
         <Card className={stats?.expiringCount ? 'border-chart-4/50' : ''}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+            <CardTitle className="text-sm font-medium">פג תוקף בקרוב</CardTitle>
             <Clock className="h-4 w-4 text-chart-4" />
           </CardHeader>
           <CardContent>
@@ -124,14 +124,14 @@ const Dashboard = () => {
               {stats?.expiringCount || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              within 3 days
+              תוך 3 ימים
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
+            <CardTitle className="text-sm font-medium">קטגוריות</CardTitle>
             <Refrigerator className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -139,7 +139,7 @@ const Dashboard = () => {
               {stats ? Object.keys(stats.categoryCounts).length : 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              product types
+              סוגי מוצרים
             </p>
           </CardContent>
         </Card>
@@ -152,7 +152,7 @@ const Dashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              <CardTitle>Low Stock Alert</CardTitle>
+              <CardTitle>התראת מלאי נמוך</CardTitle>
             </div>
             {lowStockProducts.length > 0 && (
               <Button 
@@ -160,15 +160,15 @@ const Dashboard = () => {
                 size="sm"
                 onClick={handleAddToShoppingList}
               >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Add All to List
+                <ShoppingCart className="h-4 w-4 me-2" />
+                הוסף הכל לרשימה
               </Button>
             )}
           </CardHeader>
           <CardContent>
             {lowStockProducts.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                All products are above minimum quantity ✓
+                כל המוצרים מעל כמות המינימום ✓
               </p>
             ) : (
               <div className="space-y-3">
@@ -190,13 +190,13 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-chart-4" />
-              <CardTitle>Expiring Soon</CardTitle>
+              <CardTitle>פג תוקף בקרוב</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {expiringProducts.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No products expiring in the next 3 days ✓
+                אין מוצרים שפג תוקפם ב-3 הימים הקרובים ✓
               </p>
             ) : (
               <div className="space-y-3">

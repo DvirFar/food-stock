@@ -10,8 +10,8 @@ import { toast } from 'sonner';
 import { Refrigerator } from 'lucide-react';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Please enter a valid email address');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const emailSchema = z.string().email('נא להזין כתובת אימייל תקינה');
+const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -55,12 +55,12 @@ const Auth = () => {
     
     if (error) {
       if (error.message.includes('Invalid login credentials')) {
-        toast.error('Invalid email or password');
+        toast.error('אימייל או סיסמה שגויים');
       } else {
         toast.error(error.message);
       }
     } else {
-      toast.success('Welcome back!');
+      toast.success('ברוך שובך!');
     }
   };
 
@@ -74,25 +74,25 @@ const Auth = () => {
     
     if (error) {
       if (error.message.includes('User already registered')) {
-        toast.error('An account with this email already exists');
+        toast.error('כבר קיים חשבון עם אימייל זה');
       } else {
         toast.error(error.message);
       }
     } else {
-      toast.success('Account created successfully!');
+      toast.success('החשבון נוצר בהצלחה!');
     }
   };
 
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">טוען...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4" dir="rtl">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -100,46 +100,48 @@ const Auth = () => {
               <Refrigerator className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">FridgeStock</CardTitle>
-          <CardDescription>Manage your home food inventory</CardDescription>
+          <CardTitle className="text-2xl">מלאי מזון</CardTitle>
+          <CardDescription>ניהול מלאי המזון הביתי שלך</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">התחברות</TabsTrigger>
+              <TabsTrigger value="signup">הרשמה</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">אימייל</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    dir="ltr"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive">{errors.email}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password">סיסמה</Label>
                   <Input
                     id="signin-password"
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    dir="ltr"
                   />
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password}</p>
                   )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? 'מתחבר...' : 'התחבר'}
                 </Button>
               </form>
             </TabsContent>
@@ -147,33 +149,35 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">אימייל</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    dir="ltr"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive">{errors.email}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">סיסמה</Label>
                   <Input
                     id="signup-password"
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    dir="ltr"
                   />
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password}</p>
                   )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading ? 'יוצר חשבון...' : 'צור חשבון'}
                 </Button>
               </form>
             </TabsContent>

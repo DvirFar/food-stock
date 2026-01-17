@@ -44,7 +44,7 @@ const Products = () => {
       const data = await productService.getAll();
       setProducts(data);
     } catch (error) {
-      toast.error('Failed to load products');
+      toast.error('שגיאה בטעינת מוצרים');
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ const Products = () => {
 
   const handleProductAdded = (product: Product) => {
     setProducts(prev => [...prev, product]);
-    toast.success(`${product.name} added to inventory`);
+    toast.success(`${product.name} נוסף למלאי`);
   };
 
   const handleQuantityChange = async (id: string, newQuantity: number) => {
@@ -83,7 +83,7 @@ const Products = () => {
         prev.map(p => p.id === id ? { ...p, quantity: newQuantity } : p)
       );
     } catch (error) {
-      toast.error('Failed to update quantity');
+      toast.error('שגיאה בעדכון כמות');
     }
   };
 
@@ -91,16 +91,16 @@ const Products = () => {
     try {
       await productService.delete(id);
       setProducts(prev => prev.filter(p => p.id !== id));
-      toast.success('Product removed');
+      toast.success('המוצר הוסר');
     } catch (error) {
-      toast.error('Failed to delete product');
+      toast.error('שגיאה במחיקת מוצר');
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">טוען...</div>
       </div>
     );
   }
@@ -110,14 +110,14 @@ const Products = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <h1 className="text-3xl font-bold tracking-tight">מוצרים</h1>
           <p className="text-muted-foreground">
-            Manage your food inventory
+            ניהול מלאי המזון שלך
           </p>
         </div>
         <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
+          <Plus className="h-4 w-4 me-2" />
+          הוסף מוצר
         </Button>
       </div>
 
@@ -126,21 +126,21 @@ const Products = () => {
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products..."
+                placeholder="חפש מוצרים..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="ps-10"
               />
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Category" />
+                <Filter className="h-4 w-4 me-2" />
+                <SelectValue placeholder="קטגוריה" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">כל הקטגוריות</SelectItem>
                 {Object.entries(categoryLabels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label}</SelectItem>
                 ))}
@@ -148,10 +148,10 @@ const Products = () => {
             </Select>
             <Select value={locationFilter} onValueChange={setLocationFilter}>
               <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Location" />
+                <SelectValue placeholder="מיקום" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="all">כל המיקומים</SelectItem>
                 {Object.entries(locationLabels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label}</SelectItem>
                 ))}
@@ -166,17 +166,17 @@ const Products = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No products found</h3>
+            <h3 className="text-lg font-medium mb-2">לא נמצאו מוצרים</h3>
             <p className="text-muted-foreground text-center mb-4">
               {products.length === 0 
-                ? "Start by adding your first product to the inventory"
-                : "Try adjusting your search or filters"
+                ? "התחל בהוספת המוצר הראשון למלאי"
+                : "נסה לשנות את החיפוש או הסינון"
               }
             </p>
             {products.length === 0 && (
               <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Product
+                <Plus className="h-4 w-4 me-2" />
+                הוסף מוצר ראשון
               </Button>
             )}
           </CardContent>
@@ -199,7 +199,7 @@ const Products = () => {
       {/* Results count */}
       {filteredProducts.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">
-          Showing {filteredProducts.length} of {products.length} products
+          מציג {filteredProducts.length} מתוך {products.length} מוצרים
         </p>
       )}
 

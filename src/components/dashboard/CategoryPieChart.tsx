@@ -31,10 +31,10 @@ export const CategoryPieChart = ({ categoryCounts }: CategoryPieChartProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Products by Category</CardTitle>
+          <CardTitle className="text-base">מוצרים לפי קטגוריה</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[200px]">
-          <p className="text-muted-foreground text-sm">No products yet</p>
+          <p className="text-muted-foreground text-sm">אין עדיין מוצרים</p>
         </CardContent>
       </Card>
     );
@@ -50,7 +50,7 @@ export const CategoryPieChart = ({ categoryCounts }: CategoryPieChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Products by Category</CardTitle>
+        <CardTitle className="text-base">מוצרים לפי קטגוריה</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[200px] w-full">

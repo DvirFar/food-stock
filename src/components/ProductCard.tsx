@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Product, categoryLabels, locationLabels } from '@/types';
 import { format, differenceInDays, parseISO } from 'date-fns';
+import { he } from 'date-fns/locale';
 
 interface ProductCardProps {
   product: Product;
@@ -44,14 +45,14 @@ export const ProductCard = ({
               <span>{product.quantity} {product.unit}</span>
               {showLowStock && isLowStock && (
                 <Badge variant="destructive" className="text-xs">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                  Low
+                  <AlertTriangle className="h-3 w-3 me-1" />
+                  נמוך
                 </Badge>
               )}
               {showExpiration && isExpiringSoon && (
                 <Badge variant="secondary" className="text-xs">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {daysUntilExpiry === 0 ? 'Today' : `${daysUntilExpiry}d`}
+                  <Clock className="h-3 w-3 me-1" />
+                  {daysUntilExpiry === 0 ? 'היום' : `${daysUntilExpiry} ימים`}
                 </Badge>
               )}
             </div>
@@ -106,7 +107,7 @@ export const ProductCard = ({
             )}
             <div className="text-center min-w-[80px]">
               <span className="text-xl font-bold">{product.quantity}</span>
-              <span className="text-muted-foreground ml-1">{product.unit}</span>
+              <span className="text-muted-foreground me-1">{product.unit}</span>
             </div>
             {onQuantityChange && (
               <Button
@@ -120,8 +121,8 @@ export const ProductCard = ({
             )}
           </div>
           
-          <div className="text-right text-sm text-muted-foreground">
-            Min: {product.min_quantity}
+          <div className="text-start text-sm text-muted-foreground">
+            מינימום: {product.min_quantity}
           </div>
         </div>
 
@@ -129,16 +130,16 @@ export const ProductCard = ({
         <div className="flex flex-wrap gap-2 mt-4">
           {showLowStock && isLowStock && (
             <Badge variant="destructive">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Low Stock
+              <AlertTriangle className="h-3 w-3 me-1" />
+              מלאי נמוך
             </Badge>
           )}
           {showExpiration && product.expiration_date && (
             <Badge variant={isExpiringSoon ? 'secondary' : 'outline'}>
-              <Clock className="h-3 w-3 mr-1" />
+              <Clock className="h-3 w-3 me-1" />
               {isExpiringSoon 
-                ? (daysUntilExpiry === 0 ? 'Expires today' : `Expires in ${daysUntilExpiry}d`)
-                : `Exp: ${format(parseISO(product.expiration_date), 'MMM d')}`
+                ? (daysUntilExpiry === 0 ? 'פג תוקף היום' : `פג תוקף בעוד ${daysUntilExpiry} ימים`)
+                : `תוקף: ${format(parseISO(product.expiration_date), 'd בMMM', { locale: he })}`
               }
             </Badge>
           )}
