@@ -19,8 +19,9 @@ interface RecipeInput {
 
 class RecipeService {
   async getAll(): Promise<Recipe[]> {
+    // Use the recipes_public view which hides user_id for non-owners
     const { data, error } = await supabase
-      .from('recipes')
+      .from('recipes_public')
       .select('*')
       .order('name');
     
@@ -36,8 +37,9 @@ class RecipeService {
   }
 
   async getById(id: string): Promise<Recipe | undefined> {
+    // Use the recipes_public view which hides user_id for non-owners
     const { data, error } = await supabase
-      .from('recipes')
+      .from('recipes_public')
       .select('*')
       .eq('id', id)
       .maybeSingle();
@@ -118,8 +120,9 @@ class RecipeService {
   }
 
   async searchByTag(tag: string): Promise<Recipe[]> {
+    // Use the recipes_public view which hides user_id for non-owners
     const { data, error } = await supabase
-      .from('recipes')
+      .from('recipes_public')
       .select('*')
       .contains('tags', [tag])
       .order('name');
