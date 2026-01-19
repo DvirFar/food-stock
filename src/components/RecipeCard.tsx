@@ -6,34 +6,46 @@ import {
   Users,
   ChefHat,
   Pencil,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { Recipe } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 
 interface RecipeCardProps {
   recipe: Recipe;
+  onView?: (recipe: Recipe) => void;
   onEdit?: (recipe: Recipe) => void;
   onDelete?: (recipe: Recipe) => void;
 }
 
-export const RecipeCard = ({ recipe, onEdit, onDelete }: RecipeCardProps) => {
+export const RecipeCard = ({ recipe, onView, onEdit, onDelete }: RecipeCardProps) => {
   const { user } = useAuth();
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
   const canModify = user && recipe.user_id === user.id;
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
+    <Card className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => onView?.(recipe)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg leading-tight">{recipe.name}</CardTitle>
           <div className="flex items-center gap-1">
+            {onView && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => { e.stopPropagation(); onView(recipe); }}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            )}
             {canModify && onEdit && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => onEdit(recipe)}
+                onClick={(e) => { e.stopPropagation(); onEdit(recipe); }}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -43,7 +55,7 @@ export const RecipeCard = ({ recipe, onEdit, onDelete }: RecipeCardProps) => {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive"
-                onClick={() => onDelete(recipe)}
+                onClick={(e) => { e.stopPropagation(); onDelete(recipe); }}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

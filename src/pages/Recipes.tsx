@@ -12,6 +12,7 @@ import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeEditorDialog } from '@/components/RecipeEditorDialog';
+import { RecipeViewDialog } from '@/components/RecipeViewDialog';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -34,6 +35,8 @@ const Recipes = () => {
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
     loadRecipes();
@@ -83,6 +86,11 @@ const Recipes = () => {
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
+  };
+
+  const handleView = (recipe: Recipe) => {
+    setViewingRecipe(recipe);
+    setViewDialogOpen(true);
   };
 
   const handleEdit = (recipe: Recipe) => {
@@ -192,6 +200,7 @@ const Recipes = () => {
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
+              onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -205,6 +214,13 @@ const Recipes = () => {
           מציג {filteredRecipes.length} מתוך {recipes.length} מתכונים
         </p>
       )}
+
+      {/* Recipe View Dialog */}
+      <RecipeViewDialog
+        recipe={viewingRecipe}
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+      />
 
       {/* Recipe Editor Dialog */}
       <RecipeEditorDialog
