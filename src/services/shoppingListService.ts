@@ -103,13 +103,54 @@ class ShoppingListService {
     return true;
   }
 
-  async clearChecked(): Promise<void> {
-    const { error } = await supabase
+  async clearChecked(): Promise<{ updatedProductIds: string[] }> {
+    // First, get all checked items that have a product_id
+    const { data: checkedItems, error: fetchError } = await supabase
+      .from('shopping_list_items')
+      .select('*')
+      .eq('checked', true);
+    
+    if (fetchError) throw fetchError;
+
+    const updatedProductIds: string[] = [];
+
+    // Update product quantities for items linked to products
+    if (checkedItems && checkedItems.length > 0) {
+      for (const item of checkedItems) {
+        if (item.product_id) {
+          // Get current product quantity
+          const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('quantity')
+            .eq('id', item.product_id)
+            .maybeSingle();
+          
+          if (productError) throw productError;
+          
+          if (product) {
+            // Update product quantity by adding the purchased amount
+            const newQuantity = Number(product.quantity) + Number(item.quantity);
+            const { error: updateError } = await supabase
+              .from('products')
+              .update({ quantity: newQuantity })
+              .eq('id', item.product_id);
+            
+            if (updateError) throw updateError;
+            updatedProductIds.push(item.product_id);
+          }
+        }
+      }
+    }
+
+    // Delete all checked items
+    const { error: deleteError } = await supabase
       .from('shopping_list_items')
       .delete()
       .eq('checked', true);
     
-    if (error) throw error;
+    if (deleteError) throw deleteError;
+
+    return { updatedProductIds };
   }
 
   async updateQuantity(id: string, quantity: number): Promise<ShoppingListItem | undefined> {
