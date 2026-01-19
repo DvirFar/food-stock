@@ -59,9 +59,14 @@ const ShoppingList = () => {
 
   const handleClearChecked = async () => {
     try {
-      await shoppingListService.clearChecked();
+      const { updatedProductIds } = await shoppingListService.clearChecked();
       setItems(prev => prev.filter(item => !item.checked));
-      toast.success('הפריטים המסומנים נמחקו');
+      
+      if (updatedProductIds.length > 0) {
+        toast.success(`${updatedProductIds.length} מוצרים עודכנו במלאי והפריטים נמחקו`);
+      } else {
+        toast.success('הפריטים המסומנים נמחקו');
+      }
     } catch (error) {
       toast.error('שגיאה במחיקת פריטים');
     }
