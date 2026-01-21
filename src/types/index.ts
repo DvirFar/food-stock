@@ -32,7 +32,8 @@ export interface Product {
 export interface RecipeIngredient {
   productId?: string;
   name: string;
-  quantity: number;
+  quantity?: number | string;
+  amount?: string; // Alternative field name used in some recipes
   unit: string;
   optional?: boolean;
 }

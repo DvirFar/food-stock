@@ -154,7 +154,7 @@ export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialo
                       )}
                     </span>
                     <span className="text-sm text-muted-foreground" dir="ltr">
-                      {ingredient.quantity} {ingredient.unit}
+                      {ingredient.amount || ingredient.quantity} {ingredient.unit}
                     </span>
                   </div>
                 ))}
