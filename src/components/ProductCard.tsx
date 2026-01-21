@@ -66,34 +66,35 @@ export const ProductCard = ({
   }
 
   return (
-    <Card className={`transition-shadow hover:shadow-md ${isLowStock ? 'border-destructive/50' : ''}`}>
+    <Card className={`transition-shadow hover:shadow-md ${isLowStock ? 'border-destructive/50' : ''}`} dir="rtl">
       <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <h3 className="font-semibold text-lg">{product.name}</h3>
-            <div className="flex gap-2 mt-1">
-              <Badge variant="outline" className="text-xs">
-                {categoryLabels[product.category]}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {locationLabels[product.location]}
-              </Badge>
-            </div>
-          </div>
+        {/* Header with name and delete */}
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
           {onDelete && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onDelete(product.id)}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
 
+        {/* Badges row */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          <Badge variant="outline" className="text-xs truncate max-w-[120px]">
+            {categoryLabels[product.category]}
+          </Badge>
+          <Badge variant="secondary" className="text-xs">
+            {locationLabels[product.location]}
+          </Badge>
+        </div>
+
         {/* Quantity Display */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {onQuantityChange && (
               <Button
@@ -105,9 +106,9 @@ export const ProductCard = ({
                 <Minus className="h-4 w-4" />
               </Button>
             )}
-            <div className="text-center min-w-[80px]">
+            <div className="text-center min-w-[60px]">
               <span className="text-xl font-bold">{product.quantity}</span>
-              <span className="text-muted-foreground me-1">{product.unit}</span>
+              <span className="text-muted-foreground me-1 text-sm">{product.unit}</span>
             </div>
             {onQuantityChange && (
               <Button
@@ -121,7 +122,7 @@ export const ProductCard = ({
             )}
           </div>
           
-          <div className="text-start text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground whitespace-nowrap">
             מינימום: {product.min_quantity}
           </div>
         </div>
