@@ -8,16 +8,23 @@ import {
   Trash2, 
   Plus,
   Check,
-  ListChecks
+  ListChecks,
+  PlusCircle
 } from 'lucide-react';
 import { shoppingListService } from '@/services/shoppingListService';
 import { productService } from '@/services/productService';
 import { ShoppingListItem, categoryLabels } from '@/types';
 import { toast } from 'sonner';
+import { AddShoppingListItemDialog } from '@/components/AddShoppingListItemDialog';
 
 const ShoppingList = () => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const handleItemAdded = (item: ShoppingListItem) => {
+    setItems(prev => [item, ...prev]);
+  };
 
   useEffect(() => {
     loadItems();
@@ -124,7 +131,11 @@ const ShoppingList = () => {
             }
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setShowAddDialog(true)}>
+            <PlusCircle className="h-4 w-4 me-2" />
+            הוסף פריט
+          </Button>
           <Button variant="outline" onClick={handleAddLowStockItems}>
             <Plus className="h-4 w-4 me-2" />
             הוסף מלאי נמוך
@@ -215,6 +226,13 @@ const ShoppingList = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Add Item Dialog */}
+      <AddShoppingListItemDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onItemAdded={handleItemAdded}
+      />
     </div>
   );
 };
