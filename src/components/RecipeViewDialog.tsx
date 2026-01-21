@@ -123,7 +123,7 @@ export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialo
         <Separator />
 
         <ScrollArea className="flex-1 max-h-[calc(90vh-280px)]">
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6" dir="rtl">
             {/* Ingredients Section */}
             <section>
               <div className="flex items-center gap-2 mb-4">
