@@ -189,9 +189,9 @@ const ShoppingList = () => {
                       checked={item.checked}
                       onCheckedChange={() => handleToggleItem(item.id)}
                     />
-                    <div className={`flex-1 ${item.checked ? 'line-through' : ''}`}>
+                    <div className={`flex-1 flex items-center gap-3 ${item.checked ? 'line-through' : ''}`}>
                       <span className="font-medium">{item.name}</span>
-                      <span className="text-muted-foreground me-2">
+                      <span className="text-muted-foreground">
                         {item.quantity} {item.unit}
                       </span>
                     </div>
