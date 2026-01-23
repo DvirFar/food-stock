@@ -14,10 +14,21 @@ import {
   ChefHat,
   Timer,
   Flame,
-  ListChecks
+  ListChecks,
+  Check,
+  X,
+  AlertCircle
 } from 'lucide-react';
 import { Recipe } from '@/types';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { productService } from '@/services/productService';
+import { checkIngredientAvailability, IngredientAvailability } from '@/lib/unitConversion';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface RecipeViewDialogProps {
   recipe: Recipe | null;
@@ -28,6 +39,47 @@ interface RecipeViewDialogProps {
 export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialogProps) => {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
+  const [products, setProducts] = useState<Array<{ name: string; quantity: number; unit: string }>>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  // Fetch products when dialog opens
+  useEffect(() => {
+    if (open) {
+      setLoadingProducts(true);
+      productService.getAll()
+        .then(data => {
+          setProducts(data.map(p => ({ name: p.name, quantity: p.quantity, unit: p.unit })));
+        })
+        .catch(err => console.error('Failed to load products:', err))
+        .finally(() => setLoadingProducts(false));
+    }
+  }, [open]);
+
+  // Calculate ingredient availability
+  const ingredientAvailability = useMemo(() => {
+    if (!recipe || products.length === 0) return new Map<number, IngredientAvailability>();
+    
+    const availability = new Map<number, IngredientAvailability>();
+    recipe.ingredients.forEach((ingredient, index) => {
+      const result = checkIngredientAvailability(
+        ingredient.name,
+        ingredient.amount || ingredient.quantity,
+        ingredient.unit,
+        products
+      );
+      availability.set(index, result);
+    });
+    return availability;
+  }, [recipe, products]);
+
+  // Summary of available ingredients
+  const availabilitySummary = useMemo(() => {
+    const total = ingredientAvailability.size;
+    const available = Array.from(ingredientAvailability.values()).filter(a => a.isAvailable).length;
+    const partial = Array.from(ingredientAvailability.values()).filter(a => !a.isAvailable && a.percentageAvailable > 0).length;
+    const missing = total - available - partial;
+    return { total, available, partial, missing };
+  }, [ingredientAvailability]);
 
   if (!recipe) return null;
 
@@ -133,31 +185,93 @@ export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialo
                   ({checkedIngredients.size}/{recipe.ingredients.length})
                 </span>
               </div>
+              
+              {/* Availability Summary */}
+              {!loadingProducts && products.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline" className="gap-1 text-primary">
+                    <Check className="h-3 w-3" />
+                    <span>{availabilitySummary.available} זמינים</span>
+                  </Badge>
+                  {availabilitySummary.partial > 0 && (
+                    <Badge variant="secondary" className="gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>{availabilitySummary.partial} חלקיים</span>
+                    </Badge>
+                  )}
+                  {availabilitySummary.missing > 0 && (
+                    <Badge variant="destructive" className="gap-1">
+                      <X className="h-3 w-3" />
+                      <span>{availabilitySummary.missing} חסרים</span>
+                    </Badge>
+                  )}
+                </div>
+              )}
+              
               <div className="space-y-2">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 ${
-                      checkedIngredients.has(index) ? 'bg-muted/50 border-primary/30' : 'bg-background'
-                    }`}
-                    onClick={() => toggleIngredient(index)}
-                  >
-                    <Checkbox
-                      checked={checkedIngredients.has(index)}
-                      onCheckedChange={() => toggleIngredient(index)}
-                      className="pointer-events-none"
-                    />
-                    <span className={`flex-1 ${checkedIngredients.has(index) ? 'line-through text-muted-foreground' : ''}`}>
-                      <span className="font-medium">{ingredient.name}</span>
-                      {ingredient.optional && (
-                        <span className="text-muted-foreground text-sm me-1">(אופציונלי)</span>
-                      )}
-                    </span>
-                    <span className="text-sm text-muted-foreground" dir="ltr">
-                      {ingredient.amount || ingredient.quantity} {ingredient.unit}
-                    </span>
-                  </div>
-                ))}
+                <TooltipProvider>
+                  {recipe.ingredients.map((ingredient, index) => {
+                    const availability = ingredientAvailability.get(index);
+                    const isAvailable = availability?.isAvailable;
+                    const isPartial = availability && !isAvailable && availability.percentageAvailable > 0;
+                    const isMissing = availability && !isAvailable && availability.percentageAvailable === 0;
+                    
+                    return (
+                      <div
+                        key={index}
+                        className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 ${
+                          checkedIngredients.has(index) ? 'bg-muted/50 border-primary/30' : 'bg-background'
+                        } ${isMissing ? 'border-destructive/40 bg-destructive/5' : ''} ${isPartial ? 'border-secondary bg-secondary/10' : ''}`}
+                        onClick={() => toggleIngredient(index)}
+                      >
+                        <Checkbox
+                          checked={checkedIngredients.has(index)}
+                          onCheckedChange={() => toggleIngredient(index)}
+                          className="pointer-events-none"
+                        />
+                        <span className={`flex-1 ${checkedIngredients.has(index) ? 'line-through text-muted-foreground' : ''}`}>
+                          <span className="font-medium">{ingredient.name}</span>
+                          {ingredient.optional && (
+                            <span className="text-muted-foreground text-sm me-1">(אופציונלי)</span>
+                          )}
+                        </span>
+                        <span className="text-sm text-muted-foreground" dir="ltr">
+                          {ingredient.amount || ingredient.quantity} {ingredient.unit}
+                        </span>
+                        
+                        {/* Availability Indicator */}
+                        {availability && !loadingProducts && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="shrink-0">
+                                {isAvailable && (
+                                  <Check className="h-4 w-4 text-primary" />
+                                )}
+                                {isPartial && (
+                                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                {isMissing && (
+                                  <X className="h-4 w-4 text-destructive" />
+                                )}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" dir="rtl">
+                              {isAvailable && (
+                                <p>יש לך: {availability.availableQuantity} {availability.availableUnit}</p>
+                              )}
+                              {isPartial && (
+                                <p>יש לך רק {Math.round(availability.percentageAvailable)}%: {availability.availableQuantity} {availability.availableUnit}</p>
+                              )}
+                              {isMissing && (
+                                <p>לא נמצא במלאי</p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    );
+                  })}
+                </TooltipProvider>
               </div>
             </section>
 
