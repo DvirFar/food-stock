@@ -7,6 +7,7 @@ import {
   ShoppingCart, 
   Trash2, 
   Plus,
+  Minus,
   Check,
   ListChecks,
   PlusCircle
@@ -51,6 +52,20 @@ const ShoppingList = () => {
       }
     } catch (error) {
       toast.error('שגיאה בעדכון פריט');
+    }
+  };
+
+  const handleQuantityChange = async (id: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    try {
+      const updated = await shoppingListService.updateQuantity(id, newQuantity);
+      if (updated) {
+        setItems(prev =>
+          prev.map(item => item.id === id ? updated : item)
+        );
+      }
+    } catch (error) {
+      toast.error('שגיאה בעדכון כמות');
     }
   };
 
@@ -189,11 +204,31 @@ const ShoppingList = () => {
                       checked={item.checked}
                       onCheckedChange={() => handleToggleItem(item.id)}
                     />
-                    <div className={`flex-1 flex items-center gap-3 ${item.checked ? 'line-through' : ''}`}>
+                    <div className={`flex-1 ${item.checked ? 'line-through' : ''}`}>
                       <span className="font-medium">{item.name}</span>
-                      <span className="text-muted-foreground">
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        disabled={item.checked || item.quantity <= 1}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="text-muted-foreground min-w-[60px] text-center" dir="ltr">
                         {item.quantity} {item.unit}
                       </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        disabled={item.checked}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
                     </div>
                     <Button
                       variant="ghost"
