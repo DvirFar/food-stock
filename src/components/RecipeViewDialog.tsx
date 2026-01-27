@@ -255,7 +255,7 @@ export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialo
                                 )}
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent side="left" dir="rtl">
+                            <TooltipContent side="top" dir="rtl" className="max-w-[200px] text-wrap">
                               {isAvailable && (
                                 <p>יש לך: {availability.availableQuantity} {availability.availableUnit}</p>
                               )}
