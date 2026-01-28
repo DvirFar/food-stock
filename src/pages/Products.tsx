@@ -10,16 +10,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   Plus, 
   Search, 
   Filter,
-  Package
+  Package,
+  ChevronDown,
+  FileSpreadsheet
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { AddProductDialog } from '@/components/AddProductDialog';
+import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { toast } from 'sonner';
 
 const Products = () => {
@@ -30,6 +39,7 @@ const Products = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showBatchDialog, setShowBatchDialog] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -76,6 +86,10 @@ const Products = () => {
     toast.success(`${product.name} נוסף למלאי`);
   };
 
+  const handleProductsAdded = (newProducts: Product[]) => {
+    setProducts(prev => [...prev, ...newProducts]);
+  };
+
   const handleQuantityChange = async (id: string, newQuantity: number) => {
     try {
       await productService.updateQuantity(id, newQuantity);
@@ -115,10 +129,25 @@ const Products = () => {
             ניהול מלאי המזון שלך
           </p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 me-2" />
-          הוסף מוצר
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 me-2" />
+              הוסף מוצר
+              <ChevronDown className="h-4 w-4 ms-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
+              <Plus className="h-4 w-4 me-2" />
+              מוצר בודד
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
+              <FileSpreadsheet className="h-4 w-4 me-2" />
+              הוספה בכמות
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Filters */}
@@ -207,6 +236,12 @@ const Products = () => {
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
         onProductAdded={handleProductAdded}
+      />
+
+      <BatchAddProductsDialog
+        open={showBatchDialog}
+        onOpenChange={setShowBatchDialog}
+        onProductsAdded={handleProductsAdded}
       />
     </div>
   );
