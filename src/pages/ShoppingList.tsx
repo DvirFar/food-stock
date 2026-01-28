@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   ShoppingCart, 
   Trash2, 
@@ -10,21 +16,29 @@ import {
   Minus,
   Check,
   ListChecks,
-  PlusCircle
+  PlusCircle,
+  ChevronDown,
+  FileSpreadsheet
 } from 'lucide-react';
 import { shoppingListService } from '@/services/shoppingListService';
 import { productService } from '@/services/productService';
 import { ShoppingListItem, categoryLabels } from '@/types';
 import { toast } from 'sonner';
 import { AddShoppingListItemDialog } from '@/components/AddShoppingListItemDialog';
+import { BatchAddShoppingListDialog } from '@/components/BatchAddShoppingListDialog';
 
 const ShoppingList = () => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showBatchDialog, setShowBatchDialog] = useState(false);
 
   const handleItemAdded = (item: ShoppingListItem) => {
     setItems(prev => [item, ...prev]);
+  };
+
+  const handleItemsAdded = (newItems: ShoppingListItem[]) => {
+    setItems(prev => [...newItems, ...prev]);
   };
 
   useEffect(() => {
@@ -147,10 +161,25 @@ const ShoppingList = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => setShowAddDialog(true)}>
-            <PlusCircle className="h-4 w-4 me-2" />
-            הוסף פריט
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <PlusCircle className="h-4 w-4 me-2" />
+                הוסף פריט
+                <ChevronDown className="h-4 w-4 ms-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
+                <Plus className="h-4 w-4 me-2" />
+                פריט בודד
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                הוספה בכמות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" onClick={handleAddLowStockItems}>
             <Plus className="h-4 w-4 me-2" />
             הוסף מלאי נמוך
@@ -267,6 +296,12 @@ const ShoppingList = () => {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onItemAdded={handleItemAdded}
+      />
+
+      <BatchAddShoppingListDialog
+        open={showBatchDialog}
+        onOpenChange={setShowBatchDialog}
+        onItemsAdded={handleItemsAdded}
       />
     </div>
   );

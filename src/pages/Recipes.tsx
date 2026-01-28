@@ -3,16 +3,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   Search, 
   ChefHat,
-  Plus
+  Plus,
+  ChevronDown,
+  FileSpreadsheet
 } from 'lucide-react';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeEditorDialog } from '@/components/RecipeEditorDialog';
 import { RecipeViewDialog } from '@/components/RecipeViewDialog';
+import { BatchAddRecipesDialog } from '@/components/BatchAddRecipesDialog';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -37,6 +46,7 @@ const Recipes = () => {
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
+  const [batchDialogOpen, setBatchDialogOpen] = useState(false);
 
   useEffect(() => {
     loadRecipes();
@@ -142,10 +152,25 @@ const Recipes = () => {
             גלה מתכונים שתוכל להכין עם המרכיבים שלך
           </p>
         </div>
-        <Button onClick={handleNewRecipe}>
-          <Plus className="h-4 w-4 me-2" />
-          מתכון חדש
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 me-2" />
+              מתכון חדש
+              <ChevronDown className="h-4 w-4 ms-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleNewRecipe}>
+              <Plus className="h-4 w-4 me-2" />
+              מתכון בודד
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setBatchDialogOpen(true)}>
+              <FileSpreadsheet className="h-4 w-4 me-2" />
+              הוספה בכמות
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Search and Filters */}
@@ -245,6 +270,13 @@ const Recipes = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Batch Add Recipes Dialog */}
+      <BatchAddRecipesDialog
+        open={batchDialogOpen}
+        onOpenChange={setBatchDialogOpen}
+        onRecipesAdded={loadRecipes}
+      />
     </div>
   );
 };
