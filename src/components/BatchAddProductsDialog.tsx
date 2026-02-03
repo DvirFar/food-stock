@@ -1,22 +1,10 @@
 import { useState, useRef } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Upload, FileSpreadsheet, Download } from 'lucide-react';
 import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels } from '@/types';
@@ -26,24 +14,20 @@ import * as XLSX from 'xlsx';
 
 // Helper function to normalize text for matching (handles Hebrew and English)
 const normalizeText = (text: string): string => {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[_\s]+/g, " ")
-    .trim();
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+  .replace(/[_\s]+/g, " ").trim();
 };
 
 // Match text input to valid category key
 const matchCategory = (value: string): ProductCategory => {
   const normalized = normalizeText(String(value || ''));
-  
+
   // Direct key match first
   const validCategories: ProductCategory[] = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'frozen', 'beverages', 'condiments', 'snacks', 'other'];
   if (validCategories.includes(normalized as ProductCategory)) {
     return normalized as ProductCategory;
   }
-  
+
   // Match Hebrew labels to keys
   const hebrewToCategory: Record<string, ProductCategory> = {
     'מוצרי חלב': 'dairy',
@@ -66,57 +50,54 @@ const matchCategory = (value: string): ProductCategory => {
     'רטבים': 'condiments',
     'חטיפים': 'snacks',
     'חטיף': 'snacks',
-    'אחר': 'other',
+    'אחר': 'other'
   };
-  
+
   // Try exact Hebrew match
   if (hebrewToCategory[value]) {
     return hebrewToCategory[value];
   }
-  
+
   // Try partial match
   for (const [hebrew, category] of Object.entries(hebrewToCategory)) {
     if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
       return category;
     }
   }
-  
   return 'other';
 };
 
 // Match text input to valid location key
 const matchLocation = (value: string): StorageLocation => {
   const normalized = normalizeText(String(value || ''));
-  
+
   // Direct key match first
   const validLocations: StorageLocation[] = ['fridge', 'freezer', 'pantry', 'counter'];
   if (validLocations.includes(normalized as StorageLocation)) {
     return normalized as StorageLocation;
   }
-  
+
   // Match Hebrew labels to keys
   const hebrewToLocation: Record<string, StorageLocation> = {
     'מקרר': 'fridge',
     'מקפיא': 'freezer',
     'מזווה': 'pantry',
-    'משטח': 'counter',
+    'משטח': 'counter'
   };
-  
+
   // Try exact Hebrew match
   if (hebrewToLocation[value]) {
     return hebrewToLocation[value];
   }
-  
+
   // Try partial match
   for (const [hebrew, location] of Object.entries(hebrewToLocation)) {
     if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
       return location;
     }
   }
-  
   return 'fridge';
 };
-
 interface BatchProductEntry {
   name: string;
   category: ProductCategory;
@@ -126,13 +107,11 @@ interface BatchProductEntry {
   location: StorageLocation;
   expirationDate: string;
 }
-
 interface BatchAddProductsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProductsAdded: (products: Product[]) => void;
 }
-
 const createEmptyEntry = (): BatchProductEntry => ({
   name: '',
   category: 'other',
@@ -140,65 +119,58 @@ const createEmptyEntry = (): BatchProductEntry => ({
   unit: '',
   minQuantity: '',
   location: 'fridge',
-  expirationDate: '',
+  expirationDate: ''
 });
-
 export const BatchAddProductsDialog = ({
   open,
   onOpenChange,
-  onProductsAdded,
+  onProductsAdded
 }: BatchAddProductsDialogProps) => {
   const [entries, setEntries] = useState<BatchProductEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('manual');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const addEntry = () => {
     setEntries([...entries, createEmptyEntry()]);
   };
-
   const removeEntry = (index: number) => {
     if (entries.length > 1) {
       setEntries(entries.filter((_, i) => i !== index));
     }
   };
-
   const updateEntry = (index: number, field: keyof BatchProductEntry, value: string) => {
     const updated = [...entries];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = {
+      ...updated[index],
+      [field]: value
+    };
     setEntries(updated);
   };
-
   const resetForm = () => {
     setEntries([createEmptyEntry()]);
     setActiveTab('manual');
   };
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json<Record<string, string>>(worksheet);
-
       if (jsonData.length === 0) {
         toast.error('הקובץ ריק');
         return;
       }
-
-      const parsedEntries: BatchProductEntry[] = jsonData.map((row) => ({
+      const parsedEntries: BatchProductEntry[] = jsonData.map(row => ({
         name: row['שם'] || row['name'] || '',
         category: matchCategory(row['קטגוריה'] || row['category'] || ''),
         quantity: String(row['כמות'] || row['quantity'] || ''),
         unit: row['יחידה'] || row['unit'] || '',
         minQuantity: String(row['כמות מינימום'] || row['min_quantity'] || ''),
         location: matchLocation(row['מיקום'] || row['location'] || ''),
-        expirationDate: row['תאריך תפוגה'] || row['expiration_date'] || '',
+        expirationDate: row['תאריך תפוגה'] || row['expiration_date'] || ''
       }));
-
       setEntries(parsedEntries.filter(entry => entry.name.trim()));
       toast.success(`${parsedEntries.length} מוצרים נטענו מהקובץ`);
     } catch (error) {
@@ -210,43 +182,31 @@ export const BatchAddProductsDialog = ({
       fileInputRef.current.value = '';
     }
   };
-
   const downloadTemplate = () => {
-    const template = [
-      {
-        'שם': 'חלב',
-        'קטגוריה': 'dairy',
-        'כמות': '2',
-        'יחידה': 'ליטר',
-        'כמות מינימום': '1',
-        'מיקום': 'fridge',
-        'תאריך תפוגה': '2025-02-15',
-      },
-    ];
-    
+    const template = [{
+      'שם': 'חלב',
+      'קטגוריה': 'dairy',
+      'כמות': '2',
+      'יחידה': 'ליטר',
+      'כמות מינימום': '1',
+      'מיקום': 'fridge',
+      'תאריך תפוגה': '2025-02-15'
+    }];
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Products');
     XLSX.writeFile(wb, 'products_template.xlsx');
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const validEntries = entries.filter(entry => 
-      entry.name.trim() && entry.quantity && entry.unit.trim() && entry.minQuantity
-    );
-
+    const validEntries = entries.filter(entry => entry.name.trim() && entry.quantity && entry.unit.trim() && entry.minQuantity);
     if (validEntries.length === 0) {
       toast.error('נא למלא לפחות מוצר אחד עם כל השדות הנדרשים');
       return;
     }
-
     setLoading(true);
-
     try {
       const addedProducts: Product[] = [];
-      
       for (const entry of validEntries) {
         const product = await productService.create({
           name: entry.name.trim(),
@@ -255,11 +215,10 @@ export const BatchAddProductsDialog = ({
           unit: entry.unit.trim(),
           min_quantity: parseFloat(entry.minQuantity),
           location: entry.location,
-          expiration_date: entry.expirationDate || null,
+          expiration_date: entry.expirationDate || null
         });
         addedProducts.push(product);
       }
-
       onProductsAdded(addedProducts);
       toast.success(`${addedProducts.length} מוצרים נוספו בהצלחה`);
       resetForm();
@@ -270,12 +229,10 @@ export const BatchAddProductsDialog = ({
       setLoading(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={(value) => {
-      if (!value) resetForm();
-      onOpenChange(value);
-    }}>
+  return <Dialog open={open} onOpenChange={value => {
+    if (!value) resetForm();
+    onOpenChange(value);
+  }}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>הוספת מוצרים בכמות</DialogTitle>
@@ -291,113 +248,65 @@ export const BatchAddProductsDialog = ({
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <ScrollArea className="flex-1 pe-4">
                 <div className="space-y-4">
-                  {entries.map((entry, index) => (
-                    <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30">
+                  {entries.map((entry, index) => <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30 \u05DD\u05D4\u05E7\u05E8">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
-                        {entries.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeEntry(index)}
-                          >
+                        {entries.length > 1 && <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
                             <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                          </Button>}
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs">שם *</Label>
-                          <Input
-                            value={entry.name}
-                            onChange={(e) => updateEntry(index, 'name', e.target.value)}
-                            placeholder="שם המוצר"
-                          />
+                          <Input value={entry.name} onChange={e => updateEntry(index, 'name', e.target.value)} placeholder="שם המוצר" />
                         </div>
 
                         <div className="space-y-1">
                           <Label className="text-xs">קטגוריה</Label>
-                          <Select
-                            value={entry.category}
-                            onValueChange={(v) => updateEntry(index, 'category', v)}
-                          >
+                          <Select value={entry.category} onValueChange={v => updateEntry(index, 'category', v)}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(categoryLabels).map(([key, label]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                              ))}
+                              {Object.entries(categoryLabels).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
 
                         <div className="space-y-1">
                           <Label className="text-xs">מיקום</Label>
-                          <Select
-                            value={entry.location}
-                            onValueChange={(v) => updateEntry(index, 'location', v)}
-                          >
+                          <Select value={entry.location} onValueChange={v => updateEntry(index, 'location', v)}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(locationLabels).map(([key, label]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                              ))}
+                              {Object.entries(locationLabels).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
 
                         <div className="space-y-1">
                           <Label className="text-xs">כמות *</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={entry.quantity}
-                            onChange={(e) => updateEntry(index, 'quantity', e.target.value)}
-                            placeholder="2"
-                            dir="ltr"
-                          />
+                          <Input type="number" step="0.01" min="0" value={entry.quantity} onChange={e => updateEntry(index, 'quantity', e.target.value)} placeholder="2" dir="ltr" />
                         </div>
 
                         <div className="space-y-1">
                           <Label className="text-xs">יחידה *</Label>
-                          <Input
-                            value={entry.unit}
-                            onChange={(e) => updateEntry(index, 'unit', e.target.value)}
-                            placeholder="ליטר"
-                          />
+                          <Input value={entry.unit} onChange={e => updateEntry(index, 'unit', e.target.value)} placeholder="ליטר" />
                         </div>
 
                         <div className="space-y-1">
                           <Label className="text-xs">כמות מינימום *</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={entry.minQuantity}
-                            onChange={(e) => updateEntry(index, 'minQuantity', e.target.value)}
-                            placeholder="1"
-                            dir="ltr"
-                          />
+                          <Input type="number" step="0.01" min="0" value={entry.minQuantity} onChange={e => updateEntry(index, 'minQuantity', e.target.value)} placeholder="1" dir="ltr" />
                         </div>
 
                         <div className="space-y-1 col-span-2 md:col-span-1">
                           <Label className="text-xs">תאריך תפוגה</Label>
-                          <Input
-                            type="date"
-                            value={entry.expirationDate}
-                            onChange={(e) => updateEntry(index, 'expirationDate', e.target.value)}
-                            dir="ltr"
-                          />
+                          <Input type="date" value={entry.expirationDate} onChange={e => updateEntry(index, 'expirationDate', e.target.value)} dir="ltr" />
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </ScrollArea>
 
@@ -428,39 +337,26 @@ export const BatchAddProductsDialog = ({
                   הקובץ צריך להכיל עמודות: שם, קטגוריה, כמות, יחידה, כמות מינימום, מיקום, תאריך תפוגה
                 </p>
                 <div className="flex justify-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
+                  <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
                     <Upload className="h-4 w-4 me-2" />
                     בחר קובץ
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={downloadTemplate}
-                  >
+                  <Button type="button" variant="ghost" onClick={downloadTemplate}>
                     <Download className="h-4 w-4 me-2" />
                     הורד תבנית
                   </Button>
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFileUpload} className="hidden" />
               </div>
 
-              {entries.length > 0 && entries[0].name && (
-                <div className="space-y-2">
+              {entries.length > 0 && entries[0].name && <div className="space-y-2">
                   <h4 className="font-medium">מוצרים שנטענו ({entries.filter(e => e.name.trim()).length})</h4>
-                  <div className="h-[300px] overflow-y-scroll border rounded-lg p-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-muted/30" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) hsl(var(--muted) / 0.3)' }}>
+                  <div className="h-[300px] overflow-y-scroll border rounded-lg p-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-muted/30" style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'hsl(var(--border)) hsl(var(--muted) / 0.3)'
+              }}>
                     <div className="space-y-1">
-                      {entries.filter(e => e.name.trim()).map((entry, index) => (
-                        <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
+                      {entries.filter(e => e.name.trim()).map((entry, index) => <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
                           <div className="flex flex-col">
                             <span className="font-medium">{entry.name}</span>
                             <span className="text-xs text-muted-foreground">
@@ -470,19 +366,16 @@ export const BatchAddProductsDialog = ({
                           <span className="text-muted-foreground">
                             {entry.quantity} {entry.unit}
                           </span>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </div>
                   <Button onClick={handleSubmit} disabled={loading} className="w-full">
                     {loading ? 'מוסיף...' : `הוסף ${entries.filter(e => e.name.trim()).length} מוצרים`}
                   </Button>
-                </div>
-              )}
+                </div>}
             </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
