@@ -355,7 +355,7 @@ export const BatchAddProductsDialog = ({
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'hsl(var(--border)) hsl(var(--muted) / 0.3)'
               }}>
-                    <div className="space-y-1">
+                    <div className="space-y-1 overflow-y-scroll ">
                       {entries.filter(e => e.name.trim()).map((entry, index) => <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
                           <div className="flex flex-col">
                             <span className="font-medium">{entry.name}</span>
