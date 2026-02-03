@@ -457,7 +457,7 @@ export const BatchAddProductsDialog = ({
               {entries.length > 0 && entries[0].name && (
                 <div className="space-y-2">
                   <h4 className="font-medium">מוצרים שנטענו ({entries.filter(e => e.name.trim()).length})</h4>
-                  <ScrollArea className="h-[300px] border rounded-lg p-2">
+                  <div className="h-[300px] overflow-y-auto border rounded-lg p-2">
                     <div className="space-y-1">
                       {entries.filter(e => e.name.trim()).map((entry, index) => (
                         <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
@@ -473,7 +473,7 @@ export const BatchAddProductsDialog = ({
                         </div>
                       ))}
                     </div>
-                  </ScrollArea>
+                  </div>
                   <Button onClick={handleSubmit} disabled={loading} className="w-full">
                     {loading ? 'מוסיף...' : `הוסף ${entries.filter(e => e.name.trim()).length} מוצרים`}
                   </Button>
