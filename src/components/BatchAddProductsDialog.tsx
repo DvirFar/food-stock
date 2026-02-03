@@ -248,7 +248,7 @@ export const BatchAddProductsDialog = ({
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <ScrollArea className="flex-1 pe-4">
                 <div className="space-y-4">
-                  {entries.map((entry, index) => <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30 \u05DD\u05D4\u05E7\u05E8">
+                  {entries.map((entry, index) => <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30 overflow-scroll ">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
                         {entries.length > 1 && <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
