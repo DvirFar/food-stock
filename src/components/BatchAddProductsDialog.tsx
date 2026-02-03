@@ -247,7 +247,7 @@ export const BatchAddProductsDialog = ({
           <TabsContent value="manual" className="flex-1 overflow-hidden flex flex-col mt-4">
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <ScrollArea className="flex-1 pe-4">
-                <div className="space-y-4 overflow-scroll ">
+                <div className="space-y-4">
                   {entries.map((entry, index) => <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
