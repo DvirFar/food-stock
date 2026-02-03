@@ -351,7 +351,7 @@ export const BatchAddProductsDialog = ({
 
               {entries.length > 0 && entries[0].name && <div className="space-y-2">
                   <h4 className="font-medium">מוצרים שנטענו ({entries.filter(e => e.name.trim()).length})</h4>
-                  <div className="h-[300px] overflow-y-scroll border rounded-lg p-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-muted/30" style={{
+                  <div className="h-[300px] overflow-y-scroll border rounded-lg p-2 " style={{
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'hsl(var(--border)) hsl(var(--muted) / 0.3)'
               }}>
