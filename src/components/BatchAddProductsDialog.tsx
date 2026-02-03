@@ -24,6 +24,99 @@ import { productService } from '@/services/productService';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
+// Helper function to normalize text for matching (handles Hebrew and English)
+const normalizeText = (text: string): string => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[_\s]+/g, " ")
+    .trim();
+};
+
+// Match text input to valid category key
+const matchCategory = (value: string): ProductCategory => {
+  const normalized = normalizeText(String(value || ''));
+  
+  // Direct key match first
+  const validCategories: ProductCategory[] = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'frozen', 'beverages', 'condiments', 'snacks', 'other'];
+  if (validCategories.includes(normalized as ProductCategory)) {
+    return normalized as ProductCategory;
+  }
+  
+  // Match Hebrew labels to keys
+  const hebrewToCategory: Record<string, ProductCategory> = {
+    'מוצרי חלב': 'dairy',
+    'חלב': 'dairy',
+    'בשר ועופות': 'meat',
+    'בשר': 'meat',
+    'עופות': 'meat',
+    'ירקות': 'vegetables',
+    'ירק': 'vegetables',
+    'פירות': 'fruits',
+    'פרי': 'fruits',
+    'דגנים': 'grains',
+    'דגן': 'grains',
+    'קפואים': 'frozen',
+    'קפוא': 'frozen',
+    'משקאות': 'beverages',
+    'משקה': 'beverages',
+    'תבלינים ורטבים': 'condiments',
+    'תבלינים': 'condiments',
+    'רטבים': 'condiments',
+    'חטיפים': 'snacks',
+    'חטיף': 'snacks',
+    'אחר': 'other',
+  };
+  
+  // Try exact Hebrew match
+  if (hebrewToCategory[value]) {
+    return hebrewToCategory[value];
+  }
+  
+  // Try partial match
+  for (const [hebrew, category] of Object.entries(hebrewToCategory)) {
+    if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
+      return category;
+    }
+  }
+  
+  return 'other';
+};
+
+// Match text input to valid location key
+const matchLocation = (value: string): StorageLocation => {
+  const normalized = normalizeText(String(value || ''));
+  
+  // Direct key match first
+  const validLocations: StorageLocation[] = ['fridge', 'freezer', 'pantry', 'counter'];
+  if (validLocations.includes(normalized as StorageLocation)) {
+    return normalized as StorageLocation;
+  }
+  
+  // Match Hebrew labels to keys
+  const hebrewToLocation: Record<string, StorageLocation> = {
+    'מקרר': 'fridge',
+    'מקפיא': 'freezer',
+    'מזווה': 'pantry',
+    'משטח': 'counter',
+  };
+  
+  // Try exact Hebrew match
+  if (hebrewToLocation[value]) {
+    return hebrewToLocation[value];
+  }
+  
+  // Try partial match
+  for (const [hebrew, location] of Object.entries(hebrewToLocation)) {
+    if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
+      return location;
+    }
+  }
+  
+  return 'fridge';
+};
+
 interface BatchProductEntry {
   name: string;
   category: ProductCategory;
@@ -98,11 +191,11 @@ export const BatchAddProductsDialog = ({
 
       const parsedEntries: BatchProductEntry[] = jsonData.map((row) => ({
         name: row['שם'] || row['name'] || '',
-        category: (row['קטגוריה'] || row['category'] || 'other') as ProductCategory,
+        category: matchCategory(row['קטגוריה'] || row['category'] || ''),
         quantity: String(row['כמות'] || row['quantity'] || ''),
         unit: row['יחידה'] || row['unit'] || '',
         minQuantity: String(row['כמות מינימום'] || row['min_quantity'] || ''),
-        location: (row['מיקום'] || row['location'] || 'fridge') as StorageLocation,
+        location: matchLocation(row['מיקום'] || row['location'] || ''),
         expirationDate: row['תאריך תפוגה'] || row['expiration_date'] || '',
       }));
 
@@ -364,11 +457,16 @@ export const BatchAddProductsDialog = ({
               {entries.length > 0 && entries[0].name && (
                 <div className="space-y-2">
                   <h4 className="font-medium">מוצרים שנטענו ({entries.filter(e => e.name.trim()).length})</h4>
-                  <ScrollArea className="h-[200px] border rounded-lg p-2">
+                  <ScrollArea className="h-[300px] border rounded-lg p-2">
                     <div className="space-y-1">
                       {entries.filter(e => e.name.trim()).map((entry, index) => (
-                        <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between">
-                          <span>{entry.name}</span>
+                        <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{entry.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {categoryLabels[entry.category]} • {locationLabels[entry.location]}
+                            </span>
+                          </div>
                           <span className="text-muted-foreground">
                             {entry.quantity} {entry.unit}
                           </span>
