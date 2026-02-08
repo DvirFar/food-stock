@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,12 +22,14 @@ import {
 } from 'lucide-react';
 import { shoppingListService } from '@/services/shoppingListService';
 import { productService } from '@/services/productService';
-import { ShoppingListItem, categoryLabels } from '@/types';
+import { ShoppingListItem } from '@/types';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import { AddShoppingListItemDialog } from '@/components/AddShoppingListItemDialog';
 import { BatchAddShoppingListDialog } from '@/components/BatchAddShoppingListDialog';
 
 const ShoppingList = () => {
+  const { categories, categoryLabels } = useSettings();
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -127,14 +129,34 @@ const ShoppingList = () => {
     }
   };
 
-  // Group items by category
-  const groupedItems = items.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, ShoppingListItem[]>);
+  // Create a map of category name to sort order
+  const categorySortOrder = useMemo(() => {
+    return categories.reduce((acc, cat) => {
+      acc[cat.name] = cat.sort_order;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [categories]);
+
+  // Group items by category and sort by category sort_order
+  const groupedItems = useMemo(() => {
+    const grouped = items.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {} as Record<string, ShoppingListItem[]>);
+    return grouped;
+  }, [items]);
+
+  // Get sorted category keys
+  const sortedCategories = useMemo(() => {
+    return Object.keys(groupedItems).sort((a, b) => {
+      const orderA = categorySortOrder[a] ?? 999;
+      const orderB = categorySortOrder[b] ?? 999;
+      return orderA - orderB;
+    });
+  }, [groupedItems, categorySortOrder]);
 
   const uncheckedCount = items.filter(i => !i.checked).length;
   const checkedCount = items.filter(i => i.checked).length;
@@ -210,12 +232,14 @@ const ShoppingList = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {Object.entries(groupedItems).map(([category, categoryItems]) => (
-            <Card key={category}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <ListChecks className="h-5 w-5" />
-                  {categoryLabels[category as keyof typeof categoryLabels]}
+          {sortedCategories.map((category) => {
+            const categoryItems = groupedItems[category];
+            return (
+              <Card key={category}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ListChecks className="h-5 w-5" />
+                    {categoryLabels[category] || category}
                   <Badge variant="secondary" className="ms-auto">
                     {categoryItems.filter(i => !i.checked).length} / {categoryItems.length}
                   </Badge>
@@ -271,7 +295,8 @@ const ShoppingList = () => {
                 ))}
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 

@@ -3,7 +3,8 @@ import {
   Package, 
   ChefHat, 
   ShoppingCart,
-  LogOut
+  LogOut,
+  Settings
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -27,6 +28,7 @@ const navItems = [
   { title: 'מוצרים', url: '/products', icon: Package },
   { title: 'מתכונים', url: '/recipes', icon: ChefHat },
   { title: 'רשימת קניות', url: '/shopping-list', icon: ShoppingCart },
+  { title: 'הגדרות', url: '/settings', icon: Settings },
 ];
 
 export const AppSidebar = () => {
