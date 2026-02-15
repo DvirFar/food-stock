@@ -22,18 +22,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels, ShoppingListItem } from '@/types';
+import { Product, ShoppingListItem } from '@/types';
 import { productService } from '@/services/productService';
 import { shoppingListService } from '@/services/shoppingListService';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 
 interface AddShoppingListItemDialogProps {
@@ -47,24 +41,25 @@ export const AddShoppingListItemDialog = ({
   onOpenChange,
   onItemAdded,
 }: AddShoppingListItemDialogProps) => {
+  const { categories, locations, categoryLabels, locationLabels } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   
-  // Selected product or new product mode
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   
-  // Form fields for shopping list item
   const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('יחידות');
   
-  // New product fields
   const [newProductName, setNewProductName] = useState('');
-  const [newProductCategory, setNewProductCategory] = useState<ProductCategory>('other');
-  const [newProductLocation, setNewProductLocation] = useState<StorageLocation>('pantry');
+  const [newProductCategory, setNewProductCategory] = useState('other');
+  const [newProductLocation, setNewProductLocation] = useState('pantry');
   const [newProductMinQuantity, setNewProductMinQuantity] = useState('1');
+
+  const [catOpen, setCatOpen] = useState(false);
+  const [locOpen, setLocOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -132,12 +127,11 @@ export const AddShoppingListItemDialog = ({
     try {
       let productToUse: Product | null = selectedProduct;
 
-      // If creating a new product, create it first
       if (isNewProduct) {
         const newProduct = await productService.create({
           name: newProductName.trim(),
-          category: newProductCategory,
-          location: newProductLocation,
+          category: newProductCategory as any,
+          location: newProductLocation as any,
           quantity: 0,
           min_quantity: Number(newProductMinQuantity) || 1,
           unit: unit,
@@ -146,13 +140,12 @@ export const AddShoppingListItemDialog = ({
         toast.success(`המוצר "${newProductName}" נוסף למלאי`);
       }
 
-      // Add to shopping list
       const shoppingItem = await shoppingListService.addItem({
         product_id: productToUse?.id || null,
         name: productToUse?.name || newProductName.trim(),
         quantity: Number(quantity) || 1,
         unit: unit,
-        category: productToUse?.category || newProductCategory,
+        category: (productToUse?.category || newProductCategory) as any,
       });
 
       onItemAdded(shoppingItem);
@@ -237,7 +230,7 @@ export const AddShoppingListItemDialog = ({
                           />
                           <span>{product.name}</span>
                           <span className="ms-auto text-xs text-muted-foreground">
-                            {categoryLabels[product.category]}
+                            {categoryLabels[product.category] || product.category}
                           </span>
                         </CommandItem>
                       ))}
@@ -273,40 +266,58 @@ export const AddShoppingListItemDialog = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>קטגוריה</Label>
-                  <Select
-                    value={newProductCategory}
-                    onValueChange={(v) => setNewProductCategory(v as ProductCategory)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(categoryLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={catOpen} onOpenChange={setCatOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between text-sm">
+                        {categoryLabels[newProductCategory] || newProductCategory}
+                        <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="חפש..." />
+                        <CommandList>
+                          <CommandEmpty>לא נמצא</CommandEmpty>
+                          <CommandGroup>
+                            {categories.map((cat) => (
+                              <CommandItem key={cat.id} value={cat.label} onSelect={() => { setNewProductCategory(cat.name); setCatOpen(false); }}>
+                                <Check className={cn("me-2 h-4 w-4", newProductCategory === cat.name ? "opacity-100" : "opacity-0")} />
+                                {cat.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div className="space-y-2">
                   <Label>מיקום</Label>
-                  <Select
-                    value={newProductLocation}
-                    onValueChange={(v) => setNewProductLocation(v as StorageLocation)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(locationLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={locOpen} onOpenChange={setLocOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between text-sm">
+                        {locationLabels[newProductLocation] || newProductLocation}
+                        <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="חפש..." />
+                        <CommandList>
+                          <CommandEmpty>לא נמצא</CommandEmpty>
+                          <CommandGroup>
+                            {locations.map((loc) => (
+                              <CommandItem key={loc.id} value={loc.label} onSelect={() => { setNewProductLocation(loc.name); setLocOpen(false); }}>
+                                <Check className={cn("me-2 h-4 w-4", newProductLocation === loc.name ? "opacity-100" : "opacity-0")} />
+                                {loc.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 

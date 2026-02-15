@@ -19,8 +19,9 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Upload, FileSpreadsheet, Download } from 'lucide-react';
-import { ProductCategory, ShoppingListItem, categoryLabels } from '@/types';
+import { ShoppingListItem } from '@/types';
 import { shoppingListService } from '@/services/shoppingListService';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
@@ -28,7 +29,7 @@ interface BatchShoppingEntry {
   name: string;
   quantity: string;
   unit: string;
-  category: ProductCategory;
+  category: string;
 }
 
 interface BatchAddShoppingListDialogProps {
@@ -49,6 +50,7 @@ export const BatchAddShoppingListDialog = ({
   onOpenChange,
   onItemsAdded,
 }: BatchAddShoppingListDialogProps) => {
+  const { categories } = useSettings();
   const [entries, setEntries] = useState<BatchShoppingEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('manual');
@@ -94,7 +96,7 @@ export const BatchAddShoppingListDialog = ({
         name: row['שם'] || row['name'] || '',
         quantity: String(row['כמות'] || row['quantity'] || '1'),
         unit: row['יחידה'] || row['unit'] || 'יחידות',
-        category: (row['קטגוריה'] || row['category'] || 'other') as ProductCategory,
+        category: row['קטגוריה'] || row['category'] || 'other',
       }));
 
       setEntries(parsedEntries.filter(entry => entry.name.trim()));
@@ -144,7 +146,7 @@ export const BatchAddShoppingListDialog = ({
           name: entry.name.trim(),
           quantity: parseFloat(entry.quantity) || 1,
           unit: entry.unit.trim() || 'יחידות',
-          category: entry.category,
+          category: entry.category as any,
         });
         addedItems.push(item);
       }
@@ -224,8 +226,8 @@ export const BatchAddShoppingListDialog = ({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {Object.entries(categoryLabels).map(([key, label]) => (
-                                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                                {categories.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>

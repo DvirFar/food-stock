@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { productService } from '@/services/productService';
-import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels } from '@/types';
+import { Product } from '@/types';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 
 interface AddProductDialogProps {
@@ -30,14 +39,20 @@ export const AddProductDialog = ({
   onOpenChange,
   onProductAdded,
 }: AddProductDialogProps) => {
+  const { categories, locations, categoryLabels, locationLabels } = useSettings();
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<ProductCategory>('other');
+  const [category, setCategory] = useState('other');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [minQuantity, setMinQuantity] = useState('');
-  const [location, setLocation] = useState<StorageLocation>('fridge');
+  const [location, setLocation] = useState('fridge');
   const [expirationDate, setExpirationDate] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [catOpen, setCatOpen] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+  const [locOpen, setLocOpen] = useState(false);
+  const [locSearch, setLocSearch] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +66,11 @@ export const AddProductDialog = ({
     try {
       const product = await productService.create({
         name: name.trim(),
-        category,
+        category: category as any,
         quantity: parseFloat(quantity),
         unit: unit.trim(),
         min_quantity: parseFloat(minQuantity),
-        location,
+        location: location as any,
         expiration_date: expirationDate || null,
       });
       
@@ -98,31 +113,67 @@ export const AddProductDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">קטגוריה</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as ProductCategory)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(categoryLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>קטגוריה</Label>
+              <Popover open={catOpen} onOpenChange={setCatOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-full justify-between">
+                    {categoryLabels[category] || category}
+                    <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="חפש קטגוריה..." value={catSearch} onValueChange={setCatSearch} />
+                    <CommandList>
+                      <CommandEmpty>לא נמצאה קטגוריה</CommandEmpty>
+                      <CommandGroup>
+                        {categories.map((cat) => (
+                          <CommandItem
+                            key={cat.id}
+                            value={cat.label}
+                            onSelect={() => { setCategory(cat.name); setCatOpen(false); }}
+                          >
+                            <Check className={cn("me-2 h-4 w-4", category === cat.name ? "opacity-100" : "opacity-0")} />
+                            {cat.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">מיקום</Label>
-              <Select value={location} onValueChange={(v) => setLocation(v as StorageLocation)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(locationLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>מיקום</Label>
+              <Popover open={locOpen} onOpenChange={setLocOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-full justify-between">
+                    {locationLabels[location] || location}
+                    <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="חפש מיקום..." value={locSearch} onValueChange={setLocSearch} />
+                    <CommandList>
+                      <CommandEmpty>לא נמצא מיקום</CommandEmpty>
+                      <CommandGroup>
+                        {locations.map((loc) => (
+                          <CommandItem
+                            key={loc.id}
+                            value={loc.label}
+                            onSelect={() => { setLocation(loc.name); setLocOpen(false); }}
+                          >
+                            <Check className={cn("me-2 h-4 w-4", location === loc.name ? "opacity-100" : "opacity-0")} />
+                            {loc.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

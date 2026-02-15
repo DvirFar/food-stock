@@ -1,117 +1,46 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Upload, FileSpreadsheet, Download } from 'lucide-react';
-import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels } from '@/types';
+import { Product } from '@/types';
 import { productService } from '@/services/productService';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
-// Helper function to normalize text for matching (handles Hebrew and English)
+// Helper function to normalize text for matching
 const normalizeText = (text: string): string => {
-  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
   .replace(/[_\s]+/g, " ").trim();
 };
 
-// Match text input to valid category key
-const matchCategory = (value: string): ProductCategory => {
-  const normalized = normalizeText(String(value || ''));
-
-  // Direct key match first
-  const validCategories: ProductCategory[] = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'frozen', 'beverages', 'condiments', 'snacks', 'other'];
-  if (validCategories.includes(normalized as ProductCategory)) {
-    return normalized as ProductCategory;
-  }
-
-  // Match Hebrew labels to keys
-  const hebrewToCategory: Record<string, ProductCategory> = {
-    'מוצרי חלב': 'dairy',
-    'חלב': 'dairy',
-    'בשר ועופות': 'meat',
-    'בשר': 'meat',
-    'עופות': 'meat',
-    'ירקות': 'vegetables',
-    'ירק': 'vegetables',
-    'פירות': 'fruits',
-    'פרי': 'fruits',
-    'דגנים': 'grains',
-    'דגן': 'grains',
-    'קפואים': 'frozen',
-    'קפוא': 'frozen',
-    'משקאות': 'beverages',
-    'משקה': 'beverages',
-    'תבלינים ורטבים': 'condiments',
-    'תבלינים': 'condiments',
-    'רטבים': 'condiments',
-    'חטיפים': 'snacks',
-    'חטיף': 'snacks',
-    'אחר': 'other'
-  };
-
-  // Try exact Hebrew match
-  if (hebrewToCategory[value]) {
-    return hebrewToCategory[value];
-  }
-
-  // Try partial match
-  for (const [hebrew, category] of Object.entries(hebrewToCategory)) {
-    if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
-      return category;
-    }
-  }
-  return 'other';
-};
-
-// Match text input to valid location key
-const matchLocation = (value: string): StorageLocation => {
-  const normalized = normalizeText(String(value || ''));
-
-  // Direct key match first
-  const validLocations: StorageLocation[] = ['fridge', 'freezer', 'pantry', 'counter'];
-  if (validLocations.includes(normalized as StorageLocation)) {
-    return normalized as StorageLocation;
-  }
-
-  // Match Hebrew labels to keys
-  const hebrewToLocation: Record<string, StorageLocation> = {
-    'מקרר': 'fridge',
-    'מקפיא': 'freezer',
-    'מזווה': 'pantry',
-    'משטח': 'counter'
-  };
-
-  // Try exact Hebrew match
-  if (hebrewToLocation[value]) {
-    return hebrewToLocation[value];
-  }
-
-  // Try partial match
-  for (const [hebrew, location] of Object.entries(hebrewToLocation)) {
-    if (normalized.includes(normalizeText(hebrew)) || normalizeText(hebrew).includes(normalized)) {
-      return location;
-    }
-  }
-  return 'fridge';
-};
 interface BatchProductEntry {
   name: string;
-  category: ProductCategory;
+  category: string;
   quantity: string;
   unit: string;
   minQuantity: string;
-  location: StorageLocation;
+  location: string;
   expirationDate: string;
 }
+
 interface BatchAddProductsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProductsAdded: (products: Product[]) => void;
 }
+
 const createEmptyEntry = (): BatchProductEntry => ({
   name: '',
   category: 'other',
@@ -121,35 +50,68 @@ const createEmptyEntry = (): BatchProductEntry => ({
   location: 'fridge',
   expirationDate: ''
 });
+
 export const BatchAddProductsDialog = ({
   open,
   onOpenChange,
   onProductsAdded
 }: BatchAddProductsDialogProps) => {
+  const { categories, locations, categoryLabels, locationLabels } = useSettings();
   const [entries, setEntries] = useState<BatchProductEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('manual');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Build matching maps from dynamic settings
+  const matchCategory = useMemo(() => {
+    return (value: string): string => {
+      const normalized = normalizeText(String(value || ''));
+      // Direct name match
+      const directMatch = categories.find(c => c.name === normalized);
+      if (directMatch) return directMatch.name;
+      // Label match
+      const labelMatch = categories.find(c => 
+        normalizeText(c.label).includes(normalized) || normalized.includes(normalizeText(c.label))
+      );
+      if (labelMatch) return labelMatch.name;
+      return 'other';
+    };
+  }, [categories]);
+
+  const matchLocation = useMemo(() => {
+    return (value: string): string => {
+      const normalized = normalizeText(String(value || ''));
+      const directMatch = locations.find(l => l.name === normalized);
+      if (directMatch) return directMatch.name;
+      const labelMatch = locations.find(l => 
+        normalizeText(l.label).includes(normalized) || normalized.includes(normalizeText(l.label))
+      );
+      if (labelMatch) return labelMatch.name;
+      return 'fridge';
+    };
+  }, [locations]);
+
   const addEntry = () => {
     setEntries([...entries, createEmptyEntry()]);
   };
+
   const removeEntry = (index: number) => {
     if (entries.length > 1) {
       setEntries(entries.filter((_, i) => i !== index));
     }
   };
+
   const updateEntry = (index: number, field: keyof BatchProductEntry, value: string) => {
     const updated = [...entries];
-    updated[index] = {
-      ...updated[index],
-      [field]: value
-    };
+    updated[index] = { ...updated[index], [field]: value };
     setEntries(updated);
   };
+
   const resetForm = () => {
     setEntries([createEmptyEntry()]);
     setActiveTab('manual');
   };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -176,12 +138,11 @@ export const BatchAddProductsDialog = ({
     } catch (error) {
       toast.error('שגיאה בקריאת הקובץ');
     }
-
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
   const downloadTemplate = () => {
     const template = [{
       'שם': 'חלב',
@@ -197,6 +158,7 @@ export const BatchAddProductsDialog = ({
     XLSX.utils.book_append_sheet(wb, ws, 'Products');
     XLSX.writeFile(wb, 'products_template.xlsx');
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validEntries = entries.filter(entry => entry.name.trim() && entry.quantity && entry.unit.trim() && entry.minQuantity);
@@ -210,11 +172,11 @@ export const BatchAddProductsDialog = ({
       for (const entry of validEntries) {
         const product = await productService.create({
           name: entry.name.trim(),
-          category: entry.category,
+          category: entry.category as any,
           quantity: parseFloat(entry.quantity),
           unit: entry.unit.trim(),
           min_quantity: parseFloat(entry.minQuantity),
-          location: entry.location,
+          location: entry.location as any,
           expiration_date: entry.expirationDate || null
         });
         addedProducts.push(product);
@@ -229,10 +191,12 @@ export const BatchAddProductsDialog = ({
       setLoading(false);
     }
   };
-  return <Dialog open={open} onOpenChange={value => {
-    if (!value) resetForm();
-    onOpenChange(value);
-  }}>
+
+  return (
+    <Dialog open={open} onOpenChange={value => {
+      if (!value) resetForm();
+      onOpenChange(value);
+    }}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>הוספת מוצרים בכמות</DialogTitle>
@@ -248,12 +212,15 @@ export const BatchAddProductsDialog = ({
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <ScrollArea className="flex-1 pe-4">
                 <div className="space-y-4">
-                  {entries.map((entry, index) => <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30">
+                  {entries.map((entry, index) => (
+                    <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/30">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
-                        {entries.length > 1 && <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
+                        {entries.length > 1 && (
+                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
                             <Trash2 className="h-4 w-4" />
-                          </Button>}
+                          </Button>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -269,7 +236,9 @@ export const BatchAddProductsDialog = ({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(categoryLabels).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
+                              {categories.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -281,7 +250,9 @@ export const BatchAddProductsDialog = ({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(locationLabels).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
+                              {locations.map((loc) => (
+                                <SelectItem key={loc.id} value={loc.name}>{loc.label}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -306,7 +277,8 @@ export const BatchAddProductsDialog = ({
                           <Input type="date" value={entry.expirationDate} onChange={e => updateEntry(index, 'expirationDate', e.target.value)} dir="ltr" />
                         </div>
                       </div>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </ScrollArea>
 
@@ -349,30 +321,35 @@ export const BatchAddProductsDialog = ({
                 <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFileUpload} className="hidden" />
               </div>
 
-              {entries.length > 0 && entries[0].name && <div className="space-y-2">
+              {entries.length > 0 && entries[0].name && (
+                <div className="space-y-2">
                   <h4 className="font-medium">מוצרים שנטענו ({entries.filter(e => e.name.trim()).length})</h4>
                   <ScrollArea className="h-[300px] border rounded-lg p-2">
                     <div className="space-y-1">
-                      {entries.filter(e => e.name.trim()).map((entry, index) => <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
+                      {entries.filter(e => e.name.trim()).map((entry, index) => (
+                        <div key={index} className="text-sm p-2 bg-muted/50 rounded flex justify-between items-center">
                           <div className="flex flex-col">
                             <span className="font-medium">{entry.name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {categoryLabels[entry.category]} • {locationLabels[entry.location]}
+                              {categoryLabels[entry.category] || entry.category} • {locationLabels[entry.location] || entry.location}
                             </span>
                           </div>
                           <span className="text-muted-foreground">
                             {entry.quantity} {entry.unit}
                           </span>
-                        </div>)}
+                        </div>
+                      ))}
                     </div>
                   </ScrollArea>
                   <Button onClick={handleSubmit} disabled={loading} className="w-full">
                     {loading ? 'מוסיף...' : `הוסף ${entries.filter(e => e.name.trim()).length} מוצרים`}
                   </Button>
-                </div>}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
