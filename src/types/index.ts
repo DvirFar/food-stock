@@ -1,29 +1,20 @@
 // Core domain types for the food stock management system
 
-export type ProductCategory = 
-  | 'dairy'
-  | 'meat'
-  | 'vegetables'
-  | 'fruits'
-  | 'grains'
-  | 'frozen'
-  | 'beverages'
-  | 'condiments'
-  | 'snacks'
-  | 'other';
-
-export type StorageLocation = 'fridge' | 'freezer' | 'pantry' | 'counter';
+// Categories and locations are now dynamic (from DB)
+// These type aliases are kept for backward compatibility
+export type ProductCategory = string;
+export type StorageLocation = string;
 
 export interface Product {
   id: string;
   user_id: string;
   name: string;
-  category: ProductCategory;
+  category: string;
   quantity: number;
   unit: string;
   min_quantity: number;
   expiration_date?: string | null;
-  location: StorageLocation;
+  location: string;
   notes?: string | null;
   created_at: string;
   updated_at: string;
@@ -33,7 +24,7 @@ export interface RecipeIngredient {
   productId?: string;
   name: string;
   quantity?: number | string;
-  amount?: string; // Alternative field name used in some recipes
+  amount?: string;
   unit: string;
   optional?: boolean;
 }
@@ -62,7 +53,7 @@ export interface ShoppingListItem {
   name: string;
   quantity: number;
   unit: string;
-  category: ProductCategory;
+  category: string;
   checked: boolean;
   added_at: string;
 }
@@ -71,26 +62,5 @@ export interface DashboardStats {
   totalProducts: number;
   lowStockCount: number;
   expiringCount: number;
-  categoryCounts: Partial<Record<ProductCategory, number>>;
+  categoryCounts: Partial<Record<string, number>>;
 }
-
-// Category display configuration
-export const categoryLabels: Record<ProductCategory, string> = {
-  dairy: 'מוצרי חלב',
-  meat: 'בשר ועופות',
-  vegetables: 'ירקות',
-  fruits: 'פירות',
-  grains: 'דגנים',
-  frozen: 'קפואים',
-  beverages: 'משקאות',
-  condiments: 'תבלינים ורטבים',
-  snacks: 'חטיפים',
-  other: 'אחר',
-};
-
-export const locationLabels: Record<StorageLocation, string> = {
-  fridge: 'מקרר',
-  freezer: 'מקפיא',
-  pantry: 'מזווה',
-  counter: 'משטח',
-};

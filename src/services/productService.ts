@@ -1,7 +1,7 @@
 // Product service - handles all product-related operations using Supabase
 
 import { supabase } from '@/integrations/supabase/client';
-import { Product, DashboardStats, ProductCategory } from '@/types';
+import { Product, DashboardStats } from '@/types';
 
 class ProductService {
   async getAll(): Promise<Product[]> {
@@ -34,7 +34,7 @@ class ProductService {
       .insert({
         ...product,
         user_id: user.id,
-      })
+      } as any)
       .select()
       .single();
     
@@ -45,7 +45,7 @@ class ProductService {
   async update(id: string, updates: Partial<Product>): Promise<Product | undefined> {
     const { data, error } = await supabase
       .from('products')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -100,7 +100,7 @@ class ProductService {
     const categoryCounts = products.reduce((acc, p) => {
       acc[p.category] = (acc[p.category] || 0) + 1;
       return acc;
-    }, {} as Partial<Record<ProductCategory, number>>);
+    }, {} as Partial<Record<string, number>>);
 
     return {
       totalProducts: products.length,

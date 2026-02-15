@@ -1,7 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Product, categoryLabels, ProductCategory } from '@/types';
+import { Product } from '@/types';
 
 interface StockLevelChartProps {
   products: Product[];

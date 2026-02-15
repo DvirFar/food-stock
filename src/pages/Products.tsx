@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -25,13 +24,15 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { productService } from '@/services/productService';
-import { Product, ProductCategory, StorageLocation, categoryLabels, locationLabels } from '@/types';
+import { Product } from '@/types';
+import { useSettings } from '@/hooks/useSettings';
 import { ProductCard } from '@/components/ProductCard';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { toast } from 'sonner';
 
 const Products = () => {
+  const { categories, locations, categoryLabels, locationLabels } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -170,8 +171,8 @@ const Products = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">כל הקטגוריות</SelectItem>
-                {Object.entries(categoryLabels).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -181,8 +182,8 @@ const Products = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">כל המיקומים</SelectItem>
-                {Object.entries(locationLabels).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                {locations.map((loc) => (
+                  <SelectItem key={loc.id} value={loc.name}>{loc.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

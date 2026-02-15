@@ -1,7 +1,7 @@
 // Shopping list service - manages shopping list operations using Supabase
 
 import { supabase } from '@/integrations/supabase/client';
-import { ShoppingListItem, Product, ProductCategory } from '@/types';
+import { ShoppingListItem, Product } from '@/types';
 
 class ShoppingListService {
   async getAll(): Promise<ShoppingListItem[]> {
@@ -24,7 +24,7 @@ class ShoppingListService {
         ...item,
         user_id: user.id,
         checked: false,
-      })
+      } as any)
       .select()
       .single();
     
@@ -59,7 +59,7 @@ class ShoppingListService {
             unit: product.unit,
             category: product.category,
             checked: false,
-          })
+          } as any)
           .select()
           .single();
         

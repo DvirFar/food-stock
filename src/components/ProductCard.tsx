@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   Clock
 } from 'lucide-react';
-import { Product, categoryLabels, locationLabels } from '@/types';
+import { Product } from '@/types';
+import { useSettings } from '@/hooks/useSettings';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { he } from 'date-fns/locale';
 
@@ -29,6 +30,7 @@ export const ProductCard = ({
   onQuantityChange,
   onDelete,
 }: ProductCardProps) => {
+  const { categoryLabels, locationLabels } = useSettings();
   const isLowStock = product.quantity < product.min_quantity;
   const daysUntilExpiry = product.expiration_date 
     ? differenceInDays(parseISO(product.expiration_date), new Date())
@@ -59,7 +61,7 @@ export const ProductCard = ({
           </div>
         </div>
         <Badge variant="outline">
-          {locationLabels[product.location]}
+          {locationLabels[product.location] || product.location}
         </Badge>
       </div>
     );
@@ -68,7 +70,6 @@ export const ProductCard = ({
   return (
     <Card className={`transition-shadow hover:shadow-md ${isLowStock ? 'border-destructive/50' : ''}`} dir="rtl">
       <CardContent className="pt-6">
-        {/* Header with name and delete */}
         <div className="flex justify-between items-start gap-2 mb-2">
           <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
           {onDelete && (
@@ -83,17 +84,15 @@ export const ProductCard = ({
           )}
         </div>
 
-        {/* Badges row */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           <Badge variant="outline" className="text-xs truncate max-w-[120px]">
-            {categoryLabels[product.category]}
+            {categoryLabels[product.category] || product.category}
           </Badge>
           <Badge variant="secondary" className="text-xs">
-            {locationLabels[product.location]}
+            {locationLabels[product.location] || product.location}
           </Badge>
         </div>
 
-        {/* Quantity Display */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {onQuantityChange && (
@@ -127,7 +126,6 @@ export const ProductCard = ({
           </div>
         </div>
 
-        {/* Alerts */}
         <div className="flex flex-wrap gap-2 mt-4">
           {showLowStock && isLowStock && (
             <Badge variant="destructive">
