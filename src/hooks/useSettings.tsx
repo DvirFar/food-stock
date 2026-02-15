@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { settingsService, Category, Location, defaultCategories, defaultLocations } from '@/services/settingsService';
+import { settingsService, type Category, type Location } from '@/services/settingsService';
 
 interface SettingsContextType {
   categories: Category[];
@@ -20,39 +20,33 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
-      const [cats, locs] = await Promise.all([
+      let [cats, locs] = await Promise.all([
         settingsService.getCategories(),
         settingsService.getLocations(),
       ]);
       
-      // If no categories/locations exist, use defaults (but don't create them yet)
-      setCategories(cats.length > 0 ? cats : defaultCategories.map((c, i) => ({
-        ...c,
-        id: `default-${i}`,
-        user_id: '',
-        created_at: new Date().toISOString(),
-      })));
-      setLocations(locs.length > 0 ? locs : defaultLocations.map((l, i) => ({
-        ...l,
-        id: `default-${i}`,
-        user_id: '',
-        created_at: new Date().toISOString(),
-      })));
+      // Auto-initialize defaults in DB if none exist
+      if (cats.length === 0) {
+        try {
+          cats = await settingsService.initializeDefaultCategories();
+        } catch (e) {
+          console.error('Error initializing default categories:', e);
+        }
+      }
+      if (locs.length === 0) {
+        try {
+          locs = await settingsService.initializeDefaultLocations();
+        } catch (e) {
+          console.error('Error initializing default locations:', e);
+        }
+      }
+
+      setCategories(cats);
+      setLocations(locs);
     } catch (error) {
       console.error('Error fetching settings:', error);
-      // Fall back to defaults on error
-      setCategories(defaultCategories.map((c, i) => ({
-        ...c,
-        id: `default-${i}`,
-        user_id: '',
-        created_at: new Date().toISOString(),
-      })));
-      setLocations(defaultLocations.map((l, i) => ({
-        ...l,
-        id: `default-${i}`,
-        user_id: '',
-        created_at: new Date().toISOString(),
-      })));
+      setCategories([]);
+      setLocations([]);
     } finally {
       setLoading(false);
     }

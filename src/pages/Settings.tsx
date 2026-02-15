@@ -30,7 +30,7 @@ import {
   MapPin,
   GripVertical
 } from 'lucide-react';
-import { settingsService, Category, Location } from '@/services/settingsService';
+import { settingsService, type Category, type Location } from '@/services/settingsService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 
@@ -58,28 +58,7 @@ const Settings = () => {
   
   const [saving, setSaving] = useState(false);
 
-  // Initialize defaults if needed
-  useEffect(() => {
-    const initDefaults = async () => {
-      if (!loading && categories.length === 0) {
-        try {
-          await settingsService.initializeDefaultCategories();
-          await refetch();
-        } catch (error) {
-          console.error('Error initializing categories:', error);
-        }
-      }
-      if (!loading && locations.length === 0) {
-        try {
-          await settingsService.initializeDefaultLocations();
-          await refetch();
-        } catch (error) {
-          console.error('Error initializing locations:', error);
-        }
-      }
-    };
-    initDefaults();
-  }, [loading, categories.length, locations.length, refetch]);
+  // Defaults are now auto-initialized by the SettingsProvider
 
   // Category handlers
   const openCategoryDialog = (mode: EditMode, category?: Category) => {
@@ -250,7 +229,7 @@ const Settings = () => {
             <CardContent>
               <div className="space-y-2">
                 {categories
-                  .filter(c => !c.id.startsWith('default-'))
+                  .sort((a, b) => a.sort_order - b.sort_order)
                   .sort((a, b) => a.sort_order - b.sort_order)
                   .map((category) => (
                     <div
@@ -282,7 +261,7 @@ const Settings = () => {
                       </Button>
                     </div>
                   ))}
-                {categories.filter(c => !c.id.startsWith('default-')).length === 0 && (
+                {categories.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     אין קטגוריות מותאמות אישית. לחץ על "הוסף קטגוריה" כדי להתחיל.
                   </div>
@@ -310,7 +289,7 @@ const Settings = () => {
             <CardContent>
               <div className="space-y-2">
                 {locations
-                  .filter(l => !l.id.startsWith('default-'))
+                  .sort((a, b) => a.sort_order - b.sort_order)
                   .sort((a, b) => a.sort_order - b.sort_order)
                   .map((location) => (
                     <div
@@ -342,7 +321,7 @@ const Settings = () => {
                       </Button>
                     </div>
                   ))}
-                {locations.filter(l => !l.id.startsWith('default-')).length === 0 && (
+                {locations.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     אין מיקומים מותאמים אישית. לחץ על "הוסף מיקום" כדי להתחיל.
                   </div>
