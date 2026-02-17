@@ -46,6 +46,8 @@ export const AddShoppingListItemDialog = ({
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [catFilterOpen, setCatFilterOpen] = useState(false);
   
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -77,11 +79,17 @@ export const AddShoppingListItemDialog = ({
   };
 
   const filteredProducts = useMemo(() => {
-    if (!searchValue) return products;
-    return products.filter(p => 
-      p.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
-  }, [products, searchValue]);
+    let filtered = products;
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === filterCategory);
+    }
+    if (searchValue) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    }
+    return filtered;
+  }, [products, searchValue, filterCategory]);
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -101,6 +109,7 @@ export const AddShoppingListItemDialog = ({
     setSelectedProduct(null);
     setIsNewProduct(false);
     setSearchValue('');
+    setFilterCategory('all');
     setQuantity('1');
     setUnit('יחידות');
     setNewProductName('');
@@ -169,6 +178,39 @@ export const AddShoppingListItemDialog = ({
           <DialogTitle>הוסף פריט לרשימת הקניות</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Category Filter */}
+          <div className="space-y-2">
+            <Label>סנן לפי קטגוריה</Label>
+            <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" className="w-full justify-between">
+                  {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                  <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="חפש קטגוריה..." />
+                  <CommandList>
+                    <CommandEmpty>לא נמצא</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem value="כל הקטגוריות" onSelect={() => { setFilterCategory('all'); setCatFilterOpen(false); }}>
+                        <Check className={cn("me-2 h-4 w-4", filterCategory === 'all' ? "opacity-100" : "opacity-0")} />
+                        כל הקטגוריות
+                      </CommandItem>
+                      {categories.map((cat) => (
+                        <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                          <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
+                          {cat.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           {/* Product Selection */}
           <div className="space-y-2">
             <Label>בחר מוצר</Label>
