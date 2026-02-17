@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Trash2, Upload, FileSpreadsheet, Download } from 'lucide-react';
-import { ShoppingListItem } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2, Upload, FileSpreadsheet, Download, Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Product, ShoppingListItem } from '@/types';
+import { productService } from '@/services/productService';
 import { shoppingListService } from '@/services/shoppingListService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
@@ -30,6 +47,11 @@ interface BatchShoppingEntry {
   quantity: string;
   unit: string;
   category: string;
+}
+
+interface SelectedProductEntry {
+  product: Product;
+  quantity: string;
 }
 
 interface BatchAddShoppingListDialogProps {
@@ -50,11 +72,67 @@ export const BatchAddShoppingListDialog = ({
   onOpenChange,
   onItemsAdded,
 }: BatchAddShoppingListDialogProps) => {
-  const { categories } = useSettings();
+  const { categories, categoryLabels } = useSettings();
   const [entries, setEntries] = useState<BatchShoppingEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('manual');
+  const [activeTab, setActiveTab] = useState('products');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Product selection state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [catFilterOpen, setCatFilterOpen] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProductEntry[]>([]);
+  const [productSearch, setProductSearch] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      loadProducts();
+    }
+  }, [open]);
+
+  const loadProducts = async () => {
+    try {
+      const data = await productService.getAll();
+      setProducts(data);
+    } catch (error) {
+      toast.error('שגיאה בטעינת המוצרים');
+    }
+  };
+
+  const filteredProducts = useMemo(() => {
+    let filtered = products;
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === filterCategory);
+    }
+    if (productSearch) {
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(productSearch.toLowerCase())
+      );
+    }
+    return filtered;
+  }, [products, filterCategory, productSearch]);
+
+  const isProductSelected = (id: string) => selectedProducts.some(sp => sp.product.id === id);
+
+  const toggleProduct = (product: Product) => {
+    setSelectedProducts(prev => {
+      if (prev.some(sp => sp.product.id === product.id)) {
+        return prev.filter(sp => sp.product.id !== product.id);
+      }
+      return [...prev, { product, quantity: '1' }];
+    });
+  };
+
+  const updateSelectedQuantity = (productId: string, quantity: string) => {
+    setSelectedProducts(prev =>
+      prev.map(sp => sp.product.id === productId ? { ...sp, quantity } : sp)
+    );
+  };
+
+  const removeSelectedProduct = (productId: string) => {
+    setSelectedProducts(prev => prev.filter(sp => sp.product.id !== productId));
+  };
 
   const addEntry = () => {
     setEntries([...entries, createEmptyEntry()]);
@@ -74,7 +152,10 @@ export const BatchAddShoppingListDialog = ({
 
   const resetForm = () => {
     setEntries([createEmptyEntry()]);
-    setActiveTab('manual');
+    setActiveTab('products');
+    setSelectedProducts([]);
+    setFilterCategory('all');
+    setProductSearch('');
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,21 +207,47 @@ export const BatchAddShoppingListDialog = ({
     XLSX.writeFile(wb, 'shopping_list_template.xlsx');
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmitProducts = async () => {
+    if (selectedProducts.length === 0) {
+      toast.error('נא לבחור לפחות מוצר אחד');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const addedItems: ShoppingListItem[] = [];
+      for (const sp of selectedProducts) {
+        const item = await shoppingListService.addItem({
+          product_id: sp.product.id,
+          name: sp.product.name,
+          quantity: parseFloat(sp.quantity) || 1,
+          unit: sp.product.unit,
+          category: sp.product.category as any,
+        });
+        addedItems.push(item);
+      }
+      onItemsAdded(addedItems);
+      toast.success(`${addedItems.length} פריטים נוספו לרשימת הקניות`);
+      resetForm();
+      onOpenChange(false);
+    } catch (error) {
+      toast.error('שגיאה בהוספת פריטים');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitManual = async (e?: React.FormEvent) => {
     e?.preventDefault();
-
     const validEntries = entries.filter(entry => entry.name.trim());
-
     if (validEntries.length === 0) {
       toast.error('נא למלא לפחות פריט אחד');
       return;
     }
 
     setLoading(true);
-
     try {
       const addedItems: ShoppingListItem[] = [];
-      
       for (const entry of validEntries) {
         const item = await shoppingListService.addItem({
           name: entry.name.trim(),
@@ -150,7 +257,6 @@ export const BatchAddShoppingListDialog = ({
         });
         addedItems.push(item);
       }
-
       onItemsAdded(addedItems);
       toast.success(`${addedItems.length} פריטים נוספו לרשימת הקניות`);
       resetForm();
@@ -173,13 +279,129 @@ export const BatchAddShoppingListDialog = ({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="products">בחירה מהמלאי</TabsTrigger>
             <TabsTrigger value="manual">הזנה ידנית</TabsTrigger>
             <TabsTrigger value="file">העלאת קובץ</TabsTrigger>
           </TabsList>
 
+          {/* Products Selection Tab */}
+          <TabsContent value="products" className="flex-1 overflow-hidden flex flex-col mt-4">
+            <div className="flex-1 flex flex-col overflow-hidden space-y-4">
+              {/* Category Filter */}
+              <div className="space-y-2">
+                <Label>סנן לפי קטגוריה</Label>
+                <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
+                      {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                      <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="חפש קטגוריה..." />
+                      <CommandList>
+                        <CommandEmpty>לא נמצא</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem value="כל הקטגוריות" onSelect={() => { setFilterCategory('all'); setCatFilterOpen(false); }}>
+                            <Check className={cn("me-2 h-4 w-4", filterCategory === 'all' ? "opacity-100" : "opacity-0")} />
+                            כל הקטגוריות
+                          </CommandItem>
+                          {categories.map((cat) => (
+                            <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                              <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
+                              {cat.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Product Search */}
+              <Input
+                placeholder="חפש מוצר..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+              />
+
+              {/* Product List */}
+              <ScrollArea className="flex-1 border rounded-lg">
+                <div className="p-2 space-y-1">
+                  {filteredProducts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">לא נמצאו מוצרים</p>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className={cn(
+                          "flex items-center gap-3 p-2 rounded-md cursor-pointer hover:bg-accent/50 transition-colors",
+                          isProductSelected(product.id) && "bg-accent"
+                        )}
+                        onClick={() => toggleProduct(product)}
+                      >
+                        <Checkbox checked={isProductSelected(product.id)} />
+                        <span className="flex-1 text-sm font-medium">{product.name}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {categoryLabels[product.category] || product.category}
+                        </Badge>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Selected Products with quantities */}
+              {selectedProducts.length > 0 && (
+                <div className="space-y-2 border-t pt-3">
+                  <Label>מוצרים נבחרים ({selectedProducts.length})</Label>
+                  <ScrollArea className="max-h-[150px]">
+                    <div className="space-y-2">
+                      {selectedProducts.map((sp) => (
+                        <div key={sp.product.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
+                          <span className="flex-1 text-sm">{sp.product.name}</span>
+                          <Input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={sp.quantity}
+                            onChange={(e) => updateSelectedQuantity(sp.product.id, e.target.value)}
+                            className="w-20 h-8 text-sm"
+                            dir="ltr"
+                          />
+                          <span className="text-xs text-muted-foreground">{sp.product.unit}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => removeSelectedProduct(sp.product.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  ביטול
+                </Button>
+                <Button onClick={handleSubmitProducts} disabled={loading || selectedProducts.length === 0}>
+                  {loading ? 'מוסיף...' : `הוסף ${selectedProducts.length} פריטים`}
+                </Button>
+              </DialogFooter>
+            </div>
+          </TabsContent>
+
           <TabsContent value="manual" className="flex-1 overflow-hidden flex flex-col mt-4">
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+            <form onSubmit={handleSubmitManual} className="flex-1 flex flex-col overflow-hidden">
               <ScrollArea className="flex-1 pe-4">
                 <div className="space-y-3">
                   {entries.map((entry, index) => (
@@ -318,7 +540,7 @@ export const BatchAddShoppingListDialog = ({
                       ))}
                     </div>
                   </ScrollArea>
-                  <Button onClick={() => handleSubmit()} disabled={loading} className="w-full">
+                  <Button onClick={() => handleSubmitManual()} disabled={loading} className="w-full">
                     {loading ? 'מוסיף...' : `הוסף ${entries.filter(e => e.name.trim()).length} פריטים`}
                   </Button>
                 </div>
