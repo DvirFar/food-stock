@@ -29,6 +29,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { ProductCard } from '@/components/ProductCard';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
+import { EditProductDialog } from '@/components/EditProductDialog';
 import { toast } from 'sonner';
 
 const Products = () => {
@@ -41,6 +42,7 @@ const Products = () => {
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBatchDialog, setShowBatchDialog] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -110,6 +112,10 @@ const Products = () => {
     } catch (error) {
       toast.error('שגיאה במחיקת מוצר');
     }
+  };
+
+  const handleProductUpdated = (updated: Product) => {
+    setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
   if (loading) {
@@ -219,6 +225,7 @@ const Products = () => {
               product={product}
               onQuantityChange={handleQuantityChange}
               onDelete={handleDelete}
+              onEdit={setEditingProduct}
               showLowStock
               showExpiration
             />
@@ -244,6 +251,15 @@ const Products = () => {
         onOpenChange={setShowBatchDialog}
         onProductsAdded={handleProductsAdded}
       />
+
+      {editingProduct && (
+        <EditProductDialog
+          open={!!editingProduct}
+          onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+          product={editingProduct}
+          onProductUpdated={handleProductUpdated}
+        />
+      )}
     </div>
   );
 };

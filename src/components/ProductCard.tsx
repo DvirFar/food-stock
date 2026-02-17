@@ -5,6 +5,7 @@ import {
   Minus, 
   Plus, 
   Trash2,
+  Pencil,
   AlertTriangle,
   Clock
 } from 'lucide-react';
@@ -20,6 +21,7 @@ interface ProductCardProps {
   showExpiration?: boolean;
   onQuantityChange?: (id: string, newQuantity: number) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (product: Product) => void;
 }
 
 export const ProductCard = ({
@@ -29,6 +31,7 @@ export const ProductCard = ({
   showExpiration = false,
   onQuantityChange,
   onDelete,
+  onEdit,
 }: ProductCardProps) => {
   const { categoryLabels, locationLabels } = useSettings();
   const isLowStock = product.quantity < product.min_quantity;
@@ -72,16 +75,28 @@ export const ProductCard = ({
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-2 mb-2">
           <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(product.id)}
-              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <div className="flex gap-1 shrink-0">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(product)}
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(product.id)}
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-4">
