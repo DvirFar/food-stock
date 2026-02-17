@@ -70,11 +70,11 @@ export type Database = {
       }
       products: {
         Row: {
-          category: Database["public"]["Enums"]["product_category"]
+          category: string
           created_at: string
           expiration_date: string | null
           id: string
-          location: Database["public"]["Enums"]["storage_location"]
+          location: string
           min_quantity: number
           name: string
           notes: string | null
@@ -84,11 +84,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category?: Database["public"]["Enums"]["product_category"]
+          category?: string
           created_at?: string
           expiration_date?: string | null
           id?: string
-          location?: Database["public"]["Enums"]["storage_location"]
+          location?: string
           min_quantity?: number
           name: string
           notes?: string | null
@@ -98,11 +98,11 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: Database["public"]["Enums"]["product_category"]
+          category?: string
           created_at?: string
           expiration_date?: string | null
           id?: string
-          location?: Database["public"]["Enums"]["storage_location"]
+          location?: string
           min_quantity?: number
           name?: string
           notes?: string | null
@@ -167,7 +167,7 @@ export type Database = {
       shopping_list_items: {
         Row: {
           added_at: string
-          category: Database["public"]["Enums"]["product_category"] | null
+          category: string | null
           checked: boolean
           id: string
           name: string
@@ -178,7 +178,7 @@ export type Database = {
         }
         Insert: {
           added_at?: string
-          category?: Database["public"]["Enums"]["product_category"] | null
+          category?: string | null
           checked?: boolean
           id?: string
           name: string
@@ -189,7 +189,7 @@ export type Database = {
         }
         Update: {
           added_at?: string
-          category?: Database["public"]["Enums"]["product_category"] | null
+          category?: string | null
           checked?: boolean
           id?: string
           name?: string
