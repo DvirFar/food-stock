@@ -286,8 +286,8 @@ export const BatchAddShoppingListDialog = ({
           </TabsList>
 
           {/* Products Selection Tab */}
-          <TabsContent value="products" className="flex-1 overflow-hidden flex flex-col mt-4">
-            <div className="flex-1 flex flex-col overflow-hidden space-y-4">
+          <TabsContent value="products" className="flex-1 overflow-auto flex flex-col mt-4">
+            <div className="flex-1 flex flex-col space-y-4">
               {/* Category Filter */}
               <div className="space-y-2">
                 <Label>סנן לפי קטגוריה</Label>
@@ -329,7 +329,7 @@ export const BatchAddShoppingListDialog = ({
               />
 
               {/* Product List */}
-              <ScrollArea className="h-[250px] border rounded-lg">
+              <ScrollArea className="min-h-[100px] max-h-[250px] border rounded-lg">
                 <div className="p-2 space-y-1">
                   {filteredProducts.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">לא נמצאו מוצרים</p>
