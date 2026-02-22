@@ -259,7 +259,7 @@ export const BatchAddProductsDialog = ({
 
                         <div className="space-y-1">
                           <Label className="text-xs">כמות *</Label>
-                          <Input type="number" step="0.01" min="0" value={entry.quantity} onChange={e => updateEntry(index, 'quantity', e.target.value)} placeholder="2" dir="ltr" />
+                          <Input type="number" step="0.01" min="0" value={entry.quantity} onChange={e => updateEntry(index, 'quantity', e.target.value)} placeholder="2" dir="rtl" />
                         </div>
 
                         <div className="space-y-1">
@@ -269,12 +269,12 @@ export const BatchAddProductsDialog = ({
 
                         <div className="space-y-1">
                           <Label className="text-xs">כמות מינימום *</Label>
-                          <Input type="number" step="0.01" min="0" value={entry.minQuantity} onChange={e => updateEntry(index, 'minQuantity', e.target.value)} placeholder="1" dir="ltr" />
+                          <Input type="number" step="0.01" min="0" value={entry.minQuantity} onChange={e => updateEntry(index, 'minQuantity', e.target.value)} placeholder="1" dir="rtl" />
                         </div>
 
                         <div className="space-y-1 col-span-2 md:col-span-1">
                           <Label className="text-xs">תאריך תפוגה</Label>
-                          <Input type="date" value={entry.expirationDate} onChange={e => updateEntry(index, 'expirationDate', e.target.value)} dir="ltr" />
+                          <Input type="date" value={entry.expirationDate} onChange={e => updateEntry(index, 'expirationDate', e.target.value)} dir="rtl" />
                         </div>
                       </div>
                     </div>

@@ -370,7 +370,7 @@ export const BatchAddShoppingListDialog = ({
                             value={sp.quantity}
                             onChange={(e) => updateSelectedQuantity(sp.product.id, e.target.value)}
                             className="w-20 h-8 text-sm"
-                            dir="ltr"
+                            dir="rtl"
                           />
                           <span className="text-xs text-muted-foreground">{sp.product.unit}</span>
                           <Button
@@ -424,7 +424,7 @@ export const BatchAddShoppingListDialog = ({
                             min="0.1"
                             value={entry.quantity}
                             onChange={(e) => updateEntry(index, 'quantity', e.target.value)}
-                            dir="ltr"
+                            dir="rtl"
                           />
                         </div>
 
