@@ -18,6 +18,35 @@ class ShoppingListService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Check if an unchecked item with the same name (or product_id) already exists
+    let existingQuery = supabase
+      .from('shopping_list_items')
+      .select('*')
+      .eq('checked', false)
+      .eq('user_id', user.id);
+
+    if (item.product_id) {
+      existingQuery = existingQuery.eq('product_id', item.product_id);
+    } else {
+      existingQuery = existingQuery.eq('name', item.name);
+    }
+
+    const { data: existing, error: fetchError } = await existingQuery.maybeSingle();
+    if (fetchError) throw fetchError;
+
+    if (existing) {
+      // Sum quantities
+      const newQuantity = Number(existing.quantity) + Number(item.quantity);
+      const { data, error } = await supabase
+        .from('shopping_list_items')
+        .update({ quantity: newQuantity })
+        .eq('id', existing.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as ShoppingListItem;
+    }
+
     const { data, error } = await supabase
       .from('shopping_list_items')
       .insert({
