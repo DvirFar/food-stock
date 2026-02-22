@@ -36,11 +36,30 @@ const ShoppingList = () => {
   const [showBatchDialog, setShowBatchDialog] = useState(false);
 
   const handleItemAdded = (item: ShoppingListItem) => {
-    setItems(prev => [item, ...prev]);
+    setItems(prev => {
+      const existingIndex = prev.findIndex(i => i.id === item.id);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = item;
+        return updated;
+      }
+      return [item, ...prev];
+    });
   };
 
   const handleItemsAdded = (newItems: ShoppingListItem[]) => {
-    setItems(prev => [...newItems, ...prev]);
+    setItems(prev => {
+      const result = [...prev];
+      for (const item of newItems) {
+        const existingIndex = result.findIndex(i => i.id === item.id);
+        if (existingIndex >= 0) {
+          result[existingIndex] = item;
+        } else {
+          result.unshift(item);
+        }
+      }
+      return result;
+    });
   };
 
   useEffect(() => {
