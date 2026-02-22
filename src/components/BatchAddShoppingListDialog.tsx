@@ -329,7 +329,7 @@ export const BatchAddShoppingListDialog = ({
               />
 
               {/* Product List */}
-              <ScrollArea className="flex-1 border rounded-lg">
+              <ScrollArea className="h-[250px] border rounded-lg">
                 <div className="p-2 space-y-1">
                   {filteredProducts.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">לא נמצאו מוצרים</p>
