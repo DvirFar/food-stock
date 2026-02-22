@@ -188,7 +188,7 @@ export const AddProductDialog = ({
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 placeholder="לדוגמה: 2"
-                dir="ltr"
+                dir="rtl"
               />
             </div>
 
@@ -214,7 +214,7 @@ export const AddProductDialog = ({
                 value={minQuantity}
                 onChange={(e) => setMinQuantity(e.target.value)}
                 placeholder="לדוגמה: 1"
-                dir="ltr"
+                dir="rtl"
               />
             </div>
 
@@ -225,7 +225,7 @@ export const AddProductDialog = ({
                 type="date"
                 value={expirationDate}
                 onChange={(e) => setExpirationDate(e.target.value)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
           </div>

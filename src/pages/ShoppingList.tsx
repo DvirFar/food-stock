@@ -289,7 +289,7 @@ const ShoppingList = () => {
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="text-muted-foreground min-w-[60px] text-center" dir="ltr">
+                      <span className="text-muted-foreground min-w-[60px] text-center" dir="rtl">
                         {item.quantity} {item.unit}
                       </span>
                       <Button

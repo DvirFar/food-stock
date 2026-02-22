@@ -192,7 +192,7 @@ export const EditProductDialog = ({
                 min="0"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
             <div className="space-y-2">
@@ -215,7 +215,7 @@ export const EditProductDialog = ({
                 min="0"
                 value={minQuantity}
                 onChange={(e) => setMinQuantity(e.target.value)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
             <div className="space-y-2">
@@ -225,7 +225,7 @@ export const EditProductDialog = ({
                 type="date"
                 value={expirationDate}
                 onChange={(e) => setExpirationDate(e.target.value)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
           </div>

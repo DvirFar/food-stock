@@ -120,7 +120,7 @@ const Auth = () => {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    dir="ltr"
+                    dir="rtl"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive">{errors.email}</p>
@@ -134,7 +134,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    dir="ltr"
+                    dir="rtl"
                   />
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password}</p>
@@ -156,7 +156,7 @@ const Auth = () => {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    dir="ltr"
+                    dir="rtl"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive">{errors.email}</p>
@@ -170,7 +170,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    dir="ltr"
+                    dir="rtl"
                   />
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password}</p>

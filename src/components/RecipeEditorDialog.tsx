@@ -205,7 +205,7 @@ export const RecipeEditorDialog = ({
                 min={0}
                 value={prepTime}
                 onChange={(e) => setPrepTime(parseInt(e.target.value) || 0)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
 
@@ -217,7 +217,7 @@ export const RecipeEditorDialog = ({
                 min={0}
                 value={cookTime}
                 onChange={(e) => setCookTime(parseInt(e.target.value) || 0)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
 
@@ -229,7 +229,7 @@ export const RecipeEditorDialog = ({
                 min={1}
                 value={servings}
                 onChange={(e) => setServings(parseInt(e.target.value) || 1)}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
 
@@ -263,7 +263,7 @@ export const RecipeEditorDialog = ({
                   value={ing.quantity}
                   onChange={(e) => updateIngredient(idx, 'quantity', parseFloat(e.target.value) || 0)}
                   className="w-20"
-                  dir="ltr"
+                  dir="rtl"
                 />
                 <Input
                   placeholder="יחידה"

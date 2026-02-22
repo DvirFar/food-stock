@@ -348,7 +348,7 @@ const Settings = () => {
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
                 placeholder="dairy"
-                dir="ltr"
+                dir="rtl"
               />
             </div>
             <div className="space-y-2">
@@ -367,7 +367,7 @@ const Settings = () => {
                 type="number"
                 value={categoryForm.sort_order}
                 onChange={(e) => setCategoryForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
           </div>
@@ -398,7 +398,7 @@ const Settings = () => {
                 value={locationForm.name}
                 onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
                 placeholder="fridge"
-                dir="ltr"
+                dir="rtl"
               />
             </div>
             <div className="space-y-2">
@@ -417,7 +417,7 @@ const Settings = () => {
                 type="number"
                 value={locationForm.sort_order}
                 onChange={(e) => setLocationForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                dir="ltr"
+                dir="rtl"
               />
             </div>
           </div>

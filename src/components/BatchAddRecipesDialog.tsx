@@ -321,7 +321,7 @@ export const BatchAddRecipesDialog = ({
                                   min="0"
                                   value={entry.prepTime}
                                   onChange={(e) => updateEntry(recipeIndex, 'prepTime', e.target.value)}
-                                  dir="ltr"
+                                   dir="rtl"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -331,7 +331,7 @@ export const BatchAddRecipesDialog = ({
                                   min="0"
                                   value={entry.cookTime}
                                   onChange={(e) => updateEntry(recipeIndex, 'cookTime', e.target.value)}
-                                  dir="ltr"
+                                   dir="rtl"
                                 />
                               </div>
                             </div>
@@ -344,7 +344,7 @@ export const BatchAddRecipesDialog = ({
                                   min="1"
                                   value={entry.servings}
                                   onChange={(e) => updateEntry(recipeIndex, 'servings', e.target.value)}
-                                  dir="ltr"
+                                   dir="rtl"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -375,7 +375,7 @@ export const BatchAddRecipesDialog = ({
                                     value={ing.quantity}
                                     onChange={(e) => updateIngredient(recipeIndex, ingIndex, 'quantity', parseFloat(e.target.value) || 0)}
                                     className="w-20"
-                                    dir="ltr"
+                                    dir="rtl"
                                   />
                                   <Input
                                     placeholder="יחידה"
