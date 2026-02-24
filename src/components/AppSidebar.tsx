@@ -32,7 +32,7 @@ const navItems = [
 ];
 
 export const AppSidebar = () => {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const { signOut, user } = useAuth();
   const isCollapsed = state === 'collapsed';
 
@@ -66,6 +66,7 @@ export const AppSidebar = () => {
                       end={item.url === '/'}
                       className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      onClick={() => { if (isMobile) setOpenMobile(false); }}
                     >
                       <item.icon className="h-5 w-5" />
                       {!isCollapsed && <span>{item.title}</span>}
