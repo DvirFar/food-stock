@@ -289,9 +289,22 @@ const ShoppingList = () => {
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="text-muted-foreground min-w-[60px] text-center" dir="rtl">
-                        {item.quantity} {item.unit}
-                      </span>
+                      <div className="flex items-center gap-1 min-w-[60px] justify-center" dir="rtl">
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (!isNaN(val) && val >= 1) {
+                              handleQuantityChange(item.id, val);
+                            }
+                          }}
+                          disabled={item.checked}
+                          className="w-12 text-center bg-transparent border-b border-input text-sm focus:outline-none focus:border-primary disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={1}
+                        />
+                        <span className="text-muted-foreground text-sm">{item.unit}</span>
+                      </div>
                       <Button
                         variant="outline"
                         size="icon"
