@@ -278,7 +278,7 @@ export const BatchAddShoppingListDialog = ({
           <DialogTitle>הוספת פריטים בכמות לרשימת הקניות</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="products">בחירה מהמלאי</TabsTrigger>
             <TabsTrigger value="manual">הזנה ידנית</TabsTrigger>
