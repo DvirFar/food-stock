@@ -68,6 +68,114 @@ export type Database = {
         }
         Relationships: []
       }
+      meal_section_recipes: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string
+          section_id: string
+          servings_override: number | null
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id: string
+          section_id: string
+          servings_override?: number | null
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          section_id?: string
+          servings_override?: number | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_section_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_section_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_section_recipes_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "meal_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_sections: {
+        Row: {
+          created_at: string
+          id: string
+          meal_id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_id: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_sections_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string
