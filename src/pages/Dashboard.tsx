@@ -15,9 +15,9 @@ import { Product, DashboardStats } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
+import { ShoppingListPreview } from '@/components/dashboard/ShoppingListPreview';
 import { ExpirationBarChart } from '@/components/dashboard/ExpirationBarChart';
-import { StockLevelChart } from '@/components/dashboard/StockLevelChart';
+import { RestockPriorityList } from '@/components/dashboard/RestockPriorityList';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -216,9 +216,9 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {stats && <CategoryPieChart categoryCounts={stats.categoryCounts} />}
+        <ShoppingListPreview />
         <ExpirationBarChart products={allProducts} />
-        <StockLevelChart products={allProducts} />
+        <RestockPriorityList products={allProducts} />
       </div>
     </div>
   );
