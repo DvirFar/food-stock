@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
+import Meals from "./pages/Meals";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -63,6 +64,16 @@ const App = () => (
                   <ProtectedRoute>
                     <AppLayout>
                       <ShoppingList />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/meals"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Meals />
                     </AppLayout>
                   </ProtectedRoute>
                 }
