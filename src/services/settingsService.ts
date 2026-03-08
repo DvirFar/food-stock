@@ -20,6 +20,14 @@ export interface Location {
   created_at: string;
 }
 
+export interface ProductTag {
+  id: string;
+  user_id: string;
+  name: string;
+  sort_order: number;
+  created_at: string;
+}
+
 // Default categories for new users
 export const defaultCategories: Omit<Category, 'id' | 'user_id' | 'created_at'>[] = [
   { name: 'dairy', label: 'מוצרי חלב', sort_order: 1 },
