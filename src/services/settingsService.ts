@@ -50,7 +50,12 @@ export const defaultLocations: Omit<Location, 'id' | 'user_id' | 'created_at'>[]
   { name: 'counter', label: 'משטח', sort_order: 4 },
 ];
 
-class SettingsService {
+// Default product tags for new users
+export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at'>[] = [
+  { name: 'regular', sort_order: 1 },
+];
+
+
   // Categories
   async getCategories(): Promise<Category[]> {
     const { data, error } = await supabase
