@@ -4,6 +4,7 @@ import {
   ChefHat, 
   ShoppingCart,
   UtensilsCrossed,
+  CalendarDays,
   LogOut,
   Settings
 } from 'lucide-react';
