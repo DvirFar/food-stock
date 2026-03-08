@@ -29,7 +29,8 @@ const navItems = [
   { title: 'לוח בקרה', url: '/', icon: LayoutDashboard },
   { title: 'מוצרים', url: '/products', icon: Package },
   { title: 'מתכונים', url: '/recipes', icon: ChefHat },
-  { title: 'תכנון ארוחות', url: '/meals', icon: UtensilsCrossed },
+  { title: 'תכנון שבועי', url: '/weekly-plan', icon: CalendarDays },
+  { title: 'ארוחות', url: '/meals', icon: UtensilsCrossed },
   { title: 'רשימת קניות', url: '/shopping-list', icon: ShoppingCart },
   { title: 'הגדרות', url: '/settings', icon: Settings },
 ];
