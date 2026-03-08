@@ -80,6 +80,16 @@ const App = () => (
                 }
               />
               <Route
+                path="/weekly-plan"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <WeeklyMealPlan />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/settings"
                 element={
                   <ProtectedRoute>
