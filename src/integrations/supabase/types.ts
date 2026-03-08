@@ -316,6 +316,113 @@ export type Database = {
           },
         ]
       }
+      weekly_meal_plans: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      weekly_plan_day_notes: {
+        Row: {
+          content: string
+          created_at: string
+          day_of_week: number
+          id: string
+          note_type: string
+          plan_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          note_type: string
+          plan_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          note_type?: string
+          plan_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_plan_day_notes_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_plan_slots: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          meal_id: string | null
+          meal_type: string
+          plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          id?: string
+          meal_id?: string | null
+          meal_type: string
+          plan_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          meal_id?: string | null
+          meal_type?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_plan_slots_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_plan_slots_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       recipes_public: {
