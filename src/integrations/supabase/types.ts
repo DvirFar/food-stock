@@ -214,6 +214,7 @@ export type Database = {
           name: string
           notes: string | null
           quantity: number
+          tags: string[] | null
           unit: string
           updated_at: string
           user_id: string
@@ -228,6 +229,7 @@ export type Database = {
           name: string
           notes?: string | null
           quantity?: number
+          tags?: string[] | null
           unit?: string
           updated_at?: string
           user_id: string
@@ -242,6 +244,7 @@ export type Database = {
           name?: string
           notes?: string | null
           quantity?: number
+          tags?: string[] | null
           unit?: string
           updated_at?: string
           user_id?: string

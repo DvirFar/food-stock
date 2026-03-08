@@ -27,6 +27,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
+import { ProductTagInput } from '@/components/ProductTagInput';
 
 interface AddProductDialogProps {
   open: boolean;
@@ -47,6 +48,7 @@ export const AddProductDialog = ({
   const [minQuantity, setMinQuantity] = useState('');
   const [location, setLocation] = useState('fridge');
   const [expirationDate, setExpirationDate] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [catOpen, setCatOpen] = useState(false);
@@ -72,6 +74,7 @@ export const AddProductDialog = ({
         min_quantity: parseFloat(minQuantity),
         location: location as any,
         expiration_date: expirationDate || null,
+        tags,
       });
       
       onProductAdded(product);
@@ -92,6 +95,7 @@ export const AddProductDialog = ({
     setMinQuantity('');
     setLocation('fridge');
     setExpirationDate('');
+    setTags([]);
   };
 
   return (
@@ -229,6 +233,8 @@ export const AddProductDialog = ({
               />
             </div>
           </div>
+
+          <ProductTagInput tags={tags} onChange={setTags} />
 
           <div className="flex justify-start gap-2 pt-4">
             <Button type="submit" disabled={loading}>

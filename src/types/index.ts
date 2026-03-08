@@ -16,6 +16,7 @@ export interface Product {
   expiration_date?: string | null;
   location: string;
   notes?: string | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }
