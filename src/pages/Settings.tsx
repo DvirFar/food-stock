@@ -239,7 +239,6 @@ const Settings = () => {
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <div className="font-medium">{category.label}</div>
-                        <div className="text-sm text-muted-foreground">{category.name}</div>
                       </div>
                       <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
                         סדר: {category.sort_order}
@@ -299,7 +298,6 @@ const Settings = () => {
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <div className="font-medium">{location.label}</div>
-                        <div className="text-sm text-muted-foreground">{location.name}</div>
                       </div>
                       <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
                         סדר: {location.sort_order}
@@ -342,16 +340,6 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="cat-name">מזהה (באנגלית)</Label>
-              <Input
-                id="cat-name"
-                value={categoryForm.name}
-                onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
-                placeholder="dairy"
-                dir="rtl"
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="cat-label">שם תצוגה</Label>
               <Input
                 id="cat-label"
@@ -367,6 +355,16 @@ const Settings = () => {
                 type="number"
                 value={categoryForm.sort_order}
                 onChange={(e) => setCategoryForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                dir="rtl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cat-name">מזהה (באנגלית)</Label>
+              <Input
+                id="cat-name"
+                value={categoryForm.name}
+                onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
+                placeholder="dairy"
                 dir="rtl"
               />
             </div>
@@ -392,16 +390,6 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="loc-name">מזהה (באנגלית)</Label>
-              <Input
-                id="loc-name"
-                value={locationForm.name}
-                onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
-                placeholder="fridge"
-                dir="rtl"
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="loc-label">שם תצוגה</Label>
               <Input
                 id="loc-label"
@@ -417,6 +405,16 @@ const Settings = () => {
                 type="number"
                 value={locationForm.sort_order}
                 onChange={(e) => setLocationForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                dir="rtl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="loc-name">מזהה (באנגלית)</Label>
+              <Input
+                id="loc-name"
+                value={locationForm.name}
+                onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
+                placeholder="fridge"
                 dir="rtl"
               />
             </div>
