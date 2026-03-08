@@ -273,10 +273,10 @@ export const RecipeEditorDialog = ({
             <Label>מרכיבים *</Label>
             {ingredients.map((ing, idx) => (
               <div key={idx} className="flex gap-2 items-start">
-                <Input
-                  placeholder="שם מרכיב"
+                <ProductIngredientPicker
                   value={ing.name}
-                  onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                  onSelect={(product) => handleProductSelect(idx, product)}
+                  onChange={(name) => updateIngredient(idx, 'name', name)}
                   className="flex-1"
                 />
                 <Input
