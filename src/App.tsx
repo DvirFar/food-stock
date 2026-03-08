@@ -91,6 +91,16 @@ const App = () => (
                 }
               />
               <Route
+                path="/shabbat"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ShabbatPlan />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/settings"
                 element={
                   <ProtectedRoute>
