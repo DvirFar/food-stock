@@ -13,6 +13,7 @@ import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
 import Meals from "./pages/Meals";
 import WeeklyMealPlan from "./pages/WeeklyMealPlan";
+import ShabbatPlan from "./pages/ShabbatPlan";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -85,6 +86,16 @@ const App = () => (
                   <ProtectedRoute>
                     <AppLayout>
                       <WeeklyMealPlan />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/shabbat"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ShabbatPlan />
                     </AppLayout>
                   </ProtectedRoute>
                 }
