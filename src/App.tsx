@@ -92,6 +92,16 @@ const App = () => (
                 }
               />
               <Route
+                path="/monthly"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <MonthlySchedule />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/shabbat"
                 element={
                   <ProtectedRoute>
