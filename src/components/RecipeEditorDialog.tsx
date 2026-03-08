@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, X } from 'lucide-react';
-import { Recipe, RecipeIngredient } from '@/types';
+import { Recipe, RecipeIngredient, Product } from '@/types';
 import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
+import { ProductIngredientPicker } from '@/components/ProductIngredientPicker';
 
 interface RecipeEditorDialogProps {
   recipe?: Recipe | null;
@@ -90,6 +91,17 @@ export const RecipeEditorDialog = ({
   const updateIngredient = (index: number, field: keyof RecipeIngredient, value: string | number) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
+    setIngredients(updated);
+  };
+
+  const handleProductSelect = (index: number, product: Product) => {
+    const updated = [...ingredients];
+    updated[index] = {
+      ...updated[index],
+      name: product.name,
+      unit: product.unit,
+      productId: product.id,
+    };
     setIngredients(updated);
   };
 
@@ -261,10 +273,10 @@ export const RecipeEditorDialog = ({
             <Label>מרכיבים *</Label>
             {ingredients.map((ing, idx) => (
               <div key={idx} className="flex gap-2 items-start">
-                <Input
-                  placeholder="שם מרכיב"
+                <ProductIngredientPicker
                   value={ing.name}
-                  onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                  onSelect={(product) => handleProductSelect(idx, product)}
+                  onChange={(name) => updateIngredient(idx, 'name', name)}
                   className="flex-1"
                 />
                 <Input
