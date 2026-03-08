@@ -17,6 +17,18 @@ interface RecipeInput {
   image_url?: string | null;
 }
 
+const MAX_TAGS = 20;
+const MAX_TAG_LENGTH = 50;
+const FORBIDDEN_TAG_CHARS = /[<>"\\]/;
+
+function sanitizeTags(tags?: string[]): string[] {
+  if (!tags) return [];
+  const sanitized = tags
+    .map(t => t.trim().toLowerCase().slice(0, MAX_TAG_LENGTH))
+    .filter(t => t.length > 0 && !FORBIDDEN_TAG_CHARS.test(t));
+  return sanitized.slice(0, MAX_TAGS);
+}
+
 class RecipeService {
   async getAll(): Promise<Recipe[]> {
     // Use the recipes_public view which hides user_id for non-owners
@@ -67,7 +79,7 @@ class RecipeService {
         prep_time: recipe.prep_time,
         cook_time: recipe.cook_time,
         servings: recipe.servings,
-        tags: recipe.tags,
+        tags: sanitizeTags(recipe.tags),
         is_public: recipe.is_public,
         image_url: recipe.image_url,
         instructions: recipe.instructions,
@@ -91,6 +103,9 @@ class RecipeService {
     const updateData: Record<string, unknown> = { ...recipe };
     if (recipe.ingredients) {
       updateData.ingredients = JSON.parse(JSON.stringify(recipe.ingredients)) as Json;
+    }
+    if (recipe.tags) {
+      updateData.tags = sanitizeTags(recipe.tags);
     }
 
     const { data, error } = await supabase
