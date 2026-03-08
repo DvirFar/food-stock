@@ -94,6 +94,17 @@ export const RecipeEditorDialog = ({
     setIngredients(updated);
   };
 
+  const handleProductSelect = (index: number, product: Product) => {
+    const updated = [...ingredients];
+    updated[index] = {
+      ...updated[index],
+      name: product.name,
+      unit: product.unit,
+      productId: product.id,
+    };
+    setIngredients(updated);
+  };
+
   const removeIngredient = (index: number) => {
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
