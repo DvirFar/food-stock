@@ -79,7 +79,7 @@ class RecipeService {
         prep_time: recipe.prep_time,
         cook_time: recipe.cook_time,
         servings: recipe.servings,
-        tags: recipe.tags,
+        tags: sanitizeTags(recipe.tags),
         is_public: recipe.is_public,
         image_url: recipe.image_url,
         instructions: recipe.instructions,
