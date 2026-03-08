@@ -390,16 +390,6 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="loc-name">מזהה (באנגלית)</Label>
-              <Input
-                id="loc-name"
-                value={locationForm.name}
-                onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
-                placeholder="fridge"
-                dir="rtl"
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="loc-label">שם תצוגה</Label>
               <Input
                 id="loc-label"
@@ -415,6 +405,16 @@ const Settings = () => {
                 type="number"
                 value={locationForm.sort_order}
                 onChange={(e) => setLocationForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                dir="rtl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="loc-name">מזהה (באנגלית)</Label>
+              <Input
+                id="loc-name"
+                value={locationForm.name}
+                onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
+                placeholder="fridge"
                 dir="rtl"
               />
             </div>
