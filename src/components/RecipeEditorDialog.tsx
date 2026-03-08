@@ -16,8 +16,6 @@ import { Recipe, RecipeIngredient, Product } from '@/types';
 import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
 import { ProductIngredientPicker } from '@/components/ProductIngredientPicker';
-import { recipeService } from '@/services/recipeService';
-import { toast } from 'sonner';
 
 interface RecipeEditorDialogProps {
   recipe?: Recipe | null;
