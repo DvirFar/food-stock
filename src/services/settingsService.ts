@@ -1,4 +1,4 @@
-// Settings service - handles categories and locations management
+// Settings service - handles categories, locations, and product tags management
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -55,14 +55,13 @@ export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at
   { name: 'regular', sort_order: 1 },
 ];
 
-
+class SettingsService {
   // Categories
   async getCategories(): Promise<Category[]> {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
       .order('sort_order');
-    
     if (error) throw error;
     return (data || []) as Category[];
   }
@@ -70,20 +69,10 @@ export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at
   async initializeDefaultCategories(): Promise<Category[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-
     const existing = await this.getCategories();
     if (existing.length > 0) return existing;
-
-    const categoriesToInsert = defaultCategories.map(cat => ({
-      ...cat,
-      user_id: user.id,
-    }));
-
-    const { data, error } = await supabase
-      .from('categories')
-      .insert(categoriesToInsert)
-      .select();
-
+    const categoriesToInsert = defaultCategories.map(cat => ({ ...cat, user_id: user.id }));
+    const { data, error } = await supabase.from('categories').insert(categoriesToInsert).select();
     if (error) throw error;
     return (data || []) as Category[];
   }
@@ -91,48 +80,25 @@ export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at
   async createCategory(category: Omit<Category, 'id' | 'user_id' | 'created_at'>): Promise<Category> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-
-    const { data, error } = await supabase
-      .from('categories')
-      .insert({
-        ...category,
-        user_id: user.id,
-      })
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('categories').insert({ ...category, user_id: user.id }).select().single();
     if (error) throw error;
     return data as Category;
   }
 
   async updateCategory(id: string, updates: Partial<Omit<Category, 'id' | 'user_id' | 'created_at'>>): Promise<Category> {
-    const { data, error } = await supabase
-      .from('categories')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('categories').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data as Category;
   }
 
   async deleteCategory(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) throw error;
   }
 
   // Locations
   async getLocations(): Promise<Location[]> {
-    const { data, error } = await supabase
-      .from('locations')
-      .select('*')
-      .order('sort_order');
-    
+    const { data, error } = await supabase.from('locations').select('*').order('sort_order');
     if (error) throw error;
     return (data || []) as Location[];
   }
@@ -140,20 +106,10 @@ export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at
   async initializeDefaultLocations(): Promise<Location[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-
     const existing = await this.getLocations();
     if (existing.length > 0) return existing;
-
-    const locationsToInsert = defaultLocations.map(loc => ({
-      ...loc,
-      user_id: user.id,
-    }));
-
-    const { data, error } = await supabase
-      .from('locations')
-      .insert(locationsToInsert)
-      .select();
-
+    const locationsToInsert = defaultLocations.map(loc => ({ ...loc, user_id: user.id }));
+    const { data, error } = await supabase.from('locations').insert(locationsToInsert).select();
     if (error) throw error;
     return (data || []) as Location[];
   }
@@ -161,70 +117,75 @@ export const defaultProductTags: Omit<ProductTag, 'id' | 'user_id' | 'created_at
   async createLocation(location: Omit<Location, 'id' | 'user_id' | 'created_at'>): Promise<Location> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-
-    const { data, error } = await supabase
-      .from('locations')
-      .insert({
-        ...location,
-        user_id: user.id,
-      })
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('locations').insert({ ...location, user_id: user.id }).select().single();
     if (error) throw error;
     return data as Location;
   }
 
   async updateLocation(id: string, updates: Partial<Omit<Location, 'id' | 'user_id' | 'created_at'>>): Promise<Location> {
-    const { data, error } = await supabase
-      .from('locations')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('locations').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data as Location;
   }
 
   async deleteLocation(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('locations')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('locations').delete().eq('id', id);
     if (error) throw error;
   }
 
-  // Get category labels map (for backward compatibility)
+  // Product Tags
+  async getProductTags(): Promise<ProductTag[]> {
+    const { data, error } = await supabase.from('product_tags').select('*').order('sort_order');
+    if (error) throw error;
+    return (data || []) as ProductTag[];
+  }
+
+  async initializeDefaultProductTags(): Promise<ProductTag[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    const existing = await this.getProductTags();
+    if (existing.length > 0) return existing;
+    const tagsToInsert = defaultProductTags.map(tag => ({ ...tag, user_id: user.id }));
+    const { data, error } = await supabase.from('product_tags').insert(tagsToInsert).select();
+    if (error) throw error;
+    return (data || []) as ProductTag[];
+  }
+
+  async createProductTag(tag: Omit<ProductTag, 'id' | 'user_id' | 'created_at'>): Promise<ProductTag> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    const { data, error } = await supabase.from('product_tags').insert({ ...tag, user_id: user.id }).select().single();
+    if (error) throw error;
+    return data as ProductTag;
+  }
+
+  async updateProductTag(id: string, updates: Partial<Omit<ProductTag, 'id' | 'user_id' | 'created_at'>>): Promise<ProductTag> {
+    const { data, error } = await supabase.from('product_tags').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data as ProductTag;
+  }
+
+  async deleteProductTag(id: string): Promise<void> {
+    const { error } = await supabase.from('product_tags').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  // Get category labels map
   async getCategoryLabels(): Promise<Record<string, string>> {
     const categories = await this.getCategories();
     if (categories.length === 0) {
-      // Return defaults if no custom categories
-      return defaultCategories.reduce((acc, cat) => {
-        acc[cat.name] = cat.label;
-        return acc;
-      }, {} as Record<string, string>);
+      return defaultCategories.reduce((acc, cat) => { acc[cat.name] = cat.label; return acc; }, {} as Record<string, string>);
     }
-    return categories.reduce((acc, cat) => {
-      acc[cat.name] = cat.label;
-      return acc;
-    }, {} as Record<string, string>);
+    return categories.reduce((acc, cat) => { acc[cat.name] = cat.label; return acc; }, {} as Record<string, string>);
   }
 
-  // Get location labels map (for backward compatibility)
+  // Get location labels map
   async getLocationLabels(): Promise<Record<string, string>> {
     const locations = await this.getLocations();
     if (locations.length === 0) {
-      return defaultLocations.reduce((acc, loc) => {
-        acc[loc.name] = loc.label;
-        return acc;
-      }, {} as Record<string, string>);
+      return defaultLocations.reduce((acc, loc) => { acc[loc.name] = loc.label; return acc; }, {} as Record<string, string>);
     }
-    return locations.reduce((acc, loc) => {
-      acc[loc.name] = loc.label;
-      return acc;
-    }, {} as Record<string, string>);
+    return locations.reduce((acc, loc) => { acc[loc.name] = loc.label; return acc; }, {} as Record<string, string>);
   }
 
   // Get sorted category names for shopping list
