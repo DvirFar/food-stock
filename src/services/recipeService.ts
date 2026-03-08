@@ -17,6 +17,18 @@ interface RecipeInput {
   image_url?: string | null;
 }
 
+const MAX_TAGS = 20;
+const MAX_TAG_LENGTH = 50;
+const FORBIDDEN_TAG_CHARS = /[<>"\\]/;
+
+function sanitizeTags(tags?: string[]): string[] {
+  if (!tags) return [];
+  const sanitized = tags
+    .map(t => t.trim().toLowerCase().slice(0, MAX_TAG_LENGTH))
+    .filter(t => t.length > 0 && !FORBIDDEN_TAG_CHARS.test(t));
+  return sanitized.slice(0, MAX_TAGS);
+}
+
 class RecipeService {
   async getAll(): Promise<Recipe[]> {
     // Use the recipes_public view which hides user_id for non-owners
