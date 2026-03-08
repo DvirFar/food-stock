@@ -12,6 +12,7 @@ import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
 import Meals from "./pages/Meals";
+import WeeklyMealPlan from "./pages/WeeklyMealPlan";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
