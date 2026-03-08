@@ -43,6 +43,17 @@ export const RecipeEditorDialog = ({
 
   const isEditing = !!recipe;
 
+  // Normalize ingredients so quantity is always populated (fallback from amount)
+  const normalizeIngredients = (ings: RecipeIngredient[]): RecipeIngredient[] =>
+    ings.map(ing => ({
+      ...ing,
+      quantity: ing.quantity != null && ing.quantity !== '' 
+        ? Number(ing.quantity) 
+        : ing.amount != null && ing.amount !== '' 
+          ? Number(ing.amount) || 0 
+          : 0,
+    }));
+
   useEffect(() => {
     if (recipe) {
       setName(recipe.name);
@@ -50,7 +61,7 @@ export const RecipeEditorDialog = ({
       setPrepTime(recipe.prep_time || 0);
       setCookTime(recipe.cook_time || 0);
       setServings(recipe.servings || 4);
-      setIngredients(recipe.ingredients);
+      setIngredients(normalizeIngredients(recipe.ingredients));
       setInstructions(recipe.instructions);
       setTags(recipe.tags);
       setIsPublic(recipe.is_public);
