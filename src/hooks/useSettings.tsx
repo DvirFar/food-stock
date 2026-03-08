@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { settingsService, type Category, type Location } from '@/services/settingsService';
+import { settingsService, type Category, type Location, type ProductTag } from '@/services/settingsService';
 
 interface SettingsContextType {
   categories: Category[];
   locations: Location[];
+  productTags: ProductTag[];
   categoryLabels: Record<string, string>;
   locationLabels: Record<string, string>;
   loading: boolean;
@@ -15,38 +16,36 @@ const SettingsContext = createContext<SettingsContextType | null>(null);
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [productTags, setProductTags] = useState<ProductTag[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
-      let [cats, locs] = await Promise.all([
+      let [cats, locs, tags] = await Promise.all([
         settingsService.getCategories(),
         settingsService.getLocations(),
+        settingsService.getProductTags(),
       ]);
       
-      // Auto-initialize defaults in DB if none exist
       if (cats.length === 0) {
-        try {
-          cats = await settingsService.initializeDefaultCategories();
-        } catch (e) {
-          console.error('Error initializing default categories:', e);
-        }
+        try { cats = await settingsService.initializeDefaultCategories(); } catch (e) { console.error('Error initializing default categories:', e); }
       }
       if (locs.length === 0) {
-        try {
-          locs = await settingsService.initializeDefaultLocations();
-        } catch (e) {
-          console.error('Error initializing default locations:', e);
-        }
+        try { locs = await settingsService.initializeDefaultLocations(); } catch (e) { console.error('Error initializing default locations:', e); }
+      }
+      if (tags.length === 0) {
+        try { tags = await settingsService.initializeDefaultProductTags(); } catch (e) { console.error('Error initializing default product tags:', e); }
       }
 
       setCategories(cats);
       setLocations(locs);
+      setProductTags(tags);
     } catch (error) {
       console.error('Error fetching settings:', error);
       setCategories([]);
       setLocations([]);
+      setProductTags([]);
     } finally {
       setLoading(false);
     }
@@ -70,6 +69,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     <SettingsContext.Provider value={{
       categories,
       locations,
+      productTags,
       categoryLabels,
       locationLabels,
       loading,
