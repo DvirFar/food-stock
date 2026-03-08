@@ -104,6 +104,9 @@ class RecipeService {
     if (recipe.ingredients) {
       updateData.ingredients = JSON.parse(JSON.stringify(recipe.ingredients)) as Json;
     }
+    if (recipe.tags) {
+      updateData.tags = sanitizeTags(recipe.tags);
+    }
 
     const { data, error } = await supabase
       .from('recipes')
