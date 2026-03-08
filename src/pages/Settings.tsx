@@ -239,7 +239,6 @@ const Settings = () => {
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <div className="font-medium">{category.label}</div>
-                        <div className="text-sm text-muted-foreground">{category.name}</div>
                       </div>
                       <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
                         סדר: {category.sort_order}
