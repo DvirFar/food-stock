@@ -27,6 +27,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
+import { ProductTagInput } from '@/components/ProductTagInput';
 
 interface EditProductDialogProps {
   open: boolean;
@@ -49,6 +50,7 @@ export const EditProductDialog = ({
   const [minQuantity, setMinQuantity] = useState('');
   const [location, setLocation] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [catOpen, setCatOpen] = useState(false);
@@ -65,6 +67,7 @@ export const EditProductDialog = ({
       setMinQuantity(String(product.min_quantity));
       setLocation(product.location);
       setExpirationDate(product.expiration_date || '');
+      setTags(product.tags || []);
     }
   }, [product, open]);
 
@@ -86,6 +89,7 @@ export const EditProductDialog = ({
         min_quantity: parseFloat(minQuantity),
         location,
         expiration_date: expirationDate || null,
+        tags,
       });
 
       if (updated) {
@@ -229,6 +233,8 @@ export const EditProductDialog = ({
               />
             </div>
           </div>
+
+          <ProductTagInput tags={tags} onChange={setTags} />
 
           <div className="flex justify-start gap-2 pt-4">
             <Button type="submit" disabled={loading}>
