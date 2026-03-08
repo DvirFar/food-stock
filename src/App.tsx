@@ -13,6 +13,7 @@ import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
 import Meals from "./pages/Meals";
 import WeeklyMealPlan from "./pages/WeeklyMealPlan";
+import MonthlySchedule from "./pages/MonthlySchedule";
 import ShabbatPlan from "./pages/ShabbatPlan";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
