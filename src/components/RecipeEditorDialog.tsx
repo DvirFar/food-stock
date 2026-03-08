@@ -271,7 +271,7 @@ export const RecipeEditorDialog = ({
                   type="number"
                   min={0}
                   step="0.1"
-                  value={ing.quantity}
+                  value={ing.quantity ?? ''}
                   onChange={(e) => updateIngredient(idx, 'quantity', parseFloat(e.target.value) || 0)}
                   className="w-20"
                   dir="rtl"
