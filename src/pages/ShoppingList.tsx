@@ -305,6 +305,7 @@ interface ShoppingEntryRowProps {
   entry: ShoppingEntry;
   isShoppingMode: boolean;
   onAmountChange: (productId: string, amount: number) => void;
+  onRemove: (productId: string) => void;
 }
 
 const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange }: ShoppingEntryRowProps) => {
