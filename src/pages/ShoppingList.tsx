@@ -14,6 +14,7 @@ import {
   PackageCheck,
   Pencil,
   Eye,
+  X,
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
@@ -35,7 +36,8 @@ const ShoppingList = () => {
   const [loading, setLoading] = useState(true);
   const [isShoppingMode, setIsShoppingMode] = useState(false);
   const [activeTags, setActiveTags] = useState<string[]>(['regular']);
-  const [overrides, setOverrides] = useState<Record<string, number>>({}); // product id -> overridden amountToBuy
+  const [overrides, setOverrides] = useState<Record<string, number>>({}); 
+  const [hiddenProducts, setHiddenProducts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadProducts();
@@ -79,10 +81,10 @@ const ShoppingList = () => {
   // Combined unique products (tagged + expiring)
   const visibleProducts = useMemo(() => {
     const map = new Map<string, Product>();
-    expiringProducts.forEach(p => map.set(p.id, p));
-    taggedProducts.forEach(p => map.set(p.id, p));
+    expiringProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
+    taggedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     return Array.from(map.values());
-  }, [expiringProducts, taggedProducts]);
+  }, [expiringProducts, taggedProducts, hiddenProducts]);
 
   // Build shopping entries
   const entries: ShoppingEntry[] = useMemo(() => {
@@ -128,6 +130,11 @@ const ShoppingList = () => {
   const handleClear = useCallback(() => {
     setActiveTags(['regular']);
     setOverrides({});
+    setHiddenProducts(new Set());
+  }, []);
+
+  const handleRemoveProduct = useCallback((productId: string) => {
+    setHiddenProducts(prev => new Set(prev).add(productId));
   }, []);
 
   const toggleTag = useCallback((tag: string) => {
@@ -272,6 +279,7 @@ const ShoppingList = () => {
                       entry={entry}
                       isShoppingMode={isShoppingMode}
                       onAmountChange={handleAmountChange}
+                      onRemove={handleRemoveProduct}
                     />
                   ))}
                 </CardContent>
@@ -304,9 +312,10 @@ interface ShoppingEntryRowProps {
   entry: ShoppingEntry;
   isShoppingMode: boolean;
   onAmountChange: (productId: string, amount: number) => void;
+  onRemove: (productId: string) => void;
 }
 
-const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange }: ShoppingEntryRowProps) => {
+const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange, onRemove }: ShoppingEntryRowProps) => {
   const { product, amountToBuy } = entry;
   const isZero = amountToBuy === 0;
 
@@ -377,6 +386,18 @@ const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange }: ShoppingEnt
           </Button>
         )}
       </div>
+
+      {/* Remove button */}
+      {!isShoppingMode && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-destructive shrink-0"
+          onClick={() => onRemove(product.id)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };
