@@ -11,7 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
-import Meals from "./pages/Meals";
+
 import WeeklyMealPlan from "./pages/WeeklyMealPlan";
 import MonthlySchedule from "./pages/MonthlySchedule";
 import ShabbatPlan from "./pages/ShabbatPlan";
@@ -67,16 +67,6 @@ const App = () => (
                   <ProtectedRoute>
                     <AppLayout>
                       <ShoppingList />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/meals"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Meals />
                     </AppLayout>
                   </ProtectedRoute>
                 }

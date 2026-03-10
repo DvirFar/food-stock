@@ -33,7 +33,7 @@ const navItems = [
   { title: 'תכנון שבועי', url: '/weekly-plan', icon: CalendarDays },
   { title: 'לוח חודשי', url: '/monthly', icon: CalendarDays },
   { title: 'תכנון שבת', url: '/shabbat', icon: CandlestickChart },
-  { title: 'ארוחות', url: '/meals', icon: UtensilsCrossed },
+  
   { title: 'רשימת קניות', url: '/shopping-list', icon: ShoppingCart },
   { title: 'הגדרות', url: '/settings', icon: Settings },
 ];

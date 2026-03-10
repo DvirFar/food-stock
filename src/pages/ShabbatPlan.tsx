@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, CalendarDays } from 'lucide-react';
-import { shabbatPlanService, ShabbatExtraRecipe, ShabbatDishAssignment } from '@/services/shabbatPlanService';
+import { shabbatPlanService } from '@/services/shabbatPlanService';
 import { mealService, Meal } from '@/services/mealService';
 import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
@@ -17,14 +17,14 @@ const ShabbatPlan = () => {
   const [planId, setPlanId] = useState<string | null>(null);
   const [fridayMealId, setFridayMealId] = useState<string | null>(null);
   const [saturdayMealId, setSaturdayMealId] = useState<string | null>(null);
-  const [extraRecipes, setExtraRecipes] = useState<ShabbatExtraRecipe[]>([]);
+  const [extraRecipes, setExtraRecipes] = useState<any[]>([]);
   const [dishAssignments, setDishAssignments] = useState<Record<string, string>>({});
   const [meals, setMeals] = useState<Meal[]>([]);
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewMeal, setPreviewMeal] = useState<Meal | null>(null);
-  const [dishTimers, setDishTimers] = useState<Record<string, NodeJS.Timeout>>({});
+  const [dishTimers, setDishTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const loadData = useCallback(async (friday: string) => {
     setLoading(true);
@@ -47,7 +47,6 @@ const ShabbatPlan = () => {
         shabbatPlanService.getDishAssignments(plan.id),
       ]);
       setExtraRecipes(extras);
-
       const dishMap: Record<string, string> = {};
       dishes.forEach(d => { dishMap[`${d.round}-${d.sink}`] = d.person; });
       setDishAssignments(dishMap);
@@ -59,13 +58,8 @@ const ShabbatPlan = () => {
     }
   }, []);
 
-  useEffect(() => {
-    loadData(currentFriday);
-  }, [currentFriday, loadData]);
-
-  useEffect(() => {
-    return () => { Object.values(dishTimers).forEach(clearTimeout); };
-  }, [dishTimers]);
+  useEffect(() => { loadData(currentFriday); }, [currentFriday, loadData]);
+  useEffect(() => { return () => { Object.values(dishTimers).forEach(clearTimeout); }; }, [dishTimers]);
 
   const navigateWeek = (direction: number) => {
     const d = new Date(currentFriday + 'T00:00:00');
@@ -79,9 +73,37 @@ const ShabbatPlan = () => {
       await shabbatPlanService.updateMealAssignment(planId, field, mealId);
       if (field === 'friday_meal_id') setFridayMealId(mealId);
       else setSaturdayMealId(mealId);
-    } catch {
-      toast.error('שגיאה בעדכון');
-    }
+      if (mealId) await loadData(currentFriday); // reload to get full meal data
+    } catch { toast.error('שגיאה בעדכון'); }
+  };
+
+  const handleCreateMeal = async (name: string): Promise<Meal> => {
+    const meal = await mealService.create(name);
+    await loadData(currentFriday);
+    return meal;
+  };
+
+  const handleDeleteMeal = async (mealId: string) => {
+    await mealService.deleteMeal(mealId);
+    await loadData(currentFriday);
+    toast.success('ארוחה נמחקה');
+  };
+
+  const handleAddSection = async (mealId: string, name: string, sortOrder: number) => {
+    await mealService.addSection(mealId, name, sortOrder);
+    await loadData(currentFriday);
+  };
+  const handleDeleteSection = async (sectionId: string) => {
+    await mealService.deleteSection(sectionId);
+    await loadData(currentFriday);
+  };
+  const handleAddRecipe = async (sectionId: string, recipeId: string, sortOrder: number) => {
+    await mealService.addRecipeToSection(sectionId, recipeId, sortOrder);
+    await loadData(currentFriday);
+  };
+  const handleRemoveRecipe = async (recipeEntryId: string) => {
+    await mealService.removeRecipeFromSection(recipeEntryId);
+    await loadData(currentFriday);
   };
 
   const handleAddExtraRecipe = async (recipeId: string) => {
@@ -90,9 +112,7 @@ const ShabbatPlan = () => {
       await shabbatPlanService.addExtraRecipe(planId, recipeId, extraRecipes.length);
       const updated = await shabbatPlanService.getExtraRecipes(planId);
       setExtraRecipes(updated);
-    } catch {
-      toast.error('שגיאה בהוספת מתכון');
-    }
+    } catch { toast.error('שגיאה בהוספת מתכון'); }
   };
 
   const handleRemoveExtraRecipe = async (id: string) => {
@@ -100,23 +120,17 @@ const ShabbatPlan = () => {
     try {
       await shabbatPlanService.removeExtraRecipe(id);
       setExtraRecipes(prev => prev.filter(r => r.id !== id));
-    } catch {
-      toast.error('שגיאה בהסרת מתכון');
-    }
+    } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
   const handleDishChange = (round: string, sink: number, person: string) => {
     const key = `${round}-${sink}`;
     setDishAssignments(prev => ({ ...prev, [key]: person }));
-
     if (dishTimers[key]) clearTimeout(dishTimers[key]);
     const timer = setTimeout(async () => {
       if (!planId) return;
-      try {
-        await shabbatPlanService.upsertDishAssignment(planId, round, sink, person);
-      } catch {
-        toast.error('שגיאה בשמירת חלוקת כלים');
-      }
+      try { await shabbatPlanService.upsertDishAssignment(planId, round, sink, person); }
+      catch { toast.error('שגיאה בשמירת חלוקת כלים'); }
     }, 800);
     setDishTimers(prev => ({ ...prev, [key]: timer }));
   };
@@ -129,6 +143,9 @@ const ShabbatPlan = () => {
     return `שבת ${fmt(d)} - ${fmt(sat)}`;
   };
 
+  const fridayMeal = fridayMealId ? meals.find(m => m.id === fridayMealId) || null : null;
+  const saturdayMeal = saturdayMealId ? meals.find(m => m.id === saturdayMealId) || null : null;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -139,13 +156,11 @@ const ShabbatPlan = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">תכנון שבת</h1>
         <p className="text-muted-foreground">תכנן את ארוחות השבת, הכנות נוספות וחלוקת כלים</p>
       </div>
 
-      {/* Week navigation */}
       <div className="flex items-center justify-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)}>
           <ChevronRight className="h-4 w-4" />
@@ -162,9 +177,7 @@ const ShabbatPlan = () => {
         </Button>
       </div>
 
-      {/* Main layout: 2 columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left column: Extra recipes + Dish washing */}
         <div className="space-y-6 order-2 lg:order-1">
           <ShabbatExtraRecipes
             extraRecipes={extraRecipes}
@@ -172,32 +185,41 @@ const ShabbatPlan = () => {
             onAdd={handleAddExtraRecipe}
             onRemove={handleRemoveExtraRecipe}
           />
-          <DishWashingTable
-            assignments={dishAssignments}
-            onChange={handleDishChange}
-          />
+          <DishWashingTable assignments={dishAssignments} onChange={handleDishChange} />
         </div>
 
-        {/* Right column: Two meals */}
         <div className="space-y-6 order-1 lg:order-2">
           <ShabbatMealCard
             title="ארוחת שישי"
-            selectedMealId={fridayMealId}
-            meals={meals}
+            meal={fridayMeal}
+            allMeals={meals}
+            allRecipes={allRecipes}
             onMealChange={(id) => handleMealChange('friday_meal_id', id)}
+            onCreateMeal={handleCreateMeal}
+            onDeleteMeal={handleDeleteMeal}
+            onAddSection={handleAddSection}
+            onDeleteSection={handleDeleteSection}
+            onAddRecipe={handleAddRecipe}
+            onRemoveRecipe={handleRemoveRecipe}
             onPreview={setPreviewMeal}
           />
           <ShabbatMealCard
             title="ארוחת שבת"
-            selectedMealId={saturdayMealId}
-            meals={meals}
+            meal={saturdayMeal}
+            allMeals={meals}
+            allRecipes={allRecipes}
             onMealChange={(id) => handleMealChange('saturday_meal_id', id)}
+            onCreateMeal={handleCreateMeal}
+            onDeleteMeal={handleDeleteMeal}
+            onAddSection={handleAddSection}
+            onDeleteSection={handleDeleteSection}
+            onAddRecipe={handleAddRecipe}
+            onRemoveRecipe={handleRemoveRecipe}
             onPreview={setPreviewMeal}
           />
         </div>
       </div>
 
-      {/* Meal Preview */}
       {previewMeal && (
         <MealPreviewDialog
           meal={previewMeal}
