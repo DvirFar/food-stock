@@ -32,7 +32,7 @@ const WeeklyMealPlan = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingNotes, setPendingNotes] = useState<Record<string, string>>({});
-  const [noteTimers, setNoteTimers] = useState<Record<string, NodeJS.Timeout>>({});
+  const [noteTimers, setNoteTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
   const [previewMeal, setPreviewMeal] = useState<Meal | null>(null);
 
   // Create meal dialog
