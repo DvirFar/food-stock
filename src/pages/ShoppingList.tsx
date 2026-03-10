@@ -36,7 +36,8 @@ const ShoppingList = () => {
   const [loading, setLoading] = useState(true);
   const [isShoppingMode, setIsShoppingMode] = useState(false);
   const [activeTags, setActiveTags] = useState<string[]>(['regular']);
-  const [overrides, setOverrides] = useState<Record<string, number>>({}); // product id -> overridden amountToBuy
+  const [overrides, setOverrides] = useState<Record<string, number>>({}); 
+  const [hiddenProducts, setHiddenProducts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadProducts();
