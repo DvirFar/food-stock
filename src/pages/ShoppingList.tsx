@@ -130,6 +130,11 @@ const ShoppingList = () => {
   const handleClear = useCallback(() => {
     setActiveTags(['regular']);
     setOverrides({});
+    setHiddenProducts(new Set());
+  }, []);
+
+  const handleRemoveProduct = useCallback((productId: string) => {
+    setHiddenProducts(prev => new Set(prev).add(productId));
   }, []);
 
   const toggleTag = useCallback((tag: string) => {
