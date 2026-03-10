@@ -24,7 +24,7 @@ const ShabbatPlan = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewMeal, setPreviewMeal] = useState<Meal | null>(null);
-  const [dishTimers, setDishTimers] = useState<Record<string, NodeJS.Timeout>>({});
+  const [dishTimers, setDishTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const loadData = useCallback(async (friday: string) => {
     setLoading(true);

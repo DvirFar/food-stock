@@ -283,7 +283,7 @@ const WeeklyMealPlan = () => {
                       </div>
                     ) : (
                       <Button
-                        variant="dashed"
+                        variant="outline"
                         size="sm"
                         className="w-full h-8 text-xs border-dashed"
                         onClick={() => { setCreateMealFor({ day: dayIndex, mealType: key }); setNewMealName(''); }}

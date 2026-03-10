@@ -72,16 +72,6 @@ const App = () => (
                 }
               />
               <Route
-                path="/meals"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Meals />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/weekly-plan"
                 element={
                   <ProtectedRoute>
