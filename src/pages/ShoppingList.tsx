@@ -279,6 +279,7 @@ const ShoppingList = () => {
                       entry={entry}
                       isShoppingMode={isShoppingMode}
                       onAmountChange={handleAmountChange}
+                      onRemove={handleRemoveProduct}
                     />
                   ))}
                 </CardContent>
