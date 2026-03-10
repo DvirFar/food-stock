@@ -379,6 +379,18 @@ const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange, onRemove }: S
           </Button>
         )}
       </div>
+
+      {/* Remove button */}
+      {!isShoppingMode && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-destructive shrink-0"
+          onClick={() => onRemove(product.id)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };
