@@ -14,6 +14,7 @@ import {
   PackageCheck,
   Pencil,
   Eye,
+  X,
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
