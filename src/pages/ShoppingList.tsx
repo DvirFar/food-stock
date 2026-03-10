@@ -81,10 +81,10 @@ const ShoppingList = () => {
   // Combined unique products (tagged + expiring)
   const visibleProducts = useMemo(() => {
     const map = new Map<string, Product>();
-    expiringProducts.forEach(p => map.set(p.id, p));
-    taggedProducts.forEach(p => map.set(p.id, p));
+    expiringProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
+    taggedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     return Array.from(map.values());
-  }, [expiringProducts, taggedProducts]);
+  }, [expiringProducts, taggedProducts, hiddenProducts]);
 
   // Build shopping entries
   const entries: ShoppingEntry[] = useMemo(() => {
