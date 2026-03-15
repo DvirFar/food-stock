@@ -128,4 +128,39 @@ class WeeklyPlanService {
   }
 }
 
+  // --- Direct recipe slots (no meals) ---
+
+  async getSlotRecipes(planId: string): Promise<WeeklySlotRecipe[]> {
+    const { data, error } = await supabase
+      .from('weekly_slot_recipes')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('sort_order');
+    if (error) throw error;
+    return (data || []) as WeeklySlotRecipe[];
+  }
+
+  async addSlotRecipe(planId: string, dayOfWeek: number, mealType: 'lunch' | 'dinner', recipeId: string, sortOrder: number): Promise<void> {
+    const { error } = await supabase
+      .from('weekly_slot_recipes')
+      .insert({ plan_id: planId, day_of_week: dayOfWeek, meal_type: mealType, recipe_id: recipeId, sort_order: sortOrder } as any);
+    if (error) throw error;
+  }
+
+  async removeSlotRecipe(id: string): Promise<void> {
+    const { error } = await supabase.from('weekly_slot_recipes').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  async clearSlotRecipes(planId: string, dayOfWeek: number, mealType: 'lunch' | 'dinner'): Promise<void> {
+    const { error } = await supabase
+      .from('weekly_slot_recipes')
+      .delete()
+      .eq('plan_id', planId)
+      .eq('day_of_week', dayOfWeek)
+      .eq('meal_type', mealType);
+    if (error) throw error;
+  }
+}
+
 export const weeklyPlanService = new WeeklyPlanService();
