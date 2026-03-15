@@ -410,6 +410,41 @@ export type Database = {
           },
         ]
       }
+      shabbat_plan_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          plan_id: string
+          slot: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          plan_id: string
+          slot: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          plan_id?: string
+          slot?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shabbat_plan_sections_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "shabbat_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shabbat_plans: {
         Row: {
           created_at: string
@@ -451,6 +486,52 @@ export type Database = {
             columns: ["saturday_meal_id"]
             isOneToOne: false
             referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shabbat_section_recipes: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string
+          section_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id: string
+          section_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          section_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shabbat_section_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shabbat_section_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shabbat_section_recipes_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "shabbat_plan_sections"
             referencedColumns: ["id"]
           },
         ]
