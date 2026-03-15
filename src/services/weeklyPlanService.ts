@@ -17,6 +17,16 @@ export interface WeeklyPlanSlot {
   created_at: string;
 }
 
+export interface WeeklySlotRecipe {
+  id: string;
+  plan_id: string;
+  day_of_week: number;
+  meal_type: 'lunch' | 'dinner';
+  recipe_id: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface WeeklyPlanDayNote {
   id: string;
   plan_id: string;
@@ -29,10 +39,9 @@ export interface WeeklyPlanDayNote {
 }
 
 class WeeklyPlanService {
-  /** Get Sunday of the week containing the given date */
   getWeekStart(date: Date = new Date()): string {
     const d = new Date(date);
-    d.setDate(d.getDate() - d.getDay()); // Sunday
+    d.setDate(d.getDate() - d.getDay());
     return d.toISOString().split('T')[0];
   }
 
@@ -40,7 +49,6 @@ class WeeklyPlanService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Try to find existing
     const { data: existing } = await supabase
       .from('weekly_meal_plans')
       .select('*')
@@ -50,7 +58,6 @@ class WeeklyPlanService {
 
     if (existing) return existing as WeeklyMealPlan;
 
-    // Create new
     const { data, error } = await supabase
       .from('weekly_meal_plans')
       .insert({ user_id: user.id, week_start: weekStart } as any)
@@ -58,41 +65,6 @@ class WeeklyPlanService {
       .single();
     if (error) throw error;
     return data as WeeklyMealPlan;
-  }
-
-  async getSlots(planId: string): Promise<WeeklyPlanSlot[]> {
-    const { data, error } = await supabase
-      .from('weekly_plan_slots')
-      .select('*')
-      .eq('plan_id', planId);
-    if (error) throw error;
-    return (data || []) as WeeklyPlanSlot[];
-  }
-
-  async upsertSlot(planId: string, dayOfWeek: number, mealType: 'lunch' | 'dinner', mealId: string | null): Promise<void> {
-    // Check if slot exists
-    const { data: existing } = await supabase
-      .from('weekly_plan_slots')
-      .select('id')
-      .eq('plan_id', planId)
-      .eq('day_of_week', dayOfWeek)
-      .eq('meal_type', mealType)
-      .maybeSingle();
-
-    if (existing) {
-      if (mealId === null) {
-        await supabase.from('weekly_plan_slots').delete().eq('id', existing.id);
-      } else {
-        await supabase.from('weekly_plan_slots').update({ meal_id: mealId } as any).eq('id', existing.id);
-      }
-    } else if (mealId !== null) {
-      await supabase.from('weekly_plan_slots').insert({
-        plan_id: planId,
-        day_of_week: dayOfWeek,
-        meal_type: mealType,
-        meal_id: mealId,
-      } as any);
-    }
   }
 
   async getNotes(planId: string): Promise<WeeklyPlanDayNote[]> {
@@ -106,7 +78,6 @@ class WeeklyPlanService {
   }
 
   async upsertNote(planId: string, dayOfWeek: number, noteType: 'lunch' | 'dinner' | 'general', content: string): Promise<void> {
-    // Find existing note
     const { data: existing } = await supabase
       .from('weekly_plan_day_notes')
       .select('id')
@@ -125,6 +96,40 @@ class WeeklyPlanService {
         content,
       } as any);
     }
+  }
+
+  // --- Direct recipe slots ---
+
+  async getSlotRecipes(planId: string): Promise<WeeklySlotRecipe[]> {
+    const { data, error } = await supabase
+      .from('weekly_slot_recipes')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('sort_order');
+    if (error) throw error;
+    return (data || []) as WeeklySlotRecipe[];
+  }
+
+  async addSlotRecipe(planId: string, dayOfWeek: number, mealType: 'lunch' | 'dinner', recipeId: string, sortOrder: number): Promise<void> {
+    const { error } = await supabase
+      .from('weekly_slot_recipes')
+      .insert({ plan_id: planId, day_of_week: dayOfWeek, meal_type: mealType, recipe_id: recipeId, sort_order: sortOrder } as any);
+    if (error) throw error;
+  }
+
+  async removeSlotRecipe(id: string): Promise<void> {
+    const { error } = await supabase.from('weekly_slot_recipes').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  async clearSlotRecipes(planId: string, dayOfWeek: number, mealType: 'lunch' | 'dinner'): Promise<void> {
+    const { error } = await supabase
+      .from('weekly_slot_recipes')
+      .delete()
+      .eq('plan_id', planId)
+      .eq('day_of_week', dayOfWeek)
+      .eq('meal_type', mealType);
+    if (error) throw error;
   }
 }
 

@@ -2,21 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ChevronRight, ChevronLeft, CalendarDays, StickyNote, Plus, UtensilsCrossed, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronRight, ChevronLeft, CalendarDays, StickyNote, Plus, UtensilsCrossed, X, Eye, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { weeklyPlanService, WeeklyPlanSlot, WeeklyPlanDayNote } from '@/services/weeklyPlanService';
-import { mealService, Meal } from '@/services/mealService';
+import { weeklyPlanService, WeeklySlotRecipe, WeeklyPlanDayNote } from '@/services/weeklyPlanService';
 import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
 import { Recipe, Product } from '@/types';
-import { InlineMealEditor } from '@/components/InlineMealEditor';
-import { MealPreviewDialog } from '@/components/MealPreviewDialog';
+import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
 import { toast } from 'sonner';
 
-const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי']; // Sun-Thu only
+const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
 const MEAL_TYPES = [
   { key: 'lunch' as const, label: 'צהריים' },
   { key: 'dinner' as const, label: 'ערב' },
@@ -25,39 +22,38 @@ const MEAL_TYPES = [
 const WeeklyMealPlan = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => weeklyPlanService.getWeekStart());
   const [planId, setPlanId] = useState<string | null>(null);
-  const [slots, setSlots] = useState<WeeklyPlanSlot[]>([]);
+  const [slotRecipes, setSlotRecipes] = useState<WeeklySlotRecipe[]>([]);
   const [notes, setNotes] = useState<WeeklyPlanDayNote[]>([]);
-  const [meals, setMeals] = useState<Meal[]>([]);
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingNotes, setPendingNotes] = useState<Record<string, string>>({});
   const [noteTimers, setNoteTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [previewMeal, setPreviewMeal] = useState<Meal | null>(null);
 
-  // Create meal dialog
-  const [createMealFor, setCreateMealFor] = useState<{ day: number; mealType: 'lunch' | 'dinner' } | null>(null);
-  const [newMealName, setNewMealName] = useState('');
+  // Adding recipe state
+  const [addingFor, setAddingFor] = useState<{ day: number; mealType: 'lunch' | 'dinner' } | null>(null);
+  const [selectedRecipeId, setSelectedRecipeId] = useState('');
+
+  // Preview state
+  const [previewSlot, setPreviewSlot] = useState<{ day: number; mealType: 'lunch' | 'dinner'; title: string } | null>(null);
 
   const loadWeek = useCallback(async (weekStart: string) => {
     setLoading(true);
     try {
-      const [plan, mealsData, recipesData, productsData] = await Promise.all([
+      const [plan, recipesData, productsData] = await Promise.all([
         weeklyPlanService.getOrCreatePlan(weekStart),
-        mealService.getAll(),
         recipeService.getAll(),
         productService.getAll(),
       ]);
       setPlanId(plan.id);
-      setMeals(mealsData);
       setAllRecipes(recipesData);
       setProducts(productsData);
 
-      const [slotsData, notesData] = await Promise.all([
-        weeklyPlanService.getSlots(plan.id),
+      const [slotRecipesData, notesData] = await Promise.all([
+        weeklyPlanService.getSlotRecipes(plan.id),
         weeklyPlanService.getNotes(plan.id),
       ]);
-      setSlots(slotsData);
+      setSlotRecipes(slotRecipesData);
       setNotes(notesData);
       setPendingNotes({});
     } catch (e) {
@@ -77,8 +73,15 @@ const WeeklyMealPlan = () => {
     setCurrentWeekStart(weeklyPlanService.getWeekStart(d));
   };
 
-  const getSlot = (day: number, mealType: 'lunch' | 'dinner') =>
-    slots.find(s => s.day_of_week === day && s.meal_type === mealType);
+  const getSlotRecipesList = (day: number, mealType: 'lunch' | 'dinner') =>
+    slotRecipes.filter(sr => sr.day_of_week === day && sr.meal_type === mealType);
+
+  const getSlotRecipesResolved = (day: number, mealType: 'lunch' | 'dinner'): Recipe[] => {
+    const entries = getSlotRecipesList(day, mealType);
+    return entries
+      .map(sr => allRecipes.find(r => r.id === sr.recipe_id))
+      .filter(Boolean) as Recipe[];
+  };
 
   const getNoteContent = (day: number, noteType: 'lunch' | 'dinner' | 'general') => {
     const key = `${day}-${noteType}`;
@@ -97,58 +100,40 @@ const WeeklyMealPlan = () => {
     setNoteTimers(prev => ({ ...prev, [key]: timer }));
   };
 
-  const handleCreateMeal = async () => {
-    if (!newMealName.trim() || !createMealFor || !planId) return;
+  const handleAddRecipe = async (day: number, mealType: 'lunch' | 'dinner') => {
+    if (!selectedRecipeId || !planId) return;
     try {
-      const meal = await mealService.create(newMealName.trim());
-      // Assign to slot
-      await weeklyPlanService.upsertSlot(planId, createMealFor.day, createMealFor.mealType, meal.id);
-      setNewMealName('');
-      setCreateMealFor(null);
-      await loadWeek(currentWeekStart);
-      toast.success('ארוחה נוצרה בהצלחה');
-    } catch { toast.error('שגיאה ביצירת ארוחה'); }
+      const currentCount = getSlotRecipesList(day, mealType).length;
+      await weeklyPlanService.addSlotRecipe(planId, day, mealType, selectedRecipeId, currentCount);
+      const updated = await weeklyPlanService.getSlotRecipes(planId);
+      setSlotRecipes(updated);
+      setSelectedRecipeId('');
+      setAddingFor(null);
+    } catch { toast.error('שגיאה בהוספת מתכון'); }
   };
 
-  const handleRemoveMealFromSlot = async (day: number, mealType: 'lunch' | 'dinner') => {
+  const handleRemoveRecipe = async (id: string) => {
     if (!planId) return;
     try {
-      await weeklyPlanService.upsertSlot(planId, day, mealType, null);
-      const updated = await weeklyPlanService.getSlots(planId);
-      setSlots(updated);
-    } catch { toast.error('שגיאה בהסרת ארוחה'); }
+      await weeklyPlanService.removeSlotRecipe(id);
+      const updated = await weeklyPlanService.getSlotRecipes(planId);
+      setSlotRecipes(updated);
+    } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
-  const handleDeleteMeal = async (mealId: string) => {
+  const handleClearSlot = async (day: number, mealType: 'lunch' | 'dinner') => {
+    if (!planId) return;
     try {
-      await mealService.deleteMeal(mealId);
-      await loadWeek(currentWeekStart);
-      toast.success('ארוחה נמחקה');
-    } catch { toast.error('שגיאה במחיקת ארוחה'); }
-  };
-
-  // Meal editing handlers
-  const handleAddSection = async (mealId: string, name: string, sortOrder: number) => {
-    await mealService.addSection(mealId, name, sortOrder);
-    await loadWeek(currentWeekStart);
-  };
-  const handleDeleteSection = async (sectionId: string) => {
-    await mealService.deleteSection(sectionId);
-    await loadWeek(currentWeekStart);
-  };
-  const handleAddRecipe = async (sectionId: string, recipeId: string, sortOrder: number) => {
-    await mealService.addRecipeToSection(sectionId, recipeId, sortOrder);
-    await loadWeek(currentWeekStart);
-  };
-  const handleRemoveRecipe = async (recipeEntryId: string) => {
-    await mealService.removeRecipeFromSection(recipeEntryId);
-    await loadWeek(currentWeekStart);
+      await weeklyPlanService.clearSlotRecipes(planId, day, mealType);
+      const updated = await weeklyPlanService.getSlotRecipes(planId);
+      setSlotRecipes(updated);
+    } catch { toast.error('שגיאה בניקוי ארוחה'); }
   };
 
   const formatWeekRange = () => {
     const start = new Date(currentWeekStart + 'T00:00:00');
     const end = new Date(start);
-    end.setDate(end.getDate() + 4); // Thu
+    end.setDate(end.getDate() + 4);
     const fmt = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`;
     return `${fmt(start)} - ${fmt(end)}`;
   };
@@ -169,7 +154,6 @@ const WeeklyMealPlan = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">תכנון שבועי</h1>
         <p className="text-muted-foreground">תכנן את הארוחות שלך לימים ראשון עד חמישי</p>
@@ -192,7 +176,7 @@ const WeeklyMealPlan = () => {
         </Button>
       </div>
 
-      {/* Horizontal day grid - Sun to Thu */}
+      {/* Day grid */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
         {DAYS_HE.map((dayName, dayIndex) => (
           <Card key={dayIndex} className="min-w-0">
@@ -222,9 +206,9 @@ const WeeklyMealPlan = () => {
 
               {/* Meal slots */}
               {MEAL_TYPES.map(({ key, label }) => {
-                const slot = getSlot(dayIndex, key);
-                const mealId = slot?.meal_id || null;
-                const meal = mealId ? meals.find(m => m.id === mealId) : null;
+                const recipes = getSlotRecipesList(dayIndex, key);
+                const resolvedRecipes = getSlotRecipesResolved(dayIndex, key);
+                const hasRecipes = recipes.length > 0;
 
                 return (
                   <div key={key} className="space-y-1.5 border rounded-lg p-2">
@@ -232,33 +216,48 @@ const WeeklyMealPlan = () => {
                       <div className="flex items-center gap-1">
                         <UtensilsCrossed className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="font-medium text-xs">{label}</span>
+                        {hasRecipes && (
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                            {recipes.length}
+                          </Badge>
+                        )}
                       </div>
-                      {meal && (
-                        <div className="flex items-center gap-0.5">
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive">
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>מחיקת ארוחה</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  האם למחוק את "{meal.name}"? פעולה זו לא ניתנת לביטול.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>ביטול</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteMeal(meal.id)}>מחק</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-0.5">
+                        {hasRecipes && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => setPreviewSlot({ day: dayIndex, mealType: key, title: `יום ${dayName} - ${label}` })}
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive">
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>ניקוי ארוחה</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    האם להסיר את כל המתכונים מארוחת {label} ביום {dayName}?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>ביטול</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleClearSlot(dayIndex, key)}>נקה</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Note for this meal type */}
+                    {/* Note */}
                     <Textarea
                       placeholder={`הערות ל${label}...`}
                       value={getNoteContent(dayIndex, key)}
@@ -267,29 +266,52 @@ const WeeklyMealPlan = () => {
                       className="resize-none text-xs"
                     />
 
-                    {meal ? (
-                      <div>
-                        <p className="text-xs font-medium mb-1">{meal.name}</p>
-                        <InlineMealEditor
-                          meal={meal}
-                          allRecipes={allRecipes}
-                          onAddSection={handleAddSection}
-                          onDeleteSection={handleDeleteSection}
-                          onAddRecipe={handleAddRecipe}
-                          onRemoveRecipe={handleRemoveRecipe}
-                          onPreview={setPreviewMeal}
-                          compact
-                        />
+                    {/* Compact recipe list */}
+                    {hasRecipes && (
+                      <div className="space-y-0.5">
+                        {recipes.map(sr => {
+                          const recipe = allRecipes.find(r => r.id === sr.recipe_id);
+                          return (
+                            <div key={sr.id} className="flex items-center justify-between text-xs bg-muted/50 rounded px-1.5 py-1">
+                              <span className="truncate">{recipe?.name || 'לא נמצא'}</span>
+                              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => handleRemoveRecipe(sr.id)}>
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Add recipe */}
+                    {addingFor?.day === dayIndex && addingFor?.mealType === key ? (
+                      <div className="flex gap-1.5">
+                        <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
+                          <SelectTrigger className="flex-1 h-7 text-xs">
+                            <SelectValue placeholder="בחר מתכון..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allRecipes.map(r => (
+                              <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" className="h-7 text-xs px-2" onClick={() => handleAddRecipe(dayIndex, key)} disabled={!selectedRecipeId}>
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={() => { setAddingFor(null); setSelectedRecipeId(''); }}>
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
                     ) : (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full h-8 text-xs border-dashed"
-                        onClick={() => { setCreateMealFor({ day: dayIndex, mealType: key }); setNewMealName(''); }}
+                        className="w-full h-7 text-xs border-dashed"
+                        onClick={() => { setAddingFor({ day: dayIndex, mealType: key }); setSelectedRecipeId(''); }}
                       >
                         <Plus className="h-3 w-3 me-1" />
-                        צור ארוחה
+                        הוסף מתכון
                       </Button>
                     )}
                   </div>
@@ -300,31 +322,14 @@ const WeeklyMealPlan = () => {
         ))}
       </div>
 
-      {/* Create Meal Dialog */}
-      <Dialog open={!!createMealFor} onOpenChange={(open) => { if (!open) setCreateMealFor(null); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>יצירת ארוחה חדשה</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="שם הארוחה"
-            value={newMealName}
-            onChange={e => setNewMealName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleCreateMeal()}
-          />
-          <DialogFooter>
-            <Button onClick={handleCreateMeal} disabled={!newMealName.trim()}>צור ארוחה</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Meal Preview */}
-      {previewMeal && (
-        <MealPreviewDialog
-          meal={previewMeal}
+      {/* Preview dialog */}
+      {previewSlot && (
+        <SlotPreviewDialog
+          recipes={getSlotRecipesResolved(previewSlot.day, previewSlot.mealType)}
           products={products}
-          open={!!previewMeal}
-          onOpenChange={(open) => { if (!open) setPreviewMeal(null); }}
+          title={previewSlot.title}
+          open={!!previewSlot}
+          onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
         />
       )}
     </div>
