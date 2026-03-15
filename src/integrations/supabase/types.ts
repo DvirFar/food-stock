@@ -606,6 +606,58 @@ export type Database = {
           },
         ]
       }
+      weekly_slot_recipes: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          meal_type: string
+          plan_id: string
+          recipe_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          id?: string
+          meal_type: string
+          plan_id: string
+          recipe_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          meal_type?: string
+          plan_id?: string
+          recipe_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_slot_recipes_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_meal_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_slot_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_slot_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       recipes_public: {
