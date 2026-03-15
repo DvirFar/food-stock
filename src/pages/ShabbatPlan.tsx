@@ -1,51 +1,49 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, CalendarDays } from 'lucide-react';
-import { shabbatPlanService } from '@/services/shabbatPlanService';
-import { mealService, Meal } from '@/services/mealService';
+import { shabbatPlanService, ShabbatPlanSection } from '@/services/shabbatPlanService';
 import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
-import { Recipe, Product } from '@/types';
+import { Recipe, Product, RecipeIngredient } from '@/types';
 import { ShabbatMealCard } from '@/components/shabbat/ShabbatMealCard';
 import { ShabbatExtraRecipes } from '@/components/shabbat/ShabbatExtraRecipes';
 import { DishWashingTable } from '@/components/shabbat/DishWashingTable';
-import { MealPreviewDialog } from '@/components/MealPreviewDialog';
+import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
 import { toast } from 'sonner';
 
 const ShabbatPlan = () => {
   const [currentFriday, setCurrentFriday] = useState(() => shabbatPlanService.getWeekFriday());
   const [planId, setPlanId] = useState<string | null>(null);
-  const [fridayMealId, setFridayMealId] = useState<string | null>(null);
-  const [saturdayMealId, setSaturdayMealId] = useState<string | null>(null);
+  const [sections, setSections] = useState<ShabbatPlanSection[]>([]);
   const [extraRecipes, setExtraRecipes] = useState<any[]>([]);
   const [dishAssignments, setDishAssignments] = useState<Record<string, string>>({});
-  const [meals, setMeals] = useState<Meal[]>([]);
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewMeal, setPreviewMeal] = useState<Meal | null>(null);
   const [dishTimers, setDishTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
+  const [previewSlot, setPreviewSlot] = useState<'friday' | 'saturday' | null>(null);
+
+  const fridaySections = useMemo(() => sections.filter(s => s.slot === 'friday'), [sections]);
+  const saturdaySections = useMemo(() => sections.filter(s => s.slot === 'saturday'), [sections]);
 
   const loadData = useCallback(async (friday: string) => {
     setLoading(true);
     try {
-      const [plan, mealsData, recipesData, productsData] = await Promise.all([
+      const [plan, recipesData, productsData] = await Promise.all([
         shabbatPlanService.getOrCreatePlan(friday),
-        mealService.getAll(),
         recipeService.getAll(),
         productService.getAll(),
       ]);
       setPlanId(plan.id);
-      setFridayMealId(plan.friday_meal_id);
-      setSaturdayMealId(plan.saturday_meal_id);
-      setMeals(mealsData);
       setAllRecipes(recipesData);
       setProducts(productsData);
 
-      const [extras, dishes] = await Promise.all([
+      const [secs, extras, dishes] = await Promise.all([
+        shabbatPlanService.getSections(plan.id),
         shabbatPlanService.getExtraRecipes(plan.id),
         shabbatPlanService.getDishAssignments(plan.id),
       ]);
+      setSections(secs);
       setExtraRecipes(extras);
       const dishMap: Record<string, string> = {};
       dishes.forEach(d => { dishMap[`${d.round}-${d.sink}`] = d.person; });
@@ -67,43 +65,33 @@ const ShabbatPlan = () => {
     setCurrentFriday(shabbatPlanService.getWeekFriday(d));
   };
 
-  const handleMealChange = async (field: 'friday_meal_id' | 'saturday_meal_id', mealId: string | null) => {
+  const handleAddSection = async (slot: string, name: string, sortOrder: number) => {
     if (!planId) return;
     try {
-      await shabbatPlanService.updateMealAssignment(planId, field, mealId);
-      if (field === 'friday_meal_id') setFridayMealId(mealId);
-      else setSaturdayMealId(mealId);
-      if (mealId) await loadData(currentFriday); // reload to get full meal data
-    } catch { toast.error('שגיאה בעדכון'); }
+      await shabbatPlanService.addSection(planId, slot, name, sortOrder);
+      await loadData(currentFriday);
+    } catch { toast.error('שגיאה בהוספת חלק'); }
   };
 
-  const handleCreateMeal = async (name: string): Promise<Meal> => {
-    const meal = await mealService.create(name);
-    await loadData(currentFriday);
-    return meal;
-  };
-
-  const handleDeleteMeal = async (mealId: string) => {
-    await mealService.deleteMeal(mealId);
-    await loadData(currentFriday);
-    toast.success('ארוחה נמחקה');
-  };
-
-  const handleAddSection = async (mealId: string, name: string, sortOrder: number) => {
-    await mealService.addSection(mealId, name, sortOrder);
-    await loadData(currentFriday);
-  };
   const handleDeleteSection = async (sectionId: string) => {
-    await mealService.deleteSection(sectionId);
-    await loadData(currentFriday);
+    try {
+      await shabbatPlanService.deleteSection(sectionId);
+      await loadData(currentFriday);
+    } catch { toast.error('שגיאה במחיקת חלק'); }
   };
+
   const handleAddRecipe = async (sectionId: string, recipeId: string, sortOrder: number) => {
-    await mealService.addRecipeToSection(sectionId, recipeId, sortOrder);
-    await loadData(currentFriday);
+    try {
+      await shabbatPlanService.addRecipeToSection(sectionId, recipeId, sortOrder);
+      await loadData(currentFriday);
+    } catch { toast.error('שגיאה בהוספת מתכון'); }
   };
+
   const handleRemoveRecipe = async (recipeEntryId: string) => {
-    await mealService.removeRecipeFromSection(recipeEntryId);
-    await loadData(currentFriday);
+    try {
+      await shabbatPlanService.removeRecipeFromSection(recipeEntryId);
+      await loadData(currentFriday);
+    } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
   const handleAddExtraRecipe = async (recipeId: string) => {
@@ -143,8 +131,12 @@ const ShabbatPlan = () => {
     return `שבת ${fmt(d)} - ${fmt(sat)}`;
   };
 
-  const fridayMeal = fridayMealId ? meals.find(m => m.id === fridayMealId) || null : null;
-  const saturdayMeal = saturdayMealId ? meals.find(m => m.id === saturdayMealId) || null : null;
+  // Build preview recipes for SlotPreviewDialog
+  const getPreviewRecipes = (slot: 'friday' | 'saturday') => {
+    const slotSections = sections.filter(s => s.slot === slot);
+    const recipeIds = slotSections.flatMap(s => s.recipes.map(r => r.recipe_id));
+    return allRecipes.filter(r => recipeIds.includes(r.id));
+  };
 
   if (loading) {
     return (
@@ -191,41 +183,36 @@ const ShabbatPlan = () => {
         <div className="space-y-6 order-1 lg:order-2">
           <ShabbatMealCard
             title="ארוחת שישי"
-            meal={fridayMeal}
-            allMeals={meals}
+            sections={fridaySections}
             allRecipes={allRecipes}
-            onMealChange={(id) => handleMealChange('friday_meal_id', id)}
-            onCreateMeal={handleCreateMeal}
-            onDeleteMeal={handleDeleteMeal}
-            onAddSection={handleAddSection}
+            products={products}
+            onAddSection={(name, order) => handleAddSection('friday', name, order)}
             onDeleteSection={handleDeleteSection}
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
-            onPreview={setPreviewMeal}
+            onPreview={() => setPreviewSlot('friday')}
           />
           <ShabbatMealCard
             title="ארוחת שבת"
-            meal={saturdayMeal}
-            allMeals={meals}
+            sections={saturdaySections}
             allRecipes={allRecipes}
-            onMealChange={(id) => handleMealChange('saturday_meal_id', id)}
-            onCreateMeal={handleCreateMeal}
-            onDeleteMeal={handleDeleteMeal}
-            onAddSection={handleAddSection}
+            products={products}
+            onAddSection={(name, order) => handleAddSection('saturday', name, order)}
             onDeleteSection={handleDeleteSection}
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
-            onPreview={setPreviewMeal}
+            onPreview={() => setPreviewSlot('saturday')}
           />
         </div>
       </div>
 
-      {previewMeal && (
-        <MealPreviewDialog
-          meal={previewMeal}
+      {previewSlot && (
+        <SlotPreviewDialog
+          open={!!previewSlot}
+          onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
+          title={previewSlot === 'friday' ? 'ארוחת שישי' : 'ארוחת שבת'}
+          recipes={getPreviewRecipes(previewSlot)}
           products={products}
-          open={!!previewMeal}
-          onOpenChange={(open) => { if (!open) setPreviewMeal(null); }}
         />
       )}
     </div>

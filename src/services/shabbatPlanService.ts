@@ -1,13 +1,31 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Recipe } from '@/types';
 
 export interface ShabbatPlan {
   id: string;
   user_id: string;
   week_start: string;
-  friday_meal_id: string | null;
-  saturday_meal_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ShabbatPlanSection {
+  id: string;
+  plan_id: string;
+  slot: 'friday' | 'saturday';
+  name: string;
+  sort_order: number;
+  created_at: string;
+  recipes: ShabbatSectionRecipe[];
+}
+
+export interface ShabbatSectionRecipe {
+  id: string;
+  section_id: string;
+  recipe_id: string;
+  sort_order: number;
+  created_at: string;
+  recipe?: Recipe;
 }
 
 export interface ShabbatExtraRecipe {
@@ -28,12 +46,12 @@ export interface ShabbatDishAssignment {
   updated_at: string;
 }
 
+const DEFAULT_SECTIONS = ['מנה ראשונה', 'מנה עיקרית', 'תוספות', 'קינוח'];
+
 class ShabbatPlanService {
-  /** Get the Friday of the week containing the given date */
   getWeekFriday(date: Date = new Date()): string {
     const d = new Date(date);
     const day = d.getDay();
-    // Move to Friday (day 5)
     const diff = day <= 5 ? 5 - day : 5 - day + 7;
     d.setDate(d.getDate() + diff);
     return d.toISOString().split('T')[0];
@@ -50,7 +68,7 @@ class ShabbatPlanService {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (existing) return existing as ShabbatPlan;
+    if (existing) return existing as unknown as ShabbatPlan;
 
     const { data, error } = await supabase
       .from('shabbat_plans')
@@ -58,14 +76,90 @@ class ShabbatPlanService {
       .select()
       .single();
     if (error) throw error;
-    return data as ShabbatPlan;
+
+    // Create default sections for both slots
+    const sectionsToInsert = ['friday', 'saturday'].flatMap(slot =>
+      DEFAULT_SECTIONS.map((name, i) => ({
+        plan_id: data.id,
+        slot,
+        name,
+        sort_order: i,
+      }))
+    );
+    await supabase.from('shabbat_plan_sections').insert(sectionsToInsert as any);
+
+    return data as unknown as ShabbatPlan;
   }
 
-  async updateMealAssignment(planId: string, field: 'friday_meal_id' | 'saturday_meal_id', mealId: string | null): Promise<void> {
+  async getSections(planId: string): Promise<ShabbatPlanSection[]> {
+    const { data: sections, error } = await supabase
+      .from('shabbat_plan_sections')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('sort_order');
+    if (error) throw error;
+
+    const sectionIds = (sections || []).map(s => s.id);
+    let sectionRecipes: any[] = [];
+    if (sectionIds.length > 0) {
+      const { data, error: srErr } = await supabase
+        .from('shabbat_section_recipes')
+        .select('*')
+        .in('section_id', sectionIds)
+        .order('sort_order');
+      if (srErr) throw srErr;
+      sectionRecipes = data || [];
+    }
+
+    // Fetch referenced recipes
+    const recipeIds = [...new Set(sectionRecipes.map(sr => sr.recipe_id))];
+    let recipesMap: Record<string, Recipe> = {};
+    if (recipeIds.length > 0) {
+      const { data: recipes } = await supabase
+        .from('recipes')
+        .select('*')
+        .in('id', recipeIds);
+      if (recipes) {
+        recipesMap = Object.fromEntries(recipes.map(r => [r.id, r as unknown as Recipe]));
+      }
+    }
+
+    return (sections || []).map(section => ({
+      ...section,
+      slot: section.slot as 'friday' | 'saturday',
+      recipes: sectionRecipes
+        .filter(sr => sr.section_id === section.id)
+        .map(sr => ({ ...sr, recipe: recipesMap[sr.recipe_id] })),
+    }));
+  }
+
+  async addSection(planId: string, slot: string, name: string, sortOrder: number): Promise<void> {
     const { error } = await supabase
-      .from('shabbat_plans')
-      .update({ [field]: mealId } as any)
-      .eq('id', planId);
+      .from('shabbat_plan_sections')
+      .insert({ plan_id: planId, slot, name, sort_order: sortOrder } as any);
+    if (error) throw error;
+  }
+
+  async deleteSection(sectionId: string): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_plan_sections')
+      .delete()
+      .eq('id', sectionId);
+    if (error) throw error;
+  }
+
+  async addRecipeToSection(sectionId: string, recipeId: string, sortOrder: number): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_section_recipes')
+      .insert({ section_id: sectionId, recipe_id: recipeId, sort_order: sortOrder } as any);
+    if (error) throw error;
+  }
+
+  async removeRecipeFromSection(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_section_recipes')
+      .delete()
+      .eq('id', id);
     if (error) throw error;
   }
 
