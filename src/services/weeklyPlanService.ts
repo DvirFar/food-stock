@@ -17,6 +17,16 @@ export interface WeeklyPlanSlot {
   created_at: string;
 }
 
+export interface WeeklySlotRecipe {
+  id: string;
+  plan_id: string;
+  day_of_week: number;
+  meal_type: 'lunch' | 'dinner';
+  recipe_id: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface WeeklyPlanDayNote {
   id: string;
   plan_id: string;
