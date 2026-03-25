@@ -21,7 +21,7 @@ export const ProductTagInput = ({ tags, onChange, label = 'תגיות' }: Produc
 
   const availableTags = productTags
     .map(t => t.name)
-    .filter(name => !tags.includes(name));
+    .filter(name => !tags.includes(name) && name !== 'low-stock');
 
   const addTag = (tag?: string) => {
     const value = (tag || newTag).trim().toLowerCase();
@@ -33,6 +33,7 @@ export const ProductTagInput = ({ tags, onChange, label = 'תגיות' }: Produc
   };
 
   const removeTag = (tag: string) => {
+    if (tag === 'low-stock') return; // system-managed tag
     onChange(tags.filter(t => t !== tag));
   };
 
@@ -85,9 +86,9 @@ export const ProductTagInput = ({ tags, onChange, label = 'תגיות' }: Produc
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      {tags.length > 0 && (
+      {tags.filter(t => t !== 'low-stock').length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {tags.map(tag => (
+          {tags.filter(t => t !== 'low-stock').map(tag => (
             <Badge key={tag} variant="secondary" className="gap-1">
               {tag}
               <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">

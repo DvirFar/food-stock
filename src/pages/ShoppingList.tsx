@@ -15,12 +15,20 @@ import {
   Pencil,
   Eye,
   X,
+  PackagePlus,
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import { differenceInDays, parseISO } from 'date-fns';
+import { AddProductToListDialog } from '@/components/AddProductToListDialog';
+
+const SYSTEM_TAG = 'low-stock';
+const DEFAULT_TAGS = ['regular', SYSTEM_TAG];
+const TAG_LABELS: Record<string, string> = {
+  'low-stock': 'מלאי נמוך',
+};
 
 // A shopping list entry derived from a product
 interface ShoppingEntry {
@@ -35,9 +43,11 @@ const ShoppingList = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isShoppingMode, setIsShoppingMode] = useState(false);
-  const [activeTags, setActiveTags] = useState<string[]>(['regular']);
-  const [overrides, setOverrides] = useState<Record<string, number>>({}); 
+  const [activeTags, setActiveTags] = useState<string[]>(DEFAULT_TAGS);
+  const [overrides, setOverrides] = useState<Record<string, number>>({});
   const [hiddenProducts, setHiddenProducts] = useState<Set<string>>(new Set());
+  const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -54,7 +64,7 @@ const ShoppingList = () => {
     }
   };
 
-  // All unique tags across products
+  // All unique tags across products (exclude system tag from user-toggleable list)
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
     allProducts.forEach(p => (p.tags || []).forEach(t => tagSet.add(t)));
@@ -78,13 +88,19 @@ const ShoppingList = () => {
     );
   }, [allProducts, activeTags]);
 
-  // Combined unique products (tagged + expiring)
+  // Manually added products
+  const manuallyAddedProducts = useMemo(() => {
+    return allProducts.filter(p => addedProductIds.has(p.id));
+  }, [allProducts, addedProductIds]);
+
+  // Combined unique products (tagged + expiring + manually added)
   const visibleProducts = useMemo(() => {
     const map = new Map<string, Product>();
     expiringProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     taggedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
+    manuallyAddedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     return Array.from(map.values());
-  }, [expiringProducts, taggedProducts, hiddenProducts]);
+  }, [expiringProducts, taggedProducts, manuallyAddedProducts, hiddenProducts]);
 
   // Build shopping entries
   const entries: ShoppingEntry[] = useMemo(() => {
@@ -128,9 +144,10 @@ const ShoppingList = () => {
   }, []);
 
   const handleClear = useCallback(() => {
-    setActiveTags(['regular']);
+    setActiveTags(DEFAULT_TAGS);
     setOverrides({});
     setHiddenProducts(new Set());
+    setAddedProductIds(new Set());
   }, []);
 
   const handleRemoveProduct = useCallback((productId: string) => {
@@ -141,6 +158,14 @@ const ShoppingList = () => {
     setActiveTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
+  }, []);
+
+  const handleAddProducts = useCallback((productIds: string[]) => {
+    setAddedProductIds(prev => {
+      const next = new Set(prev);
+      productIds.forEach(id => next.add(id));
+      return next;
+    });
   }, []);
 
   const handleUpdateStock = async () => {
@@ -157,9 +182,9 @@ const ShoppingList = () => {
         await productService.updateQuantity(entry.product.id, newQuantity);
         count++;
       }
-      // Reload products to reflect changes
       await loadProducts();
       setOverrides({});
+      setAddedProductIds(new Set());
       toast.success(`${count} מוצרים עודכנו במלאי`);
     } catch (error) {
       toast.error('שגיאה בעדכון מלאי');
@@ -200,6 +225,10 @@ const ShoppingList = () => {
           </div>
           {!isShoppingMode && (
             <>
+              <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)}>
+                <PackagePlus className="h-4 w-4 me-2" />
+                הוסף מוצרים
+              </Button>
               <Button variant="outline" size="sm" onClick={handleClear}>
                 <RotateCcw className="h-4 w-4 me-2" />
                 אפס
@@ -231,7 +260,7 @@ const ShoppingList = () => {
                   className="cursor-pointer select-none"
                   onClick={() => toggleTag(tag)}
                 >
-                  {tag}
+                  {TAG_LABELS[tag] || tag}
                 </Badge>
               ))}
               {allTags.length === 0 && (
@@ -304,6 +333,15 @@ const ShoppingList = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Add Products Dialog */}
+      <AddProductToListDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        allProducts={allProducts}
+        alreadyVisibleIds={new Set(visibleProducts.map(p => p.id))}
+        onProductsAdded={handleAddProducts}
+      />
     </div>
   );
 };
@@ -327,9 +365,9 @@ const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange, onRemove }: S
     >
       <div className="flex-1">
         <span className="font-medium">{product.name}</span>
-        {(product.tags || []).length > 0 && (
+        {(product.tags || []).filter(t => t !== 'low-stock').length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {(product.tags || []).map(tag => (
+            {(product.tags || []).filter(t => t !== 'low-stock').map(tag => (
               <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">
                 {tag}
               </Badge>
