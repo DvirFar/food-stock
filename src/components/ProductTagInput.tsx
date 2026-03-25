@@ -21,7 +21,7 @@ export const ProductTagInput = ({ tags, onChange, label = 'תגיות' }: Produc
 
   const availableTags = productTags
     .map(t => t.name)
-    .filter(name => !tags.includes(name));
+    .filter(name => !tags.includes(name) && name !== 'low-stock');
 
   const addTag = (tag?: string) => {
     const value = (tag || newTag).trim().toLowerCase();
@@ -33,6 +33,7 @@ export const ProductTagInput = ({ tags, onChange, label = 'תגיות' }: Produc
   };
 
   const removeTag = (tag: string) => {
+    if (tag === 'low-stock') return; // system-managed tag
     onChange(tags.filter(t => t !== tag));
   };
 
