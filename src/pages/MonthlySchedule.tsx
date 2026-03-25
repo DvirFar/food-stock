@@ -10,14 +10,16 @@ import { toast } from 'sonner';
 
 const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
-const HEBREW_MONTHS_ORDER: JewishMonth[] = [
+type JewishMonthName = typeof JewishMonth[keyof typeof JewishMonth];
+
+const HEBREW_MONTHS_ORDER: JewishMonthName[] = [
   JewishMonth.Tishri, JewishMonth.Cheshvan, JewishMonth.Kislev,
   JewishMonth.Tevet, JewishMonth.Shevat, JewishMonth.Adar,
   JewishMonth.Nisan, JewishMonth.Iyyar, JewishMonth.Sivan,
   JewishMonth.Tammuz, JewishMonth.Av, JewishMonth.Elul,
 ];
 
-const HEBREW_MONTHS_ORDER_LEAP: JewishMonth[] = [
+const HEBREW_MONTHS_ORDER_LEAP: JewishMonthName[] = [
   JewishMonth.Tishri, JewishMonth.Cheshvan, JewishMonth.Kislev,
   JewishMonth.Tevet, JewishMonth.Shevat, JewishMonth.Adar, JewishMonth.AdarII,
   JewishMonth.Nisan, JewishMonth.Iyyar, JewishMonth.Sivan,
@@ -33,7 +35,7 @@ function isLeapYear(hebrewYear: number): boolean {
   return [3, 6, 8, 11, 14, 17, 19].includes(hebrewYear % 19);
 }
 
-function getMonthsForYear(hebrewYear: number): JewishMonth[] {
+function getMonthsForYear(hebrewYear: number): JewishMonthName[] {
   return isLeapYear(hebrewYear) ? HEBREW_MONTHS_ORDER_LEAP : HEBREW_MONTHS_ORDER;
 }
 
@@ -49,7 +51,7 @@ interface DayCell {
   isToday: boolean;
 }
 
-function buildHebrewMonthGrid(hebrewYear: number, hebrewMonth: JewishMonth): DayCell[] {
+function buildHebrewMonthGrid(hebrewYear: number, hebrewMonth: JewishMonthName): DayCell[] {
   // Find Gregorian date of 1st of Hebrew month
   const firstGreg = toGregorianDate({ year: hebrewYear, monthName: hebrewMonth, day: 1 });
 
@@ -112,7 +114,7 @@ function buildHebrewMonthGrid(hebrewYear: number, hebrewMonth: JewishMonth): Day
 
 const MonthlySchedule = () => {
   const [hebrewYear, setHebrewYear] = useState<number>(() => toJewishDate(new Date()).year);
-  const [hebrewMonth, setHebrewMonth] = useState<JewishMonth>(() => toJewishDate(new Date()).monthName);
+  const [hebrewMonth, setHebrewMonth] = useState<JewishMonthName>(() => toJewishDate(new Date()).monthName);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<DayCell | null>(null);
@@ -123,7 +125,7 @@ const MonthlySchedule = () => {
 
   // Get Hebrew month display name
   const hebrewMonthLabel = useMemo(() => {
-    const heb = toHebrewJewishDate({ year: hebrewYear, monthName: hebrewMonth, day: 1, month: 0 });
+    const heb = toHebrewJewishDate({ year: hebrewYear, monthName: hebrewMonth, day: 1 } as any);
     return `${heb.monthName} ${heb.year}`;
   }, [hebrewYear, hebrewMonth]);
 
