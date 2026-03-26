@@ -5,22 +5,19 @@ import {
   Package, 
   AlertTriangle, 
   Clock, 
-  ShoppingCart,
   TrendingDown,
   Refrigerator
 } from 'lucide-react';
 import { productService } from '@/services/productService';
-import { shoppingListService } from '@/services/shoppingListService';
+
 import { Product, DashboardStats } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { ShoppingListPreview } from '@/components/dashboard/ShoppingListPreview';
 import { ExpirationBarChart } from '@/components/dashboard/ExpirationBarChart';
 import { RestockPriorityList } from '@/components/dashboard/RestockPriorityList';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
@@ -50,21 +47,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddToShoppingList = async () => {
-    if (lowStockProducts.length === 0) return;
-    
-    try {
-      const added = await shoppingListService.addFromLowStock(lowStockProducts);
-      if (added.length > 0) {
-        toast.success(`נוספו ${added.length} פריטים לרשימת הקניות`);
-        navigate('/shopping-list');
-      } else {
-        toast.info('כל הפריטים החסרים כבר ברשימת הקניות');
-      }
-    } catch (error) {
-      toast.error('שגיאה בהוספת פריטים לרשימת הקניות');
-    }
-  };
 
   if (loading) {
     return (
@@ -154,16 +136,6 @@ const Dashboard = () => {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <CardTitle>התראת מלאי נמוך</CardTitle>
             </div>
-            {lowStockProducts.length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleAddToShoppingList}
-              >
-                <ShoppingCart className="h-4 w-4 me-2" />
-                הוסף הכל לרשימה
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
             {lowStockProducts.length === 0 ? (
