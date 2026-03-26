@@ -5,12 +5,11 @@ import {
   Package, 
   AlertTriangle, 
   Clock, 
-  ShoppingCart,
   TrendingDown,
   Refrigerator
 } from 'lucide-react';
 import { productService } from '@/services/productService';
-import { shoppingListService } from '@/services/shoppingListService';
+
 import { Product, DashboardStats } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { useNavigate } from 'react-router-dom';
@@ -50,21 +49,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddToShoppingList = async () => {
-    if (lowStockProducts.length === 0) return;
-    
-    try {
-      const added = await shoppingListService.addFromLowStock(lowStockProducts);
-      if (added.length > 0) {
-        toast.success(`נוספו ${added.length} פריטים לרשימת הקניות`);
-        navigate('/shopping-list');
-      } else {
-        toast.info('כל הפריטים החסרים כבר ברשימת הקניות');
-      }
-    } catch (error) {
-      toast.error('שגיאה בהוספת פריטים לרשימת הקניות');
-    }
-  };
 
   if (loading) {
     return (
