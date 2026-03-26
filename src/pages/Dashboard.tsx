@@ -12,14 +12,12 @@ import { productService } from '@/services/productService';
 
 import { Product, DashboardStats } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { ShoppingListPreview } from '@/components/dashboard/ShoppingListPreview';
 import { ExpirationBarChart } from '@/components/dashboard/ExpirationBarChart';
 import { RestockPriorityList } from '@/components/dashboard/RestockPriorityList';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
