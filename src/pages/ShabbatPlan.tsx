@@ -182,7 +182,7 @@ const ShabbatPlan = () => {
 
         <div className="space-y-6 order-1 lg:order-2">
           <ShabbatMealCard
-            title="ארוחת שישי"
+            title="ערב שבת"
             sections={fridaySections}
             allRecipes={allRecipes}
             products={products}
@@ -193,7 +193,7 @@ const ShabbatPlan = () => {
             onPreview={() => setPreviewSlot('friday')}
           />
           <ShabbatMealCard
-            title="ארוחת שבת"
+            title="שבת בוקר"
             sections={saturdaySections}
             allRecipes={allRecipes}
             products={products}
@@ -210,7 +210,7 @@ const ShabbatPlan = () => {
         <SlotPreviewDialog
           open={!!previewSlot}
           onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
-          title={previewSlot === 'friday' ? 'ארוחת שישי' : 'ארוחת שבת'}
+          title={previewSlot === 'friday' ? 'ערב שבת' : 'שבת בוקר'}
           recipes={getPreviewRecipes(previewSlot)}
           products={products}
         />
