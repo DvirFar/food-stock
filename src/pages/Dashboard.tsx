@@ -154,16 +154,6 @@ const Dashboard = () => {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <CardTitle>התראת מלאי נמוך</CardTitle>
             </div>
-            {lowStockProducts.length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleAddToShoppingList}
-              >
-                <ShoppingCart className="h-4 w-4 me-2" />
-                הוסף הכל לרשימה
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
             {lowStockProducts.length === 0 ? (
