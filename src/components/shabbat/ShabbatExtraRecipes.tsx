@@ -25,7 +25,7 @@ export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove 
   };
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <CakeSlice className="h-5 w-5" />
