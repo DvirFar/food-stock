@@ -205,14 +205,19 @@ const ShoppingList = () => {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Pencil className={`h-4 w-4 ${!isShoppingMode ? 'text-primary' : 'text-muted-foreground'}`} />
+          <div className="flex items-center gap-2 shrink-0">
+            <Label className="text-sm cursor-pointer" onClick={() => setIsShoppingMode(false)}>
+              <Pencil className={`h-4 w-4 inline me-1 ${!isShoppingMode ? 'text-primary' : 'text-muted-foreground'}`} />
+              {!isShoppingMode && 'עריכה'}
+            </Label>
             <Switch
               checked={isShoppingMode}
               onCheckedChange={setIsShoppingMode}
             />
-            <Eye className={`h-4 w-4 ${isShoppingMode ? 'text-primary' : 'text-muted-foreground'}`} />
-            <Label className="text-sm">{isShoppingMode ? 'מצב קניות' : 'מצב עריכה'}</Label>
+            <Label className="text-sm cursor-pointer" onClick={() => setIsShoppingMode(true)}>
+              <Eye className={`h-4 w-4 inline me-1 ${isShoppingMode ? 'text-primary' : 'text-muted-foreground'}`} />
+              {isShoppingMode && 'קניות'}
+            </Label>
           </div>
           {!isShoppingMode && (
             <>
