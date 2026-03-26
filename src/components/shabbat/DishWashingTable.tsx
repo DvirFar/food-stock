@@ -30,8 +30,8 @@ export const DishWashingTable = ({ assignments, onChange }: DishWashingTableProp
           <TableHeader>
             <TableRow>
               <TableHead className="text-right w-[100px]">סבב</TableHead>
-              <TableHead className="text-right">כיור 1</TableHead>
-              <TableHead className="text-right">כיור 2</TableHead>
+              <TableHead className="text-right">חלבי</TableHead>
+              <TableHead className="text-right">בשרי</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
