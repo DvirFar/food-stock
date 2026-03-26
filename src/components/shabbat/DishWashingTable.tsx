@@ -18,7 +18,7 @@ export const DishWashingTable = ({ assignments, onChange }: DishWashingTableProp
   const getValue = (round: string, sink: number) => assignments[`${round}-${sink}`] || '';
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Droplets className="h-5 w-5" />
