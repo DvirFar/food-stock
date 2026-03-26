@@ -21,7 +21,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
-import { differenceInDays, parseISO } from 'date-fns';
+
 import { AddProductToListDialog } from '@/components/AddProductToListDialog';
 
 const SYSTEM_TAG = 'low-stock';
@@ -36,7 +36,7 @@ interface ShoppingEntry {
   amountToBuy: number;
 }
 
-const EXPIRING_DAYS = 3;
+
 
 const ShoppingList = () => {
   const { categories, categoryLabels } = useSettings();
