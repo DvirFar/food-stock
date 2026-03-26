@@ -21,7 +21,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
-import { differenceInDays, parseISO } from 'date-fns';
+
 import { AddProductToListDialog } from '@/components/AddProductToListDialog';
 
 const SYSTEM_TAG = 'low-stock';
@@ -36,7 +36,7 @@ interface ShoppingEntry {
   amountToBuy: number;
 }
 
-const EXPIRING_DAYS = 3;
+
 
 const ShoppingList = () => {
   const { categories, categoryLabels } = useSettings();
@@ -71,15 +71,7 @@ const ShoppingList = () => {
     return Array.from(tagSet).sort();
   }, [allProducts]);
 
-  // Products expiring soon
-  const expiringProducts = useMemo(() => {
-    const now = new Date();
-    return allProducts.filter(p => {
-      if (!p.expiration_date) return false;
-      const days = differenceInDays(parseISO(p.expiration_date), now);
-      return days >= 0 && days <= EXPIRING_DAYS;
-    });
-  }, [allProducts]);
+  // (Expiring products removed from default view)
 
   // Products matching active tags
   const taggedProducts = useMemo(() => {
@@ -93,14 +85,13 @@ const ShoppingList = () => {
     return allProducts.filter(p => addedProductIds.has(p.id));
   }, [allProducts, addedProductIds]);
 
-  // Combined unique products (tagged + expiring + manually added)
+  // Combined unique products (tagged + manually added)
   const visibleProducts = useMemo(() => {
     const map = new Map<string, Product>();
-    expiringProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     taggedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     manuallyAddedProducts.forEach(p => { if (!hiddenProducts.has(p.id)) map.set(p.id, p); });
     return Array.from(map.values());
-  }, [expiringProducts, taggedProducts, manuallyAddedProducts, hiddenProducts]);
+  }, [taggedProducts, manuallyAddedProducts, hiddenProducts]);
 
   // Build shopping entries
   const entries: ShoppingEntry[] = useMemo(() => {
