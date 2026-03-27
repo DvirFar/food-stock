@@ -31,9 +31,9 @@ const navItems = [
   { title: 'לוח בקרה', url: '/', icon: LayoutDashboard },
   { title: 'מוצרים', url: '/products', icon: Package },
   { title: 'מתכונים', url: '/recipes', icon: ChefHat },
-  { title: 'תכנון שבועי', url: '/weekly-plan', icon: CalendarDays },
+  { title: 'תכנון שבועי', url: '/weekly-plan', icon: CalendarRange },
   { title: 'לוח חודשי', url: '/monthly', icon: CalendarDays },
-  { title: 'תכנון שבת', url: '/shabbat', icon: CandlestickChart },
+  { title: 'תכנון שבת', url: '/shabbat', icon: Flame },
   
   { title: 'רשימת קניות', url: '/shopping-list', icon: ShoppingCart },
   { title: 'הגדרות', url: '/settings', icon: Settings },
