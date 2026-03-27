@@ -5,7 +5,8 @@ import {
   ShoppingCart,
   UtensilsCrossed,
   CalendarDays,
-  CandlestickChart,
+  CalendarRange,
+  Flame,
   LogOut,
   Settings
 } from 'lucide-react';
