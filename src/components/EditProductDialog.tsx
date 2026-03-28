@@ -42,7 +42,7 @@ export const EditProductDialog = ({
   product,
   onProductUpdated,
 }: EditProductDialogProps) => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -126,7 +126,7 @@ export const EditProductDialog = ({
               <Popover open={catOpen} onOpenChange={setCatOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {categoryLabels[category] || category}
+                    {category}
                     <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -139,11 +139,11 @@ export const EditProductDialog = ({
                         {categories.map((cat) => (
                           <CommandItem
                             key={cat.id}
-                            value={cat.label}
+                            value={cat.name}
                             onSelect={() => { setCategory(cat.name); setCatOpen(false); }}
                           >
                             <Check className={cn("me-2 h-4 w-4", category === cat.name ? "opacity-100" : "opacity-0")} />
-                            {cat.label}
+                            {cat.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -158,7 +158,7 @@ export const EditProductDialog = ({
               <Popover open={locOpen} onOpenChange={setLocOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {locationLabels[location] || location}
+                    {location}
                     <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -171,11 +171,11 @@ export const EditProductDialog = ({
                         {locations.map((loc) => (
                           <CommandItem
                             key={loc.id}
-                            value={loc.label}
+                            value={loc.name}
                             onSelect={() => { setLocation(loc.name); setLocOpen(false); }}
                           >
                             <Check className={cn("me-2 h-4 w-4", location === loc.name ? "opacity-100" : "opacity-0")} />
-                            {loc.label}
+                            {loc.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>

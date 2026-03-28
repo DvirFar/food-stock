@@ -33,7 +33,7 @@ export const ProductCard = ({
   onDelete,
   onEdit,
 }: ProductCardProps) => {
-  const { categoryLabels, locationLabels } = useSettings();
+  const { } = useSettings();
   const isLowStock = product.quantity < product.min_quantity;
   const daysUntilExpiry = product.expiration_date 
     ? differenceInDays(parseISO(product.expiration_date), new Date())
@@ -64,7 +64,7 @@ export const ProductCard = ({
           </div>
         </div>
         <Badge variant="outline">
-          {locationLabels[product.location] || product.location}
+          {product.location}
         </Badge>
       </div>
     );
@@ -101,10 +101,10 @@ export const ProductCard = ({
 
         <div className="flex flex-wrap gap-1.5 mb-4">
           <Badge variant="outline" className="text-xs truncate max-w-[120px]">
-            {categoryLabels[product.category] || product.category}
+            {product.category}
           </Badge>
           <Badge variant="secondary" className="text-xs">
-            {locationLabels[product.location] || product.location}
+            {product.location}
           </Badge>
           {product.tags?.filter(t => t !== 'low-stock').map(tag => (
             <Badge key={tag} variant="outline" className="text-xs bg-accent/50">
