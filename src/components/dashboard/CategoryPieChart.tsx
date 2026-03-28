@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { useSettings } from '@/hooks/useSettings';
+
 
 interface CategoryPieChartProps {
   categoryCounts: Partial<Record<string, number>>;
@@ -21,7 +21,6 @@ const CHART_COLORS = [
 ];
 
 export const CategoryPieChart = ({ categoryCounts }: CategoryPieChartProps) => {
-  const { } = useSettings();
 
   const data = Object.entries(categoryCounts).map(([category, count], i) => ({
     name: category,

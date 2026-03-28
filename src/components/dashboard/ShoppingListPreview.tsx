@@ -5,13 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Check, ExternalLink } from 'lucide-react';
 import { ShoppingListItem } from '@/types';
 import { shoppingListService } from '@/services/shoppingListService';
-import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 
 export const ShoppingListPreview = () => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { } = useSettings();
   const navigate = useNavigate();
 
   useEffect(() => {
