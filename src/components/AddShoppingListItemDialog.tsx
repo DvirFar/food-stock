@@ -56,8 +56,8 @@ export const AddShoppingListItemDialog = ({
   const [unit, setUnit] = useState('יחידות');
   
   const [newProductName, setNewProductName] = useState('');
-  const [newProductCategory, setNewProductCategory] = useState('other');
-  const [newProductLocation, setNewProductLocation] = useState('pantry');
+  const [newProductCategory, setNewProductCategory] = useState('אחר');
+  const [newProductLocation, setNewProductLocation] = useState('מזווה');
   const [newProductMinQuantity, setNewProductMinQuantity] = useState('1');
 
   const [catOpen, setCatOpen] = useState(false);
@@ -113,8 +113,8 @@ export const AddShoppingListItemDialog = ({
     setQuantity('1');
     setUnit('יחידות');
     setNewProductName('');
-    setNewProductCategory('other');
-    setNewProductLocation('pantry');
+    setNewProductCategory('אחר');
+    setNewProductLocation('מזווה');
     setNewProductMinQuantity('1');
   };
 

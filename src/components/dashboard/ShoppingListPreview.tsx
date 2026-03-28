@@ -33,7 +33,7 @@ export const ShoppingListPreview = () => {
 
   // Group by category
   const byCategory = uncheckedItems.reduce((acc, item) => {
-    const cat = item.category || 'other';
+    const cat = item.category || 'אחר';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;

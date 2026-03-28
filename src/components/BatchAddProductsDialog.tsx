@@ -148,7 +148,7 @@ export const BatchAddProductsDialog = ({
       'כמות': '2',
       'יחידה': 'ליטר',
       'כמות מינימום': '1',
-      'מיקום': 'fridge',
+      'מיקום': 'מקרר',
       'תאריך תפוגה': '2025-02-15'
     }];
     const ws = XLSX.utils.json_to_sheet(template);

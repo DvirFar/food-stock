@@ -64,7 +64,7 @@ const createEmptyEntry = (): BatchShoppingEntry => ({
   name: '',
   quantity: '1',
   unit: 'יחידות',
-  category: 'other',
+  category: 'אחר',
 });
 
 export const BatchAddShoppingListDialog = ({
@@ -177,7 +177,7 @@ export const BatchAddShoppingListDialog = ({
         name: row['שם'] || row['name'] || '',
         quantity: String(row['כמות'] || row['quantity'] || '1'),
         unit: row['יחידה'] || row['unit'] || 'יחידות',
-        category: row['קטגוריה'] || row['category'] || 'other',
+        category: row['קטגוריה'] || row['category'] || 'אחר',
       }));
 
       setEntries(parsedEntries.filter(entry => entry.name.trim()));
