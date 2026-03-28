@@ -148,7 +148,7 @@ export const AddProductToListDialog = ({
                       {product.quantity} {product.unit}
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {categoryLabels[product.category] || product.category}
+                      {product.category}
                     </Badge>
                   </div>
                 ))
