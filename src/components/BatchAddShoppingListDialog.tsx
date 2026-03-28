@@ -309,9 +309,9 @@ export const BatchAddShoppingListDialog = ({
                             כל הקטגוריות
                           </CommandItem>
                           {categories.map((cat) => (
-                            <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                            <CommandItem key={cat.id} value={cat.name} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
                               <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
-                              {cat.label}
+                              {cat.name}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -449,7 +449,7 @@ export const BatchAddShoppingListDialog = ({
                               </SelectTrigger>
                               <SelectContent>
                                 {categories.map((cat) => (
-                                  <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
+                                  <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
