@@ -39,7 +39,7 @@ interface ShoppingEntry {
 
 
 const ShoppingList = () => {
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isShoppingMode, setIsShoppingMode] = useState(false);
@@ -291,7 +291,7 @@ const ShoppingList = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <ListChecks className="h-5 w-5" />
-                    {categoryLabels[category] || category}
+                    {category}
                     <Badge variant="secondary" className="ms-auto">
                       {categoryEntries.filter(e => e.amountToBuy > 0).length} / {categoryEntries.length}
                     </Badge>

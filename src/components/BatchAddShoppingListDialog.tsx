@@ -64,7 +64,7 @@ const createEmptyEntry = (): BatchShoppingEntry => ({
   name: '',
   quantity: '1',
   unit: 'יחידות',
-  category: 'other',
+  category: 'אחר',
 });
 
 export const BatchAddShoppingListDialog = ({
@@ -72,7 +72,7 @@ export const BatchAddShoppingListDialog = ({
   onOpenChange,
   onItemsAdded,
 }: BatchAddShoppingListDialogProps) => {
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const [entries, setEntries] = useState<BatchShoppingEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
@@ -177,7 +177,7 @@ export const BatchAddShoppingListDialog = ({
         name: row['שם'] || row['name'] || '',
         quantity: String(row['כמות'] || row['quantity'] || '1'),
         unit: row['יחידה'] || row['unit'] || 'יחידות',
-        category: row['קטגוריה'] || row['category'] || 'other',
+        category: row['קטגוריה'] || row['category'] || 'אחר',
       }));
 
       setEntries(parsedEntries.filter(entry => entry.name.trim()));
@@ -294,7 +294,7 @@ export const BatchAddShoppingListDialog = ({
                 <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" className="w-full justify-between">
-                      {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                      {filterCategory === 'all' ? 'כל הקטגוריות' : filterCategory}
                       <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -309,9 +309,9 @@ export const BatchAddShoppingListDialog = ({
                             כל הקטגוריות
                           </CommandItem>
                           {categories.map((cat) => (
-                            <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                            <CommandItem key={cat.id} value={cat.name} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
                               <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
-                              {cat.label}
+                              {cat.name}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -346,7 +346,7 @@ export const BatchAddShoppingListDialog = ({
                         <Checkbox checked={isProductSelected(product.id)} />
                         <span className="flex-1 text-sm font-medium">{product.name}</span>
                         <Badge variant="secondary" className="text-xs">
-                          {categoryLabels[product.category] || product.category}
+                          {product.category}
                         </Badge>
                       </div>
                     ))
@@ -449,7 +449,7 @@ export const BatchAddShoppingListDialog = ({
                               </SelectTrigger>
                               <SelectContent>
                                 {categories.map((cat) => (
-                                  <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
+                                  <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>

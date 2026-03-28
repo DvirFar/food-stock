@@ -5,13 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Check, ExternalLink } from 'lucide-react';
 import { ShoppingListItem } from '@/types';
 import { shoppingListService } from '@/services/shoppingListService';
-import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 
 export const ShoppingListPreview = () => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { categoryLabels } = useSettings();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +31,7 @@ export const ShoppingListPreview = () => {
 
   // Group by category
   const byCategory = uncheckedItems.reduce((acc, item) => {
-    const cat = item.category || 'other';
+    const cat = item.category || 'אחר';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
@@ -77,7 +75,7 @@ export const ShoppingListPreview = () => {
             {Object.entries(byCategory).map(([cat, catItems]) => (
               <div key={cat}>
                 <p className="text-xs font-medium text-muted-foreground mb-1">
-                  {categoryLabels[cat] || cat}
+                  {cat}
                 </p>
                 <div className="space-y-1">
                   {catItems.slice(0, 3).map(item => (

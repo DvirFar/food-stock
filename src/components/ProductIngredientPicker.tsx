@@ -25,7 +25,7 @@ export const ProductIngredientPicker = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export const ProductIngredientPicker = ({
                   className="cursor-pointer text-xs"
                   onClick={() => setSelectedCategory(prev => prev === cat ? null : cat)}
                 >
-                  {categoryLabels[cat] || cat}
+                  {cat}
                 </Badge>
               ))}
             </div>
@@ -141,7 +141,7 @@ export const ProductIngredientPicker = ({
                       <span>{product.name}</span>
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {categoryLabels[product.category] || product.category}
+                      {product.category}
                     </span>
                   </button>
                 ))}

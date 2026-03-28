@@ -41,7 +41,7 @@ export const AddShoppingListItemDialog = ({
   onOpenChange,
   onItemAdded,
 }: AddShoppingListItemDialogProps) => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -56,8 +56,8 @@ export const AddShoppingListItemDialog = ({
   const [unit, setUnit] = useState('יחידות');
   
   const [newProductName, setNewProductName] = useState('');
-  const [newProductCategory, setNewProductCategory] = useState('other');
-  const [newProductLocation, setNewProductLocation] = useState('pantry');
+  const [newProductCategory, setNewProductCategory] = useState('אחר');
+  const [newProductLocation, setNewProductLocation] = useState('מזווה');
   const [newProductMinQuantity, setNewProductMinQuantity] = useState('1');
 
   const [catOpen, setCatOpen] = useState(false);
@@ -113,8 +113,8 @@ export const AddShoppingListItemDialog = ({
     setQuantity('1');
     setUnit('יחידות');
     setNewProductName('');
-    setNewProductCategory('other');
-    setNewProductLocation('pantry');
+    setNewProductCategory('אחר');
+    setNewProductLocation('מזווה');
     setNewProductMinQuantity('1');
   };
 
@@ -184,7 +184,7 @@ export const AddShoppingListItemDialog = ({
             <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between">
-                  {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                  {filterCategory === 'all' ? 'כל הקטגוריות' : filterCategory}
                   <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -199,9 +199,9 @@ export const AddShoppingListItemDialog = ({
                         כל הקטגוריות
                       </CommandItem>
                       {categories.map((cat) => (
-                        <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                        <CommandItem key={cat.id} value={cat.name} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
                           <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
-                          {cat.label}
+                          {cat.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -272,7 +272,7 @@ export const AddShoppingListItemDialog = ({
                           />
                           <span>{product.name}</span>
                           <span className="ms-auto text-xs text-muted-foreground">
-                            {categoryLabels[product.category] || product.category}
+                            {product.category}
                           </span>
                         </CommandItem>
                       ))}
@@ -311,7 +311,7 @@ export const AddShoppingListItemDialog = ({
                   <Popover open={catOpen} onOpenChange={setCatOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" role="combobox" className="w-full justify-between text-sm">
-                        {categoryLabels[newProductCategory] || newProductCategory}
+                        {newProductCategory}
                         <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -322,9 +322,9 @@ export const AddShoppingListItemDialog = ({
                           <CommandEmpty>לא נמצא</CommandEmpty>
                           <CommandGroup>
                             {categories.map((cat) => (
-                              <CommandItem key={cat.id} value={cat.label} onSelect={() => { setNewProductCategory(cat.name); setCatOpen(false); }}>
+                              <CommandItem key={cat.id} value={cat.name} onSelect={() => { setNewProductCategory(cat.name); setCatOpen(false); }}>
                                 <Check className={cn("me-2 h-4 w-4", newProductCategory === cat.name ? "opacity-100" : "opacity-0")} />
-                                {cat.label}
+                                {cat.name}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -339,7 +339,7 @@ export const AddShoppingListItemDialog = ({
                   <Popover open={locOpen} onOpenChange={setLocOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" role="combobox" className="w-full justify-between text-sm">
-                        {locationLabels[newProductLocation] || newProductLocation}
+                        {newProductLocation}
                         <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -350,9 +350,9 @@ export const AddShoppingListItemDialog = ({
                           <CommandEmpty>לא נמצא</CommandEmpty>
                           <CommandGroup>
                             {locations.map((loc) => (
-                              <CommandItem key={loc.id} value={loc.label} onSelect={() => { setNewProductLocation(loc.name); setLocOpen(false); }}>
+                              <CommandItem key={loc.id} value={loc.name} onSelect={() => { setNewProductLocation(loc.name); setLocOpen(false); }}>
                                 <Check className={cn("me-2 h-4 w-4", newProductLocation === loc.name ? "opacity-100" : "opacity-0")} />
-                                {loc.label}
+                                {loc.name}
                               </CommandItem>
                             ))}
                           </CommandGroup>

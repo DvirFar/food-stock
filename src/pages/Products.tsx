@@ -33,7 +33,7 @@ import { EditProductDialog } from '@/components/EditProductDialog';
 import { toast } from 'sonner';
 
 const Products = () => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,7 +178,7 @@ const Products = () => {
               <SelectContent>
                 <SelectItem value="all">כל הקטגוריות</SelectItem>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
+                  <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -189,7 +189,7 @@ const Products = () => {
               <SelectContent>
                 <SelectItem value="all">כל המיקומים</SelectItem>
                 {locations.map((loc) => (
-                  <SelectItem key={loc.id} value={loc.name}>{loc.label}</SelectItem>
+                  <SelectItem key={loc.id} value={loc.name}>{loc.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

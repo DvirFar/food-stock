@@ -45,7 +45,7 @@ export const AddProductToListDialog = ({
   alreadyVisibleIds,
   onProductsAdded,
 }: AddProductToListDialogProps) => {
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [catFilterOpen, setCatFilterOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -99,7 +99,7 @@ export const AddProductToListDialog = ({
             <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between">
-                  {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                  {filterCategory === 'all' ? 'כל הקטגוריות' : filterCategory}
                   <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -114,9 +114,9 @@ export const AddProductToListDialog = ({
                         כל הקטגוריות
                       </CommandItem>
                       {categories.map((cat) => (
-                        <CommandItem key={cat.id} value={cat.label} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
+                        <CommandItem key={cat.id} value={cat.name} onSelect={() => { setFilterCategory(cat.name); setCatFilterOpen(false); }}>
                           <Check className={cn("me-2 h-4 w-4", filterCategory === cat.name ? "opacity-100" : "opacity-0")} />
-                          {cat.label}
+                          {cat.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -148,7 +148,7 @@ export const AddProductToListDialog = ({
                       {product.quantity} {product.unit}
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {categoryLabels[product.category] || product.category}
+                      {product.category}
                     </Badge>
                   </div>
                 ))
