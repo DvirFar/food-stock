@@ -43,11 +43,11 @@ interface BatchAddProductsDialogProps {
 
 const createEmptyEntry = (): BatchProductEntry => ({
   name: '',
-  category: 'other',
+  category: 'אחר',
   quantity: '',
   unit: '',
   minQuantity: '',
-  location: 'fridge',
+  location: 'מקרר',
   expirationDate: ''
 });
 
@@ -56,7 +56,7 @@ export const BatchAddProductsDialog = ({
   onOpenChange,
   onProductsAdded
 }: BatchAddProductsDialogProps) => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [entries, setEntries] = useState<BatchProductEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('manual');
@@ -66,28 +66,26 @@ export const BatchAddProductsDialog = ({
   const matchCategory = useMemo(() => {
     return (value: string): string => {
       const normalized = normalizeText(String(value || ''));
-      // Direct name match
-      const directMatch = categories.find(c => c.name === normalized);
+      const directMatch = categories.find(c => normalizeText(c.name) === normalized);
       if (directMatch) return directMatch.name;
-      // Label match
-      const labelMatch = categories.find(c => 
-        normalizeText(c.label).includes(normalized) || normalized.includes(normalizeText(c.label))
+      const partialMatch = categories.find(c => 
+        normalizeText(c.name).includes(normalized) || normalized.includes(normalizeText(c.name))
       );
-      if (labelMatch) return labelMatch.name;
-      return 'other';
+      if (partialMatch) return partialMatch.name;
+      return 'אחר';
     };
   }, [categories]);
 
   const matchLocation = useMemo(() => {
     return (value: string): string => {
       const normalized = normalizeText(String(value || ''));
-      const directMatch = locations.find(l => l.name === normalized);
+      const directMatch = locations.find(l => normalizeText(l.name) === normalized);
       if (directMatch) return directMatch.name;
-      const labelMatch = locations.find(l => 
-        normalizeText(l.label).includes(normalized) || normalized.includes(normalizeText(l.label))
+      const partialMatch = locations.find(l => 
+        normalizeText(l.name).includes(normalized) || normalized.includes(normalizeText(l.name))
       );
-      if (labelMatch) return labelMatch.name;
-      return 'fridge';
+      if (partialMatch) return partialMatch.name;
+      return 'מקרר';
     };
   }, [locations]);
 
@@ -237,7 +235,7 @@ export const BatchAddProductsDialog = ({
                             </SelectTrigger>
                             <SelectContent>
                               {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.name}>{cat.label}</SelectItem>
+                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -251,7 +249,7 @@ export const BatchAddProductsDialog = ({
                             </SelectTrigger>
                             <SelectContent>
                               {locations.map((loc) => (
-                                <SelectItem key={loc.id} value={loc.name}>{loc.label}</SelectItem>
+                                <SelectItem key={loc.id} value={loc.name}>{loc.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -331,7 +329,7 @@ export const BatchAddProductsDialog = ({
                           <div className="flex flex-col">
                             <span className="font-medium">{entry.name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {categoryLabels[entry.category] || entry.category} • {locationLabels[entry.location] || entry.location}
+                              {entry.category} • {entry.location}
                             </span>
                           </div>
                           <span className="text-muted-foreground">
