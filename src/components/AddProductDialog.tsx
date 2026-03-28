@@ -40,13 +40,13 @@ export const AddProductDialog = ({
   onOpenChange,
   onProductAdded,
 }: AddProductDialogProps) => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('other');
+  const [category, setCategory] = useState('אחר');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [minQuantity, setMinQuantity] = useState('');
-  const [location, setLocation] = useState('fridge');
+  const [location, setLocation] = useState('מקרר');
   const [expirationDate, setExpirationDate] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -89,11 +89,11 @@ export const AddProductDialog = ({
 
   const resetForm = () => {
     setName('');
-    setCategory('other');
+    setCategory('אחר');
     setQuantity('');
     setUnit('');
     setMinQuantity('');
-    setLocation('fridge');
+    setLocation('מקרר');
     setExpirationDate('');
     setTags([]);
   };
@@ -121,7 +121,7 @@ export const AddProductDialog = ({
               <Popover open={catOpen} onOpenChange={setCatOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {categoryLabels[category] || category}
+                    {category}
                     <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -134,11 +134,11 @@ export const AddProductDialog = ({
                         {categories.map((cat) => (
                           <CommandItem
                             key={cat.id}
-                            value={cat.label}
+                            value={cat.name}
                             onSelect={() => { setCategory(cat.name); setCatOpen(false); }}
                           >
                             <Check className={cn("me-2 h-4 w-4", category === cat.name ? "opacity-100" : "opacity-0")} />
-                            {cat.label}
+                            {cat.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -153,7 +153,7 @@ export const AddProductDialog = ({
               <Popover open={locOpen} onOpenChange={setLocOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {locationLabels[location] || location}
+                    {location}
                     <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -166,11 +166,11 @@ export const AddProductDialog = ({
                         {locations.map((loc) => (
                           <CommandItem
                             key={loc.id}
-                            value={loc.label}
+                            value={loc.name}
                             onSelect={() => { setLocation(loc.name); setLocOpen(false); }}
                           >
                             <Check className={cn("me-2 h-4 w-4", location === loc.name ? "opacity-100" : "opacity-0")} />
-                            {loc.label}
+                            {loc.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
