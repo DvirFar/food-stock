@@ -45,13 +45,13 @@ const Settings = () => {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [categoryEditMode, setCategoryEditMode] = useState<EditMode>('create');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryForm, setCategoryForm] = useState({ name: '', label: '', sort_order: 0 });
+  const [categoryForm, setCategoryForm] = useState({ name: '', sort_order: 0 });
   
   // Location dialog state
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [locationEditMode, setLocationEditMode] = useState<EditMode>('create');
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-  const [locationForm, setLocationForm] = useState({ name: '', label: '', sort_order: 0 });
+  const [locationForm, setLocationForm] = useState({ name: '', sort_order: 0 });
 
   // Product tag dialog state
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
@@ -70,18 +70,18 @@ const Settings = () => {
     setCategoryEditMode(mode);
     if (mode === 'edit' && category) {
       setEditingCategory(category);
-      setCategoryForm({ name: category.name, label: category.label, sort_order: category.sort_order });
+      setCategoryForm({ name: category.name, sort_order: category.sort_order });
     } else {
       setEditingCategory(null);
       const maxOrder = categories.reduce((max, c) => Math.max(max, c.sort_order), 0);
-      setCategoryForm({ name: '', label: '', sort_order: maxOrder + 1 });
+      setCategoryForm({ name: '', sort_order: maxOrder + 1 });
     }
     setCategoryDialogOpen(true);
   };
 
   const handleSaveCategory = async () => {
-    if (!categoryForm.name.trim() || !categoryForm.label.trim()) {
-      toast.error('יש למלא את כל השדות');
+    if (!categoryForm.name.trim()) {
+      toast.error('יש למלא את שם הקטגוריה');
       return;
     }
     setSaving(true);
@@ -90,6 +90,10 @@ const Settings = () => {
         await settingsService.createCategory(categoryForm);
         toast.success('הקטגוריה נוספה בהצלחה');
       } else if (editingCategory) {
+        // If name changed, update products too
+        if (editingCategory.name !== categoryForm.name.trim()) {
+          await updateProductsCategory(editingCategory.name, categoryForm.name.trim());
+        }
         await settingsService.updateCategory(editingCategory.id, categoryForm);
         toast.success('הקטגוריה עודכנה בהצלחה');
       }
@@ -107,18 +111,18 @@ const Settings = () => {
     setLocationEditMode(mode);
     if (mode === 'edit' && location) {
       setEditingLocation(location);
-      setLocationForm({ name: location.name, label: location.label, sort_order: location.sort_order });
+      setLocationForm({ name: location.name, sort_order: location.sort_order });
     } else {
       setEditingLocation(null);
       const maxOrder = locations.reduce((max, l) => Math.max(max, l.sort_order), 0);
-      setLocationForm({ name: '', label: '', sort_order: maxOrder + 1 });
+      setLocationForm({ name: '', sort_order: maxOrder + 1 });
     }
     setLocationDialogOpen(true);
   };
 
   const handleSaveLocation = async () => {
-    if (!locationForm.name.trim() || !locationForm.label.trim()) {
-      toast.error('יש למלא את כל השדות');
+    if (!locationForm.name.trim()) {
+      toast.error('יש למלא את שם המיקום');
       return;
     }
     setSaving(true);
@@ -127,6 +131,9 @@ const Settings = () => {
         await settingsService.createLocation(locationForm);
         toast.success('המיקום נוסף בהצלחה');
       } else if (editingLocation) {
+        if (editingLocation.name !== locationForm.name.trim()) {
+          await updateProductsLocation(editingLocation.name, locationForm.name.trim());
+        }
         await settingsService.updateLocation(editingLocation.id, locationForm);
         toast.success('המיקום עודכן בהצלחה');
       }
@@ -137,6 +144,18 @@ const Settings = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Helper: update products when category/location name changes
+  const updateProductsCategory = async (oldName: string, newName: string) => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    await supabase.from('products').update({ category: newName } as any).eq('category', oldName);
+    await supabase.from('shopping_list_items').update({ category: newName } as any).eq('category', oldName);
+  };
+
+  const updateProductsLocation = async (oldName: string, newName: string) => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    await supabase.from('products').update({ location: newName } as any).eq('location', oldName);
   };
 
   // Product tag handlers
@@ -257,13 +276,13 @@ const Settings = () => {
                   <div key={category.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
-                      <div className="font-medium">{category.label}</div>
+                      <div className="font-medium">{category.name}</div>
                     </div>
                     <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">סדר: {category.sort_order}</div>
                     <Button variant="ghost" size="icon" onClick={() => openCategoryDialog('edit', category)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog('category', category.id, category.label)}>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog('category', category.id, category.name)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -295,13 +314,13 @@ const Settings = () => {
                   <div key={location.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
-                      <div className="font-medium">{location.label}</div>
+                      <div className="font-medium">{location.name}</div>
                     </div>
                     <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">סדר: {location.sort_order}</div>
                     <Button variant="ghost" size="icon" onClick={() => openLocationDialog('edit', location)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog('location', location.id, location.label)}>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog('location', location.id, location.name)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -361,16 +380,12 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="cat-label">שם תצוגה</Label>
-              <Input id="cat-label" value={categoryForm.label} onChange={(e) => setCategoryForm(prev => ({ ...prev, label: e.target.value }))} placeholder="מוצרי חלב" />
+              <Label htmlFor="cat-name">שם</Label>
+              <Input id="cat-name" value={categoryForm.name} onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))} placeholder="מוצרי חלב" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cat-order">מספר סידורי (למיון)</Label>
               <Input id="cat-order" type="number" value={categoryForm.sort_order} onChange={(e) => setCategoryForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))} dir="rtl" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cat-name">מזהה (באנגלית)</Label>
-              <Input id="cat-name" value={categoryForm.name} onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))} placeholder="dairy" dir="rtl" />
             </div>
           </div>
           <DialogFooter>
@@ -388,16 +403,12 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="loc-label">שם תצוגה</Label>
-              <Input id="loc-label" value={locationForm.label} onChange={(e) => setLocationForm(prev => ({ ...prev, label: e.target.value }))} placeholder="מקרר" />
+              <Label htmlFor="loc-name">שם</Label>
+              <Input id="loc-name" value={locationForm.name} onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value }))} placeholder="מקרר" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="loc-order">מספר סידורי</Label>
               <Input id="loc-order" type="number" value={locationForm.sort_order} onChange={(e) => setLocationForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))} dir="rtl" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="loc-name">מזהה (באנגלית)</Label>
-              <Input id="loc-name" value={locationForm.name} onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))} placeholder="fridge" dir="rtl" />
             </div>
           </div>
           <DialogFooter>
@@ -416,7 +427,7 @@ const Settings = () => {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="tag-name">שם התגית</Label>
-              <Input id="tag-name" value={tagForm.name} onChange={(e) => setTagForm(prev => ({ ...prev, name: e.target.value.toLowerCase().replace(/\s+/g, '_') }))} placeholder="regular" />
+              <Input id="tag-name" value={tagForm.name} onChange={(e) => setTagForm(prev => ({ ...prev, name: e.target.value }))} placeholder="רגיל" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="tag-order">מספר סידורי</Label>
@@ -434,15 +445,14 @@ const Settings = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
+            <AlertDialogTitle>האם למחוק?</AlertDialogTitle>
             <AlertDialogDescription>
-              פעולה זו תמחק את {deleteTarget?.type === 'category' ? 'הקטגוריה' : deleteTarget?.type === 'location' ? 'המיקום' : 'התגית'} "{deleteTarget?.name}".
-              לא ניתן לבטל פעולה זו.
+              האם אתה בטוח שברצונך למחוק את "{deleteTarget?.name}"? פעולה זו אינה ניתנת לביטול.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ביטול</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">מחק</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>מחק</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -28,26 +28,26 @@ export interface ProductTag {
   created_at: string;
 }
 
-// Default categories for new users
+// Default categories for new users (name = label)
 export const defaultCategories: Omit<Category, 'id' | 'user_id' | 'created_at'>[] = [
-  { name: 'dairy', label: 'מוצרי חלב', sort_order: 1 },
-  { name: 'meat', label: 'בשר ועופות', sort_order: 2 },
-  { name: 'vegetables', label: 'ירקות', sort_order: 3 },
-  { name: 'fruits', label: 'פירות', sort_order: 4 },
-  { name: 'grains', label: 'דגנים', sort_order: 5 },
-  { name: 'frozen', label: 'קפואים', sort_order: 6 },
-  { name: 'beverages', label: 'משקאות', sort_order: 7 },
-  { name: 'condiments', label: 'תבלינים ורטבים', sort_order: 8 },
-  { name: 'snacks', label: 'חטיפים', sort_order: 9 },
-  { name: 'other', label: 'אחר', sort_order: 10 },
+  { name: 'מוצרי חלב', label: 'מוצרי חלב', sort_order: 1 },
+  { name: 'בשר ועופות', label: 'בשר ועופות', sort_order: 2 },
+  { name: 'ירקות', label: 'ירקות', sort_order: 3 },
+  { name: 'פירות', label: 'פירות', sort_order: 4 },
+  { name: 'דגנים', label: 'דגנים', sort_order: 5 },
+  { name: 'קפואים', label: 'קפואים', sort_order: 6 },
+  { name: 'משקאות', label: 'משקאות', sort_order: 7 },
+  { name: 'תבלינים ורטבים', label: 'תבלינים ורטבים', sort_order: 8 },
+  { name: 'חטיפים', label: 'חטיפים', sort_order: 9 },
+  { name: 'אחר', label: 'אחר', sort_order: 10 },
 ];
 
-// Default locations for new users
+// Default locations for new users (name = label)
 export const defaultLocations: Omit<Location, 'id' | 'user_id' | 'created_at'>[] = [
-  { name: 'fridge', label: 'מקרר', sort_order: 1 },
-  { name: 'freezer', label: 'מקפיא', sort_order: 2 },
-  { name: 'pantry', label: 'מזווה', sort_order: 3 },
-  { name: 'counter', label: 'משטח', sort_order: 4 },
+  { name: 'מקרר', label: 'מקרר', sort_order: 1 },
+  { name: 'מקפיא', label: 'מקפיא', sort_order: 2 },
+  { name: 'מזווה', label: 'מזווה', sort_order: 3 },
+  { name: 'משטח', label: 'משטח', sort_order: 4 },
 ];
 
 // Default product tags for new users
@@ -77,16 +77,25 @@ class SettingsService {
     return (data || []) as Category[];
   }
 
-  async createCategory(category: Omit<Category, 'id' | 'user_id' | 'created_at'>): Promise<Category> {
+  async createCategory(category: { name: string; sort_order: number }): Promise<Category> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-    const { data, error } = await supabase.from('categories').insert({ ...category, user_id: user.id }).select().single();
+    const { data, error } = await supabase.from('categories').insert({ 
+      name: category.name, 
+      label: category.name, 
+      sort_order: category.sort_order, 
+      user_id: user.id 
+    }).select().single();
     if (error) throw error;
     return data as Category;
   }
 
-  async updateCategory(id: string, updates: Partial<Omit<Category, 'id' | 'user_id' | 'created_at'>>): Promise<Category> {
-    const { data, error } = await supabase.from('categories').update(updates).eq('id', id).select().single();
+  async updateCategory(id: string, updates: { name: string; sort_order: number }): Promise<Category> {
+    const { data, error } = await supabase.from('categories').update({ 
+      name: updates.name, 
+      label: updates.name, 
+      sort_order: updates.sort_order 
+    }).eq('id', id).select().single();
     if (error) throw error;
     return data as Category;
   }
@@ -114,16 +123,25 @@ class SettingsService {
     return (data || []) as Location[];
   }
 
-  async createLocation(location: Omit<Location, 'id' | 'user_id' | 'created_at'>): Promise<Location> {
+  async createLocation(location: { name: string; sort_order: number }): Promise<Location> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-    const { data, error } = await supabase.from('locations').insert({ ...location, user_id: user.id }).select().single();
+    const { data, error } = await supabase.from('locations').insert({ 
+      name: location.name, 
+      label: location.name, 
+      sort_order: location.sort_order, 
+      user_id: user.id 
+    }).select().single();
     if (error) throw error;
     return data as Location;
   }
 
-  async updateLocation(id: string, updates: Partial<Omit<Location, 'id' | 'user_id' | 'created_at'>>): Promise<Location> {
-    const { data, error } = await supabase.from('locations').update(updates).eq('id', id).select().single();
+  async updateLocation(id: string, updates: { name: string; sort_order: number }): Promise<Location> {
+    const { data, error } = await supabase.from('locations').update({ 
+      name: updates.name, 
+      label: updates.name, 
+      sort_order: updates.sort_order 
+    }).eq('id', id).select().single();
     if (error) throw error;
     return data as Location;
   }
@@ -170,22 +188,22 @@ class SettingsService {
     if (error) throw error;
   }
 
-  // Get category labels map
+  // Get category labels map (identity since name = label)
   async getCategoryLabels(): Promise<Record<string, string>> {
     const categories = await this.getCategories();
     if (categories.length === 0) {
-      return defaultCategories.reduce((acc, cat) => { acc[cat.name] = cat.label; return acc; }, {} as Record<string, string>);
+      return defaultCategories.reduce((acc, cat) => { acc[cat.name] = cat.name; return acc; }, {} as Record<string, string>);
     }
-    return categories.reduce((acc, cat) => { acc[cat.name] = cat.label; return acc; }, {} as Record<string, string>);
+    return categories.reduce((acc, cat) => { acc[cat.name] = cat.name; return acc; }, {} as Record<string, string>);
   }
 
-  // Get location labels map
+  // Get location labels map (identity since name = label)
   async getLocationLabels(): Promise<Record<string, string>> {
     const locations = await this.getLocations();
     if (locations.length === 0) {
-      return defaultLocations.reduce((acc, loc) => { acc[loc.name] = loc.label; return acc; }, {} as Record<string, string>);
+      return defaultLocations.reduce((acc, loc) => { acc[loc.name] = loc.name; return acc; }, {} as Record<string, string>);
     }
-    return locations.reduce((acc, loc) => { acc[loc.name] = loc.label; return acc; }, {} as Record<string, string>);
+    return locations.reduce((acc, loc) => { acc[loc.name] = loc.name; return acc; }, {} as Record<string, string>);
   }
 
   // Get sorted category names for shopping list
