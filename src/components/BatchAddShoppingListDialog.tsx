@@ -72,7 +72,7 @@ export const BatchAddShoppingListDialog = ({
   onOpenChange,
   onItemsAdded,
 }: BatchAddShoppingListDialogProps) => {
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const [entries, setEntries] = useState<BatchShoppingEntry[]>([createEmptyEntry()]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
@@ -294,7 +294,7 @@ export const BatchAddShoppingListDialog = ({
                 <Popover open={catFilterOpen} onOpenChange={setCatFilterOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" className="w-full justify-between">
-                      {filterCategory === 'all' ? 'כל הקטגוריות' : (categoryLabels[filterCategory] || filterCategory)}
+                      {filterCategory === 'all' ? 'כל הקטגוריות' : filterCategory}
                       <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -346,7 +346,7 @@ export const BatchAddShoppingListDialog = ({
                         <Checkbox checked={isProductSelected(product.id)} />
                         <span className="flex-1 text-sm font-medium">{product.name}</span>
                         <Badge variant="secondary" className="text-xs">
-                          {categoryLabels[product.category] || product.category}
+                          {product.category}
                         </Badge>
                       </div>
                     ))

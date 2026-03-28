@@ -25,7 +25,7 @@ export const ProductIngredientPicker = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { categories, categoryLabels } = useSettings();
+  const { categories } = useSettings();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -41,7 +41,7 @@ export const AddShoppingListItemDialog = ({
   onOpenChange,
   onItemAdded,
 }: AddShoppingListItemDialogProps) => {
-  const { categories, locations, categoryLabels, locationLabels } = useSettings();
+  const { categories, locations } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

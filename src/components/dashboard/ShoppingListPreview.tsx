@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 export const ShoppingListPreview = () => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { categoryLabels } = useSettings();
+  const { } = useSettings();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export const ShoppingListPreview = () => {
             {Object.entries(byCategory).map(([cat, catItems]) => (
               <div key={cat}>
                 <p className="text-xs font-medium text-muted-foreground mb-1">
-                  {categoryLabels[cat] || cat}
+                  {cat}
                 </p>
                 <div className="space-y-1">
                   {catItems.slice(0, 3).map(item => (

@@ -21,10 +21,10 @@ const CHART_COLORS = [
 ];
 
 export const CategoryPieChart = ({ categoryCounts }: CategoryPieChartProps) => {
-  const { categoryLabels } = useSettings();
+  const { } = useSettings();
 
   const data = Object.entries(categoryCounts).map(([category, count], i) => ({
-    name: categoryLabels[category] || category,
+    name: category,
     value: count,
     category,
     color: CHART_COLORS[i % CHART_COLORS.length],
