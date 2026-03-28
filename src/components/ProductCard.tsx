@@ -10,7 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 import { Product } from '@/types';
-import { useSettings } from '@/hooks/useSettings';
+
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { he } from 'date-fns/locale';
 
@@ -33,7 +33,6 @@ export const ProductCard = ({
   onDelete,
   onEdit,
 }: ProductCardProps) => {
-  const { } = useSettings();
   const isLowStock = product.quantity < product.min_quantity;
   const daysUntilExpiry = product.expiration_date 
     ? differenceInDays(parseISO(product.expiration_date), new Date())
