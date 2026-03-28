@@ -106,6 +106,11 @@ export const ProductCard = ({
           <Badge variant="secondary" className="text-xs">
             {locationLabels[product.location] || product.location}
           </Badge>
+          {product.tags?.filter(t => t !== 'low-stock').map(tag => (
+            <Badge key={tag} variant="outline" className="text-xs bg-accent/50">
+              {tag}
+            </Badge>
+          ))}
         </div>
 
         <div className="flex items-center justify-between gap-2">
