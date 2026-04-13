@@ -122,6 +122,13 @@ const Products = () => {
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
+  const handleBulkProductsUpdated = (updatedProducts: Product[]) => {
+    setProducts(prev => prev.map(p => {
+      const updated = updatedProducts.find(u => u.id === p.id);
+      return updated || p;
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
