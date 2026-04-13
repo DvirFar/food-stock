@@ -50,6 +50,7 @@ const Recipes = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     loadRecipes();
