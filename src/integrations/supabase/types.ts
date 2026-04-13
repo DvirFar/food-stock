@@ -176,6 +176,39 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_calendar_events: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          id: string
+          sort_order: number
+          time_display: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description?: string
+          id?: string
+          sort_order?: number
+          time_display?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          sort_order?: number
+          time_display?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       monthly_calendar_notes: {
         Row: {
           content: string
