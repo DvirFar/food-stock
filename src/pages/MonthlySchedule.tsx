@@ -1,280 +1,158 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ChevronRight, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { toJewishDate, toHebrewJewishDate, toGregorianDate, JewishMonth } from 'jewish-date';
-import { monthlyCalendarService } from '@/services/monthlyCalendarService';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ChevronRight, ChevronLeft, Calendar as CalendarIcon, Plus } from 'lucide-react';
+import { toJewishDate, toHebrewJewishDate } from 'jewish-date';
+import { monthlyCalendarService, type CalendarEvent } from '@/services/monthlyCalendarService';
+import { CalendarEventItem } from '@/components/calendar/CalendarEventItem';
+import { DAYS_HE, buildHebrewMonthGrid, getMonthsForYear, type DayCell, type JewishMonthName } from '@/components/calendar/HebrewCalendarUtils';
 import { toast } from 'sonner';
-
-const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
-
-type JewishMonthName = typeof JewishMonth[keyof typeof JewishMonth];
-
-const HEBREW_MONTHS_ORDER: JewishMonthName[] = [
-  JewishMonth.Tishri, JewishMonth.Cheshvan, JewishMonth.Kislev,
-  JewishMonth.Tevet, JewishMonth.Shevat, JewishMonth.Adar,
-  JewishMonth.Nisan, JewishMonth.Iyyar, JewishMonth.Sivan,
-  JewishMonth.Tammuz, JewishMonth.Av, JewishMonth.Elul,
-];
-
-const HEBREW_MONTHS_ORDER_LEAP: JewishMonthName[] = [
-  JewishMonth.Tishri, JewishMonth.Cheshvan, JewishMonth.Kislev,
-  JewishMonth.Tevet, JewishMonth.Shevat, JewishMonth.Adar, JewishMonth.AdarII,
-  JewishMonth.Nisan, JewishMonth.Iyyar, JewishMonth.Sivan,
-  JewishMonth.Tammuz, JewishMonth.Av, JewishMonth.Elul,
-];
-
-const GREG_MONTHS_HE = [
-  'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
-  'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
-];
-
-function isLeapYear(hebrewYear: number): boolean {
-  return [3, 6, 8, 11, 14, 17, 19].includes(hebrewYear % 19);
-}
-
-function getMonthsForYear(hebrewYear: number): JewishMonthName[] {
-  return isLeapYear(hebrewYear) ? HEBREW_MONTHS_ORDER_LEAP : HEBREW_MONTHS_ORDER;
-}
-
-interface DayCell {
-  date: Date;
-  dateStr: string;
-  gregDay: number;
-  gregMonthYear: string;
-  hebrewDay: string;
-  hebrewDayNum: number;
-  hebrewMonthName: string;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-}
-
-function buildHebrewMonthGrid(hebrewYear: number, hebrewMonth: JewishMonthName): DayCell[] {
-  // Find Gregorian date of 1st of Hebrew month
-  const firstGreg = toGregorianDate({ year: hebrewYear, monthName: hebrewMonth, day: 1 });
-
-  // Find all days in this Hebrew month by iterating until month changes
-  const daysInMonth: Date[] = [];
-  for (let dayNum = 1; dayNum <= 30; dayNum++) {
-    try {
-      const g = toGregorianDate({ year: hebrewYear, monthName: hebrewMonth, day: dayNum });
-      // Verify it's valid by converting back
-      const check = toJewishDate(g);
-      if (check.monthName !== hebrewMonth || check.year !== hebrewYear) break;
-      daysInMonth.push(g);
-    } catch {
-      break;
-    }
-  }
-
-  if (daysInMonth.length === 0) return [];
-
-  const lastDay = daysInMonth[daysInMonth.length - 1];
-
-  // Pad to full weeks (Sunday start)
-  const startOffset = firstGreg.getDay(); // 0=Sunday
-  const startDate = new Date(firstGreg);
-  startDate.setDate(startDate.getDate() - startOffset);
-
-  const endDayOfWeek = lastDay.getDay();
-  const endPad = endDayOfWeek === 6 ? 0 : 6 - endDayOfWeek;
-
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-  const cells: DayCell[] = [];
-  const totalDays = startOffset + daysInMonth.length + endPad;
-
-  for (let i = 0; i < totalDays; i++) {
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + i);
-
-    const jd = toJewishDate(d);
-    const heb = toHebrewJewishDate(jd);
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const isInMonth = jd.monthName === hebrewMonth && jd.year === hebrewYear;
-
-    cells.push({
-      date: d,
-      dateStr,
-      gregDay: d.getDate(),
-      gregMonthYear: `${GREG_MONTHS_HE[d.getMonth()]} ${d.getFullYear()}`,
-      hebrewDay: heb.day,
-      hebrewDayNum: jd.day,
-      hebrewMonthName: heb.monthName,
-      isCurrentMonth: isInMonth,
-      isToday: dateStr === todayStr,
-    });
-  }
-
-  return cells;
-}
 
 const MonthlySchedule = () => {
   const [hebrewYear, setHebrewYear] = useState<number>(() => toJewishDate(new Date()).year);
   const [hebrewMonth, setHebrewMonth] = useState<JewishMonthName>(() => toJewishDate(new Date()).monthName);
-  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<DayCell | null>(null);
-  const [editingNote, setEditingNote] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [newDesc, setNewDesc] = useState('');
+  const [newTime, setNewTime] = useState('');
+  const [adding, setAdding] = useState(false);
 
   const cells = useMemo(() => buildHebrewMonthGrid(hebrewYear, hebrewMonth), [hebrewYear, hebrewMonth]);
 
-  // Get Hebrew month display name
   const hebrewMonthLabel = useMemo(() => {
     const heb = toHebrewJewishDate({ year: hebrewYear, monthName: hebrewMonth, day: 1 } as any);
     return `${heb.monthName} ${heb.year}`;
   }, [hebrewYear, hebrewMonth]);
 
-  // Get Gregorian months that overlap
   const gregMonthsLabel = useMemo(() => {
     const gregMonths = new Set<string>();
     cells.filter(c => c.isCurrentMonth).forEach(c => gregMonths.add(c.gregMonthYear));
     return Array.from(gregMonths).join(' / ');
   }, [cells]);
 
-  const loadNotes = useCallback(async () => {
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, CalendarEvent[]> = {};
+    events.forEach(e => {
+      if (!map[e.date]) map[e.date] = [];
+      map[e.date].push(e);
+    });
+    return map;
+  }, [events]);
+
+  const loadEvents = useCallback(async () => {
     if (cells.length === 0) return;
     setLoading(true);
     try {
-      const firstCell = cells[0];
-      const lastCell = cells[cells.length - 1];
-      const data = await monthlyCalendarService.getNotesForRange(firstCell.dateStr, lastCell.dateStr);
-      const map: Record<string, string> = {};
-      data.forEach(n => { map[n.date] = n.content; });
-      setNotes(map);
+      const data = await monthlyCalendarService.getEventsForRange(cells[0].dateStr, cells[cells.length - 1].dateStr);
+      setEvents(data);
     } catch (e) {
       console.error(e);
-      toast.error('שגיאה בטעינת הערות');
+      toast.error('שגיאה בטעינת אירועים');
     } finally {
       setLoading(false);
     }
   }, [hebrewYear, hebrewMonth]);
 
-  useEffect(() => {
-    loadNotes();
-  }, [loadNotes]);
+  useEffect(() => { loadEvents(); }, [loadEvents]);
 
   const navigateMonth = (dir: number) => {
     const months = getMonthsForYear(hebrewYear);
     const currentIdx = months.indexOf(hebrewMonth);
-
     if (dir === 1) {
-      if (currentIdx < months.length - 1) {
-        setHebrewMonth(months[currentIdx + 1]);
-      } else {
-        const nextYear = hebrewYear + 1;
-        const nextMonths = getMonthsForYear(nextYear);
-        setHebrewYear(nextYear);
-        setHebrewMonth(nextMonths[0]);
-      }
+      if (currentIdx < months.length - 1) setHebrewMonth(months[currentIdx + 1]);
+      else { const y = hebrewYear + 1; setHebrewYear(y); setHebrewMonth(getMonthsForYear(y)[0]); }
     } else {
-      if (currentIdx > 0) {
-        setHebrewMonth(months[currentIdx - 1]);
-      } else {
-        const prevYear = hebrewYear - 1;
-        const prevMonths = getMonthsForYear(prevYear);
-        setHebrewYear(prevYear);
-        setHebrewMonth(prevMonths[prevMonths.length - 1]);
-      }
+      if (currentIdx > 0) setHebrewMonth(months[currentIdx - 1]);
+      else { const y = hebrewYear - 1; const m = getMonthsForYear(y); setHebrewYear(y); setHebrewMonth(m[m.length - 1]); }
     }
   };
 
-  const goToday = () => {
-    const jd = toJewishDate(new Date());
-    setHebrewYear(jd.year);
-    setHebrewMonth(jd.monthName);
-  };
+  const goToday = () => { const jd = toJewishDate(new Date()); setHebrewYear(jd.year); setHebrewMonth(jd.monthName); };
 
-  const openDay = (cell: DayCell) => {
-    setSelectedDay(cell);
-    setEditingNote(notes[cell.dateStr] || '');
-  };
-
-  const saveNote = async () => {
-    if (!selectedDay) return;
-    setSaving(true);
+  const handleAddEvent = async () => {
+    if (!selectedDay || !newDesc.trim()) return;
+    setAdding(true);
     try {
-      await monthlyCalendarService.upsertNote(selectedDay.dateStr, editingNote);
-      setNotes(prev => {
-        const next = { ...prev };
-        if (editingNote.trim() === '') {
-          delete next[selectedDay.dateStr];
-        } else {
-          next[selectedDay.dateStr] = editingNote;
-        }
-        return next;
-      });
-      setSelectedDay(null);
-    } catch (e) {
-      toast.error('שגיאה בשמירת ההערה');
-    } finally {
-      setSaving(false);
-    }
+      const ev = await monthlyCalendarService.addEvent(selectedDay.dateStr, newDesc.trim(), newTime.trim() || null);
+      setEvents(prev => [...prev, ev]);
+      setNewDesc('');
+      setNewTime('');
+    } catch { toast.error('שגיאה בהוספת אירוע'); }
+    finally { setAdding(false); }
   };
+
+  const handleUpdateEvent = async (id: string, updates: { description?: string; time_display?: string | null }) => {
+    try {
+      await monthlyCalendarService.updateEvent(id, updates);
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updates, updated_at: new Date().toISOString() } : e));
+    } catch { toast.error('שגיאה בעדכון אירוע'); }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      await monthlyCalendarService.deleteEvent(id);
+      setEvents(prev => prev.filter(e => e.id !== id));
+    } catch { toast.error('שגיאה במחיקת אירוע'); }
+  };
+
+  const dayEvents = selectedDay ? (eventsByDate[selectedDay.dateStr] || []) : [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">לוח חודשי</h1>
-        <p className="text-muted-foreground">תכנון חודשי לפי חודשים עבריים</p>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex items-center justify-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigateMonth(1)}>
+    <div className="flex flex-col gap-2 h-full">
+      {/* Compact header */}
+      <div className="flex items-center justify-center gap-3">
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigateMonth(1)}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="font-medium text-lg">{hebrewMonthLabel}</span>
-          <span className="text-sm text-muted-foreground">{gregMonthsLabel}</span>
+        <div className="flex flex-col items-center leading-tight">
+          <span className="font-semibold">{hebrewMonthLabel}</span>
+          <span className="text-xs text-muted-foreground">{gregMonthsLabel}</span>
         </div>
-        <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)}>
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigateMonth(-1)}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={goToday}>
-          היום
-        </Button>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={goToday}>היום</Button>
       </div>
 
       {/* Calendar Grid */}
-      <Card>
-        <CardContent className="p-2 sm:p-4">
-          <div className="grid grid-cols-7 gap-1 mb-1">
+      <Card className="flex-1 min-h-0">
+        <CardContent className="p-1.5 sm:p-2 h-full">
+          <div className="grid grid-cols-7 gap-0.5 mb-0.5">
             {DAYS_HE.map(day => (
-              <div key={day} className="text-center text-sm font-medium text-muted-foreground py-1">
-                {day}
-              </div>
+              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-0.5">{day}</div>
             ))}
           </div>
-
-          <div className="grid grid-cols-7 gap-1">
-            {cells.map((cell) => {
-              const hasNote = !!notes[cell.dateStr];
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map(cell => {
+              const cellEvents = eventsByDate[cell.dateStr] || [];
               return (
                 <button
                   key={cell.dateStr}
-                  onClick={() => openDay(cell)}
+                  onClick={() => { setSelectedDay(cell); setNewDesc(''); setNewTime(''); }}
                   className={`
-                    relative flex flex-col items-start p-1.5 sm:p-2 rounded-md min-h-[60px] sm:min-h-[80px] text-start transition-colors
+                    relative flex flex-col items-start p-1 sm:p-1.5 rounded min-h-[56px] sm:min-h-[70px] text-start transition-colors
                     border border-transparent hover:border-primary/30 hover:bg-accent/50
                     ${!cell.isCurrentMonth ? 'opacity-40' : ''}
                     ${cell.isToday ? 'bg-primary/10 border-primary/40' : ''}
                   `}
                 >
-                  <div className="flex items-center justify-between w-full gap-1">
-                    <span className={`text-sm font-medium ${cell.isToday ? 'text-primary' : ''}`}>
-                      {cell.hebrewDay}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{cell.gregDay}</span>
+                  <div className="flex items-center justify-between w-full gap-0.5">
+                    <span className={`text-xs font-medium ${cell.isToday ? 'text-primary' : ''}`}>{cell.hebrewDay}</span>
+                    <span className="text-[10px] text-muted-foreground">{cell.gregDay}</span>
                   </div>
-                  {hasNote && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 w-full">
-                      {notes[cell.dateStr]}
-                    </p>
+                  {cellEvents.slice(0, 2).map(ev => (
+                    <div key={ev.id} className="w-full mt-0.5">
+                      <div className="text-[10px] leading-tight truncate w-full rounded bg-primary/10 px-0.5">
+                        {ev.time_display && <span className="font-mono text-primary/70" dir="ltr">{ev.time_display} </span>}
+                        {ev.description}
+                      </div>
+                    </div>
+                  ))}
+                  {cellEvents.length > 2 && (
+                    <span className="text-[9px] text-muted-foreground mt-0.5">+{cellEvents.length - 2} עוד</span>
                   )}
                 </button>
               );
@@ -283,12 +161,12 @@ const MonthlySchedule = () => {
         </CardContent>
       </Card>
 
-      {/* Note editing dialog */}
-      <Dialog open={!!selectedDay} onOpenChange={(open) => { if (!open) setSelectedDay(null); }}>
-        <DialogContent className="sm:max-w-md">
+      {/* Day detail dialog */}
+      <Dialog open={!!selectedDay} onOpenChange={open => { if (!open) setSelectedDay(null); }}>
+        <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <CalendarIcon className="h-4 w-4" />
               {selectedDay && (
                 <span>
                   {selectedDay.hebrewDay} {selectedDay.hebrewMonthName}
@@ -298,19 +176,40 @@ const MonthlySchedule = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <Textarea
-            value={editingNote}
-            onChange={(e) => setEditingNote(e.target.value)}
-            placeholder="הוסף הערה ליום..."
-            rows={5}
-            className="resize-none"
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedDay(null)}>ביטול</Button>
-            <Button onClick={saveNote} disabled={saving}>
-              {saving ? 'שומר...' : 'שמור'}
-            </Button>
-          </DialogFooter>
+
+          {/* Events list */}
+          <div className="flex-1 overflow-y-auto space-y-1 min-h-0">
+            {dayEvents.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">אין אירועים ליום זה</p>
+            )}
+            {dayEvents.map(ev => (
+              <CalendarEventItem key={ev.id} event={ev} onUpdate={handleUpdateEvent} onDelete={handleDeleteEvent} />
+            ))}
+          </div>
+
+          {/* Add new event */}
+          <div className="border-t pt-2 space-y-1.5">
+            <Input
+              value={newDesc}
+              onChange={e => setNewDesc(e.target.value)}
+              placeholder="אירוע חדש..."
+              className="h-8 text-sm"
+              onKeyDown={e => { if (e.key === 'Enter' && newDesc.trim()) handleAddEvent(); }}
+            />
+            <div className="flex items-center gap-2">
+              <Input
+                value={newTime}
+                onChange={e => setNewTime(e.target.value)}
+                placeholder="שעה (לא חובה) 09:00-10:30"
+                className="h-7 text-xs flex-1"
+                dir="ltr"
+              />
+              <Button size="sm" className="h-7 px-3 text-xs" onClick={handleAddEvent} disabled={adding || !newDesc.trim()}>
+                <Plus className="h-3 w-3 me-1" />
+                הוסף
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
