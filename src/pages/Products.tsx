@@ -147,25 +147,45 @@ const Products = () => {
             ניהול מלאי המזון שלך
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 me-2" />
-              הוסף מוצר
-              <ChevronDown className="h-4 w-4 ms-2" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-s-md"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 me-2" />
-              מוצר בודד
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
-              <FileSpreadsheet className="h-4 w-4 me-2" />
-              הוספה בכמות
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-e-md"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 me-2" />
+                הוסף מוצר
+                <ChevronDown className="h-4 w-4 ms-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
+                <Plus className="h-4 w-4 me-2" />
+                מוצר בודד
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                הוספה בכמות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Filters */}
