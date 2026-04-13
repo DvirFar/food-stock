@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -52,13 +53,16 @@ export const AppSidebar = () => {
   return (
     <Sidebar collapsible="icon" side="right">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Package className="h-5 w-5" />
+        <div className="flex items-center justify-between gap-2 px-2 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Package className="h-5 w-5" />
+            </div>
+            {!isCollapsed && (
+              <span className="font-semibold text-lg">מלאי מזון</span>
+            )}
           </div>
-          {!isCollapsed && (
-            <span className="font-semibold text-lg">מלאי מזון</span>
-          )}
+          <SidebarTrigger className="h-7 w-7" />
         </div>
       </SidebarHeader>
 

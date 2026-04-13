@@ -1,49 +1,56 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export interface CalendarNote {
+export interface CalendarEvent {
   id: string;
   user_id: string;
   date: string;
-  content: string;
+  description: string;
+  time_display: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
 
 class MonthlyCalendarService {
-  async getNotesForRange(startDate: string, endDate: string): Promise<CalendarNote[]> {
+  async getEventsForRange(startDate: string, endDate: string): Promise<CalendarEvent[]> {
     const { data, error } = await supabase
-      .from('monthly_calendar_notes')
+      .from('monthly_calendar_events')
       .select('*')
       .gte('date', startDate)
-      .lte('date', endDate);
+      .lte('date', endDate)
+      .order('sort_order', { ascending: true })
+      .order('time_display', { ascending: true, nullsFirst: false });
     if (error) throw error;
-    return (data || []) as CalendarNote[];
+    return (data || []) as CalendarEvent[];
   }
 
-  async upsertNote(date: string, content: string): Promise<void> {
+  async addEvent(date: string, description: string, timeDisplay: string | null): Promise<CalendarEvent> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const { data: existing } = await supabase
-      .from('monthly_calendar_notes')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('date', date)
-      .maybeSingle();
+    const { data, error } = await supabase
+      .from('monthly_calendar_events')
+      .insert({ user_id: user.id, date, description, time_display: timeDisplay } as any)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as CalendarEvent;
+  }
 
-    if (existing) {
-      if (content.trim() === '') {
-        await supabase.from('monthly_calendar_notes').delete().eq('id', existing.id);
-      } else {
-        await supabase.from('monthly_calendar_notes').update({ content, updated_at: new Date().toISOString() } as any).eq('id', existing.id);
-      }
-    } else if (content.trim() !== '') {
-      await supabase.from('monthly_calendar_notes').insert({
-        user_id: user.id,
-        date,
-        content,
-      } as any);
-    }
+  async updateEvent(id: string, updates: { description?: string; time_display?: string | null }): Promise<void> {
+    const { error } = await supabase
+      .from('monthly_calendar_events')
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('monthly_calendar_events')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   }
 }
 
