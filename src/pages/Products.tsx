@@ -21,12 +21,15 @@ import {
   Filter,
   Package,
   ChevronDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductListView } from '@/components/ProductListView';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { EditProductDialog } from '@/components/EditProductDialog';
@@ -43,6 +46,7 @@ const Products = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     loadProducts();
