@@ -229,7 +229,7 @@ const Recipes = () => {
         </CardContent>
       </Card>
 
-      {/* Recipes Grid */}
+      {/* Recipes Grid/List */}
       {filteredRecipes.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -243,6 +243,15 @@ const Recipes = () => {
             </p>
           </CardContent>
         </Card>
+      ) : viewMode === 'list' ? (
+        <RecipeListView
+          recipes={filteredRecipes}
+          allTags={allTags}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onRecipesUpdated={loadRecipes}
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map(recipe => (
