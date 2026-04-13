@@ -14,11 +14,14 @@ import {
   ChefHat,
   Plus,
   ChevronDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { RecipeCard } from '@/components/RecipeCard';
+import { RecipeListView } from '@/components/RecipeListView';
 import { RecipeEditorDialog } from '@/components/RecipeEditorDialog';
 import { RecipeViewDialog } from '@/components/RecipeViewDialog';
 import { BatchAddRecipesDialog } from '@/components/BatchAddRecipesDialog';
