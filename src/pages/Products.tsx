@@ -228,7 +228,7 @@ const Products = () => {
         </CardContent>
       </Card>
 
-      {/* Products Grid */}
+      {/* Products Grid/List */}
       {filteredProducts.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -248,6 +248,15 @@ const Products = () => {
             )}
           </CardContent>
         </Card>
+      ) : viewMode === 'list' ? (
+        <ProductListView
+          products={filteredProducts}
+          onProductUpdated={handleProductUpdated}
+          onProductsUpdated={handleBulkProductsUpdated}
+          onQuantityChange={handleQuantityChange}
+          onDelete={handleDelete}
+          onEdit={setEditingProduct}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map(product => (
