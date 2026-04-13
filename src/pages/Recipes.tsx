@@ -14,11 +14,14 @@ import {
   ChefHat,
   Plus,
   ChevronDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { RecipeCard } from '@/components/RecipeCard';
+import { RecipeListView } from '@/components/RecipeListView';
 import { RecipeEditorDialog } from '@/components/RecipeEditorDialog';
 import { RecipeViewDialog } from '@/components/RecipeViewDialog';
 import { BatchAddRecipesDialog } from '@/components/BatchAddRecipesDialog';
@@ -47,6 +50,7 @@ const Recipes = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     loadRecipes();
@@ -152,25 +156,45 @@ const Recipes = () => {
             גלה מתכונים שתוכל להכין עם המרכיבים שלך
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 me-2" />
-              מתכון חדש
-              <ChevronDown className="h-4 w-4 ms-2" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-s-md"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleNewRecipe}>
-              <Plus className="h-4 w-4 me-2" />
-              מתכון בודד
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setBatchDialogOpen(true)}>
-              <FileSpreadsheet className="h-4 w-4 me-2" />
-              הוספה בכמות
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-e-md"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 me-2" />
+                מתכון חדש
+                <ChevronDown className="h-4 w-4 ms-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleNewRecipe}>
+                <Plus className="h-4 w-4 me-2" />
+                מתכון בודד
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setBatchDialogOpen(true)}>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                הוספה בכמות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -205,7 +229,7 @@ const Recipes = () => {
         </CardContent>
       </Card>
 
-      {/* Recipes Grid */}
+      {/* Recipes Grid/List */}
       {filteredRecipes.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -219,6 +243,15 @@ const Recipes = () => {
             </p>
           </CardContent>
         </Card>
+      ) : viewMode === 'list' ? (
+        <RecipeListView
+          recipes={filteredRecipes}
+          allTags={allTags}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onRecipesUpdated={loadRecipes}
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map(recipe => (

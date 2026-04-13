@@ -21,12 +21,15 @@ import {
   Filter,
   Package,
   ChevronDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductListView } from '@/components/ProductListView';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { EditProductDialog } from '@/components/EditProductDialog';
@@ -43,6 +46,7 @@ const Products = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     loadProducts();
@@ -118,6 +122,13 @@ const Products = () => {
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
+  const handleBulkProductsUpdated = (updatedProducts: Product[]) => {
+    setProducts(prev => prev.map(p => {
+      const updated = updatedProducts.find(u => u.id === p.id);
+      return updated || p;
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -136,25 +147,45 @@ const Products = () => {
             ניהול מלאי המזון שלך
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 me-2" />
-              הוסף מוצר
-              <ChevronDown className="h-4 w-4 ms-2" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-s-md"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 me-2" />
-              מוצר בודד
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
-              <FileSpreadsheet className="h-4 w-4 me-2" />
-              הוספה בכמות
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-9 w-9 rounded-none rounded-e-md"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 me-2" />
+                הוסף מוצר
+                <ChevronDown className="h-4 w-4 ms-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowAddDialog(true)}>
+                <Plus className="h-4 w-4 me-2" />
+                מוצר בודד
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowBatchDialog(true)}>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                הוספה בכמות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Filters */}
@@ -197,7 +228,7 @@ const Products = () => {
         </CardContent>
       </Card>
 
-      {/* Products Grid */}
+      {/* Products Grid/List */}
       {filteredProducts.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -217,6 +248,15 @@ const Products = () => {
             )}
           </CardContent>
         </Card>
+      ) : viewMode === 'list' ? (
+        <ProductListView
+          products={filteredProducts}
+          onProductUpdated={handleProductUpdated}
+          onProductsUpdated={handleBulkProductsUpdated}
+          onQuantityChange={handleQuantityChange}
+          onDelete={handleDelete}
+          onEdit={setEditingProduct}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map(product => (
