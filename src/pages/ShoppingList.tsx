@@ -191,11 +191,27 @@ const ShoppingList = () => {
       toast.info('אין פריטים לייצוא');
       return;
     }
+    // Group by category using same sort order as the page
+    const grouped: Record<string, ShoppingEntry[]> = {};
+    rows.forEach(e => {
+      const cat = e.product.category;
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(e);
+    });
+    const sorted = Object.keys(grouped).sort((a, b) => {
+      const orderA = categorySortOrder[a] ?? 999;
+      const orderB = categorySortOrder[b] ?? 999;
+      return orderA - orderB;
+    });
+
     const BOM = '\uFEFF';
-    const header = 'שם מוצר,כמות לקנייה,יחידה';
-    const csvRows = rows.map(e =>
-      `"${e.product.name.replace(/"/g, '""')}",${e.amountToBuy},"${e.product.unit}"`
-    );
+    const header = 'קטגוריה,שם מוצר,כמות לקנייה,יחידה';
+    const csvRows: string[] = [];
+    sorted.forEach(cat => {
+      grouped[cat].forEach(e => {
+        csvRows.push(`"${cat}","${e.product.name.replace(/"/g, '""')}",${e.amountToBuy},"${e.product.unit}"`);
+      });
+    });
     const csvContent = BOM + [header, ...csvRows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -204,7 +220,7 @@ const ShoppingList = () => {
     link.download = 'shopping-list.csv';
     link.click();
     URL.revokeObjectURL(url);
-  }, [entries]);
+  }, [entries, categorySortOrder]);
 
   if (loading) {
     return (
