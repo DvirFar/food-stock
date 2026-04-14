@@ -115,7 +115,7 @@ export const ProductListView = ({
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg border bg-muted/50 sticky top-0 z-10">
           <span className="text-sm font-medium">
-            {selectedIds.size} נבחרו
+            {selectedIds.size}&nbsp;נבחרו
           </span>
           <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
             <X className="h-4 w-4 me-1" />
@@ -213,14 +213,14 @@ export const ProductListView = ({
               </div>
               {/* Mobile: show details inline */}
               <div className="flex items-center gap-2 text-xs text-muted-foreground sm:hidden mt-0.5">
-                <span>{product.quantity} {product.unit}</span>
+                <span>{product.quantity}&nbsp;{product.unit}</span>
                 <span>·</span>
                 <span>{product.category}</span>
               </div>
             </div>
 
             <span className="w-20 text-center text-sm hidden sm:block">
-              {product.quantity} {product.unit}
+              {product.quantity}&nbsp;{product.unit}
             </span>
 
             <span className="w-24 hidden md:block">
@@ -243,7 +243,7 @@ export const ProductListView = ({
               ))}
               {(product.tags?.length || 0) > 2 && (
                 <Badge variant="outline" className="text-xs">
-                  +{(product.tags?.length || 0) - 2}
+                  +{(product.tags?.length || 0) - 2}&nbsp;
                 </Badge>
               )}
             </div>

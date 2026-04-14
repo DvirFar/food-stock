@@ -269,7 +269,7 @@ const Recipes = () => {
       {/* Results count */}
       {filteredRecipes.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">
-          מציג {filteredRecipes.length} מתוך {recipes.length} מתכונים
+          מציג {filteredRecipes.length} מתוך {recipes.length}&nbsp;מתכונים
         </p>
       )}
 

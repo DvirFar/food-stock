@@ -46,7 +46,7 @@ export const ProductCard = ({
           <div>
             <span className="font-medium">{product.name}</span>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{product.quantity} {product.unit}</span>
+              <span>{product.quantity}&nbsp;{product.unit}</span>
               {showLowStock && isLowStock && (
                 <Badge variant="destructive" className="text-xs">
                   <AlertTriangle className="h-3 w-3 me-1" />
@@ -56,7 +56,7 @@ export const ProductCard = ({
               {showExpiration && isExpiringSoon && (
                 <Badge variant="secondary" className="text-xs">
                   <Clock className="h-3 w-3 me-1" />
-                  {daysUntilExpiry === 0 ? 'היום' : `${daysUntilExpiry} ימים`}
+                  {daysUntilExpiry === 0 ? 'היום' : <>{daysUntilExpiry}&nbsp;ימים</>}
                 </Badge>
               )}
             </div>
@@ -126,7 +126,7 @@ export const ProductCard = ({
             )}
             <div className="text-center min-w-[60px]">
               <span className="text-xl font-bold">{product.quantity}</span>
-              <span className="text-muted-foreground me-1 text-sm">{product.unit}</span>
+              <span className="text-muted-foreground me-1 text-sm">&nbsp;{product.unit}</span>
             </div>
             {onQuantityChange && (
               <Button
@@ -141,7 +141,7 @@ export const ProductCard = ({
           </div>
           
           <div className="text-sm text-muted-foreground whitespace-nowrap">
-            מינימום: {product.min_quantity}
+            מינימום:&nbsp;{product.min_quantity}
           </div>
         </div>
 
