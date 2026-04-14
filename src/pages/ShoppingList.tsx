@@ -186,7 +186,11 @@ const ShoppingList = () => {
   const totalToBuy = entries.filter(e => e.amountToBuy > 0).length;
 
   const handleExportCsv = useCallback(() => {
-    const rows = entries.filter(e => e.amountToBuy > 0);
+    const rows = entries.filter(e => e.amountToBuy > 0).sort((a, b) => {
+      const orderA = categorySortOrder[a.product.category] ?? 999;
+      const orderB = categorySortOrder[b.product.category] ?? 999;
+      return orderA - orderB;
+    });
     if (rows.length === 0) {
       toast.info('אין פריטים לייצוא');
       return;
