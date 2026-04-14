@@ -16,6 +16,7 @@ import {
   Eye,
   X,
   PackagePlus,
+  Download,
 } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
@@ -184,6 +185,27 @@ const ShoppingList = () => {
 
   const totalToBuy = entries.filter(e => e.amountToBuy > 0).length;
 
+  const handleExportCsv = useCallback(() => {
+    const rows = entries.filter(e => e.amountToBuy > 0);
+    if (rows.length === 0) {
+      toast.info('אין פריטים לייצוא');
+      return;
+    }
+    const BOM = '\uFEFF';
+    const header = 'שם מוצר,כמות לקנייה,יחידה';
+    const csvRows = rows.map(e =>
+      `"${e.product.name.replace(/"/g, '""')}",${e.amountToBuy},"${e.product.unit}"`
+    );
+    const csvContent = BOM + [header, ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'shopping-list.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [entries]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -235,6 +257,10 @@ const ShoppingList = () => {
               </Button>
             </>
           )}
+          <Button variant="outline" size="sm" onClick={handleExportCsv}>
+            <Download className="h-4 w-4 me-2" />
+            ייצוא CSV
+          </Button>
         </div>
       </div>
 
