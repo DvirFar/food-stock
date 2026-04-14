@@ -118,46 +118,51 @@ const MonthlySchedule = () => {
       </div>
 
       {/* Calendar Grid */}
-      <Card className="flex-1 min-h-0">
-        <CardContent className="p-1.5 sm:p-2 h-full">
+      <Card className="flex-1 min-h-0 flex flex-col">
+        <CardContent className="p-1.5 sm:p-2 flex-1 min-h-0 flex flex-col">
           <div className="grid grid-cols-7 gap-0.5 mb-0.5">
             {DAYS_HE.map(day => (
               <div key={day} className="text-center text-xs font-medium text-muted-foreground py-0.5">{day}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-0.5">
-            {cells.map(cell => {
-              const cellEvents = eventsByDate[cell.dateStr] || [];
-              return (
-                <button
-                  key={cell.dateStr}
-                  onClick={() => { setSelectedDay(cell); setNewDesc(''); setNewTime(''); }}
-                  className={`
-                    relative flex flex-col items-start p-1 sm:p-1.5 rounded min-h-[56px] sm:min-h-[70px] text-start transition-colors
-                    border border-transparent hover:border-primary/30 hover:bg-accent/50
-                    ${!cell.isCurrentMonth ? 'opacity-40' : ''}
-                    ${cell.isToday ? 'bg-primary/10 border-primary/40' : ''}
-                  `}
-                >
-                  <div className="flex items-center justify-between w-full gap-0.5">
-                    <span className={`text-xs font-medium ${cell.isToday ? 'text-primary' : ''}`}>{cell.hebrewDay}</span>
-                    <span className="text-[10px] text-muted-foreground">{cell.gregDay}</span>
-                  </div>
-                  {cellEvents.slice(0, 2).map(ev => (
-                    <div key={ev.id} className="w-full mt-0.5">
-                      <div className="text-[10px] leading-tight truncate w-full rounded bg-primary/10 px-0.5">
-                        {ev.time_display && <span className="font-mono text-primary/70" dir="ltr">{ev.time_display} </span>}
-                        {ev.description}
+          {(() => {
+            const rowCount = Math.ceil(cells.length / 7);
+            return (
+              <div className="grid grid-cols-7 gap-0.5 flex-1 min-h-0" style={{ gridTemplateRows: `repeat(${rowCount}, 1fr)` }}>
+                {cells.map(cell => {
+                  const cellEvents = eventsByDate[cell.dateStr] || [];
+                  return (
+                    <button
+                      key={cell.dateStr}
+                      onClick={() => { setSelectedDay(cell); setNewDesc(''); setNewTime(''); }}
+                      className={`
+                        relative flex flex-col items-start p-1 sm:p-1.5 rounded text-start transition-colors overflow-hidden
+                        border border-transparent hover:border-primary/30 hover:bg-accent/50
+                        ${!cell.isCurrentMonth ? 'opacity-40' : ''}
+                        ${cell.isToday ? 'bg-primary/10 border-primary/40' : ''}
+                      `}
+                    >
+                      <div className="flex items-center justify-between w-full gap-0.5">
+                        <span className={`text-xs font-medium ${cell.isToday ? 'text-primary' : ''}`}>{cell.hebrewDay}</span>
+                        <span className="text-[10px] text-muted-foreground">{cell.gregDay}</span>
                       </div>
-                    </div>
-                  ))}
-                  {cellEvents.length > 2 && (
-                    <span className="text-[9px] text-muted-foreground mt-0.5">+{cellEvents.length - 2} עוד</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                      {cellEvents.slice(0, 3).map(ev => (
+                        <div key={ev.id} className="w-full mt-0.5">
+                          <div className="text-[10px] leading-tight truncate w-full rounded bg-primary/10 px-0.5">
+                            {ev.time_display && <span className="font-mono text-primary/70" dir="ltr">{ev.time_display} </span>}
+                            {ev.description}
+                          </div>
+                        </div>
+                      ))}
+                      {cellEvents.length > 3 && (
+                        <span className="text-[9px] text-muted-foreground mt-0.5">+{cellEvents.length - 3} עוד</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
