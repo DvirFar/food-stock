@@ -160,7 +160,7 @@ export const RecipeListView = ({
             </span>
 
             <span className="w-24 text-sm hidden md:block text-muted-foreground">
-              {recipe.ingredients.length} מרכיבים
+              {recipe.ingredients.length}&nbsp;מרכיבים
             </span>
 
             <div className="w-32 hidden lg:flex flex-wrap gap-1">
