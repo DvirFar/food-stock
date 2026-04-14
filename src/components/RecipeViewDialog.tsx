@@ -139,24 +139,24 @@ export const RecipeViewDialog = ({ recipe, open, onOpenChange }: RecipeViewDialo
             {recipe.prep_time && recipe.prep_time > 0 && (
               <div className="flex items-center gap-2 text-sm bg-muted/50 px-3 py-1.5 rounded-full">
                 <Timer className="h-4 w-4 text-muted-foreground" />
-                <span>הכנה: {recipe.prep_time} דק׳</span>
+                <span>הכנה:&nbsp;{recipe.prep_time}&nbsp;דק׳</span>
               </div>
             )}
             {recipe.cook_time && recipe.cook_time > 0 && (
               <div className="flex items-center gap-2 text-sm bg-muted/50 px-3 py-1.5 rounded-full">
                 <Flame className="h-4 w-4 text-muted-foreground" />
-                <span>בישול: {recipe.cook_time} דק׳</span>
+                <span>בישול:&nbsp;{recipe.cook_time}&nbsp;דק׳</span>
               </div>
             )}
             {totalTime > 0 && (
               <div className="flex items-center gap-2 text-sm bg-primary/10 px-3 py-1.5 rounded-full font-medium">
                 <Clock className="h-4 w-4 text-primary" />
-                <span>סה״כ: {totalTime} דק׳</span>
+                <span>סה״כ:&nbsp;{totalTime}&nbsp;דק׳</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-sm bg-muted/50 px-3 py-1.5 rounded-full">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{recipe.servings} מנות</span>
+              <span>{recipe.servings}&nbsp;מנות</span>
             </div>
           </div>
 

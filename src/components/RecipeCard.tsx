@@ -72,11 +72,11 @@ export const RecipeCard = ({ recipe, onView, onEdit, onDelete }: RecipeCardProps
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            <span>{totalTime} דק׳</span>
+            <span>{totalTime}&nbsp;דק׳</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{recipe.servings} מנות</span>
+            <span>{recipe.servings}&nbsp;מנות</span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@ export const RecipeCard = ({ recipe, onView, onEdit, onDelete }: RecipeCardProps
             ))}
             {recipe.ingredients.length > 4 && (
               <Badge variant="outline" className="text-xs">
-                +{recipe.ingredients.length - 4} נוספים
+                +{recipe.ingredients.length - 4}&nbsp;נוספים
               </Badge>
             )}
           </div>

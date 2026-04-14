@@ -56,8 +56,8 @@ export const ShoppingListPreview = () => {
         <div>
           <CardTitle className="text-base">רשימת קניות</CardTitle>
           <CardDescription>
-            {uncheckedItems.length} פריטים ממתינים
-            {checkedCount > 0 && ` · ${checkedCount} הושלמו`}
+            {uncheckedItems.length}&nbsp;פריטים ממתינים
+            {checkedCount > 0 && <> · {checkedCount}&nbsp;הושלמו</>}
           </CardDescription>
         </div>
         <Button variant="ghost" size="sm" onClick={() => navigate('/shopping-list')}>

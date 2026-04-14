@@ -404,7 +404,7 @@ const ShoppingEntryRow = ({ entry, isShoppingMode, onAmountChange, onRemove }: S
 
       {/* Existing amount */}
       <div className="text-sm text-muted-foreground whitespace-nowrap">
-        במלאי: {product.quantity} {product.unit}
+        במלאי:&nbsp;{product.quantity}&nbsp;{product.unit}
       </div>
 
       {/* Amount to buy */}

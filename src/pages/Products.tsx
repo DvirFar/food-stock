@@ -276,7 +276,7 @@ const Products = () => {
       {/* Results count */}
       {filteredProducts.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">
-          מציג {filteredProducts.length} מתוך {products.length} מוצרים
+          מציג {filteredProducts.length} מתוך {products.length}&nbsp;מוצרים
         </p>
       )}
 

@@ -73,7 +73,7 @@ export const RecipeListView = ({
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg border bg-muted/50 sticky top-0 z-10">
           <span className="text-sm font-medium">
-            {selectedIds.size} נבחרו
+            {selectedIds.size}&nbsp;נבחרו
           </span>
           <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
             <X className="h-4 w-4 me-1" />
@@ -144,8 +144,8 @@ export const RecipeListView = ({
               )}
               {/* Mobile details */}
               <div className="flex items-center gap-2 text-xs text-muted-foreground sm:hidden mt-0.5">
-                {totalTime > 0 && <span>{totalTime} דק׳</span>}
-                <span>{recipe.servings} מנות</span>
+                {totalTime > 0 && <span>{totalTime}&nbsp;דק׳</span>}
+                <span>{recipe.servings}&nbsp;מנות</span>
               </div>
             </div>
 
@@ -160,7 +160,7 @@ export const RecipeListView = ({
             </span>
 
             <span className="w-24 text-sm hidden md:block text-muted-foreground">
-              {recipe.ingredients.length} מרכיבים
+              {recipe.ingredients.length}&nbsp;מרכיבים
             </span>
 
             <div className="w-32 hidden lg:flex flex-wrap gap-1">
