@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye } from 'lucide-react';
+import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User } from 'lucide-react';
 import { ShabbatPlanSection } from '@/services/shabbatPlanService';
 import { Recipe, Product, RecipeIngredient } from '@/types';
 
@@ -17,6 +18,7 @@ interface ShabbatMealCardProps {
   onDeleteSection: (sectionId: string) => Promise<void>;
   onAddRecipe: (sectionId: string, recipeId: string, sortOrder: number) => Promise<void>;
   onRemoveRecipe: (recipeEntryId: string) => Promise<void>;
+  onUpdateRecipe: (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => Promise<void>;
   onPreview?: () => void;
 }
 
@@ -29,6 +31,7 @@ export const ShabbatMealCard = ({
   onDeleteSection,
   onAddRecipe,
   onRemoveRecipe,
+  onUpdateRecipe,
   onPreview,
 }: ShabbatMealCardProps) => {
   const [showAddSection, setShowAddSection] = useState(false);
@@ -115,16 +118,33 @@ export const ShabbatMealCard = ({
                 {section.recipes.map(sr => (
                   <div
                     key={sr.id}
-                    className="flex items-center justify-between bg-muted/50 rounded-md px-2 py-1.5 text-xs"
+                    className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <ChefHat className="h-3 w-3 text-muted-foreground" />
-                      <span>{sr.recipe?.name || 'מתכון לא נמצא'}</span>
+                    <Checkbox
+                      checked={sr.is_done}
+                      onCheckedChange={(checked) => onUpdateRecipe(sr.id, { is_done: !!checked })}
+                      className="h-3.5 w-3.5"
+                    />
+                    <ChefHat className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className={`flex-1 truncate ${sr.is_done ? 'line-through text-muted-foreground' : ''}`}>
+                      {sr.recipe?.name || 'מתכון לא נמצא'}
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <User className="h-3 w-3 text-muted-foreground" />
+                      <Input
+                        defaultValue={sr.assigned_to}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== sr.assigned_to) onUpdateRecipe(sr.id, { assigned_to: v });
+                        }}
+                        placeholder="מי?"
+                        className="h-6 w-16 text-xs px-1.5"
+                      />
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-5 w-5"
+                      className="h-5 w-5 shrink-0"
                       onClick={() => onRemoveRecipe(sr.id)}
                     >
                       <X className="h-3 w-3" />

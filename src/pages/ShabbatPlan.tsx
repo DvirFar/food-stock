@@ -94,6 +94,19 @@ const ShabbatPlan = () => {
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
+  const handleUpdateRecipe = async (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => {
+    setSections(prev => prev.map(s => ({
+      ...s,
+      recipes: s.recipes.map(r => r.id === recipeEntryId ? { ...r, ...updates } : r),
+    })));
+    try {
+      await shabbatPlanService.updateSectionRecipe(recipeEntryId, updates);
+    } catch {
+      toast.error('שגיאה בעדכון מתכון');
+      await loadData(currentFriday);
+    }
+  };
+
   const handleAddExtraRecipe = async (recipeId: string) => {
     if (!planId) return;
     try {
@@ -190,6 +203,7 @@ const ShabbatPlan = () => {
             onDeleteSection={handleDeleteSection}
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
+            onUpdateRecipe={handleUpdateRecipe}
             onPreview={() => setPreviewSlot('friday')}
           />
           <ShabbatMealCard
@@ -201,6 +215,7 @@ const ShabbatPlan = () => {
             onDeleteSection={handleDeleteSection}
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
+            onUpdateRecipe={handleUpdateRecipe}
             onPreview={() => setPreviewSlot('saturday')}
           />
         </div>

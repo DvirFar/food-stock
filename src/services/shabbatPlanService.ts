@@ -24,6 +24,8 @@ export interface ShabbatSectionRecipe {
   section_id: string;
   recipe_id: string;
   sort_order: number;
+  is_done: boolean;
+  assigned_to: string;
   created_at: string;
   recipe?: Recipe;
 }
@@ -159,6 +161,14 @@ class ShabbatPlanService {
     const { error } = await supabase
       .from('shabbat_section_recipes')
       .delete()
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  async updateSectionRecipe(id: string, updates: { is_done?: boolean; assigned_to?: string }): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_section_recipes')
+      .update(updates as any)
       .eq('id', id);
     if (error) throw error;
   }
