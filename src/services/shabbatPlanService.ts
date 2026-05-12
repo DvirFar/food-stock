@@ -165,6 +165,14 @@ class ShabbatPlanService {
     if (error) throw error;
   }
 
+  async updateSectionRecipe(id: string, updates: { is_done?: boolean; assigned_to?: string }): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_section_recipes')
+      .update(updates as any)
+      .eq('id', id);
+    if (error) throw error;
+  }
+
   async getExtraRecipes(planId: string): Promise<ShabbatExtraRecipe[]> {
     const { data, error } = await supabase
       .from('shabbat_extra_recipes')
