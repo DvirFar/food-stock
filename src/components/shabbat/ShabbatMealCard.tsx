@@ -31,6 +31,7 @@ export const ShabbatMealCard = ({
   onDeleteSection,
   onAddRecipe,
   onRemoveRecipe,
+  onUpdateRecipe,
   onPreview,
 }: ShabbatMealCardProps) => {
   const [showAddSection, setShowAddSection] = useState(false);
