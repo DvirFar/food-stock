@@ -29,7 +29,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const navItems = [
-  { title: 'לוח בקרה', url: '/', icon: LayoutDashboard },
+  { title: 'היום', url: '/', icon: LayoutDashboard },
   { title: 'מוצרים', url: '/products', icon: Package },
   { title: 'מתכונים', url: '/recipes', icon: ChefHat },
   { title: 'תכנון שבועי', url: '/weekly-plan', icon: CalendarRange },

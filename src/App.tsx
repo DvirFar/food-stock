@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { SettingsProvider } from "@/hooks/useSettings";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
-import Dashboard from "./pages/Dashboard";
+import DailyView from "./pages/DailyView";
 import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import ShoppingList from "./pages/ShoppingList";
@@ -36,7 +36,7 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <Dashboard />
+                      <DailyView />
                     </AppLayout>
                   </ProtectedRoute>
                 }
