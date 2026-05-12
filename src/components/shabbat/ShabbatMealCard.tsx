@@ -18,6 +18,7 @@ interface ShabbatMealCardProps {
   onDeleteSection: (sectionId: string) => Promise<void>;
   onAddRecipe: (sectionId: string, recipeId: string, sortOrder: number) => Promise<void>;
   onRemoveRecipe: (recipeEntryId: string) => Promise<void>;
+  onUpdateRecipe: (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => Promise<void>;
   onPreview?: () => void;
 }
 
