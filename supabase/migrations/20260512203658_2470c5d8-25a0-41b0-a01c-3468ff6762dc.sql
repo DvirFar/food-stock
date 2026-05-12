@@ -1,0 +1,3 @@
+ALTER TABLE public.shabbat_section_recipes
+  ADD COLUMN IF NOT EXISTS is_done boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS assigned_to text NOT NULL DEFAULT '';
