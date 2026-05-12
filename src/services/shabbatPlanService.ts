@@ -24,6 +24,8 @@ export interface ShabbatSectionRecipe {
   section_id: string;
   recipe_id: string;
   sort_order: number;
+  is_done: boolean;
+  assigned_to: string;
   created_at: string;
   recipe?: Recipe;
 }
