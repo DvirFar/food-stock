@@ -118,16 +118,33 @@ export const ShabbatMealCard = ({
                 {section.recipes.map(sr => (
                   <div
                     key={sr.id}
-                    className="flex items-center justify-between bg-muted/50 rounded-md px-2 py-1.5 text-xs"
+                    className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <ChefHat className="h-3 w-3 text-muted-foreground" />
-                      <span>{sr.recipe?.name || 'מתכון לא נמצא'}</span>
+                    <Checkbox
+                      checked={sr.is_done}
+                      onCheckedChange={(checked) => onUpdateRecipe(sr.id, { is_done: !!checked })}
+                      className="h-3.5 w-3.5"
+                    />
+                    <ChefHat className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className={`flex-1 truncate ${sr.is_done ? 'line-through text-muted-foreground' : ''}`}>
+                      {sr.recipe?.name || 'מתכון לא נמצא'}
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <User className="h-3 w-3 text-muted-foreground" />
+                      <Input
+                        defaultValue={sr.assigned_to}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== sr.assigned_to) onUpdateRecipe(sr.id, { assigned_to: v });
+                        }}
+                        placeholder="מי?"
+                        className="h-6 w-16 text-xs px-1.5"
+                      />
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-5 w-5"
+                      className="h-5 w-5 shrink-0"
                       onClick={() => onRemoveRecipe(sr.id)}
                     >
                       <X className="h-3 w-3" />
