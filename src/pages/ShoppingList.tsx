@@ -196,16 +196,13 @@ const ShoppingList = () => {
       return;
     }
     const BOM = '\uFEFF';
-    const header = 'שם מוצר,כמות לקנייה,יחידה';
-    const csvRows = rows.map(e =>
-      `"${e.product.name.replace(/"/g, '""')}",${e.amountToBuy},"${e.product.unit}"`
-    );
-    const csvContent = BOM + [header, ...csvRows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const lines = rows.map(e => `${e.product.name} ${e.amountToBuy} ${e.product.unit}`);
+    const content = BOM + lines.join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'shopping-list.csv';
+    link.download = 'shopping-list.txt';
     link.click();
     URL.revokeObjectURL(url);
   }, [entries]);
