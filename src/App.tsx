@@ -17,7 +17,9 @@ import MonthlySchedule from "./pages/MonthlySchedule";
 import ShabbatPlan from "./pages/ShabbatPlan";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <SettingsProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+
               <Route
                 path="/"
                 element={
