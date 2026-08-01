@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,14 @@ import { z } from 'zod';
 const emailSchema = z.string().email('נא להזין כתובת אימייל תקינה');
 const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
 
+// Only allow same-origin relative paths as a post-login redirect target.
+const safeNext = (value: string | null) =>
+  value && value.startsWith('/') && !value.startsWith('//') ? value : '/';
+
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = safeNext(searchParams.get('next'));
   const { user, signIn, signUp, loading: authLoading } = useAuth();
   
   const [email, setEmail] = useState('');
@@ -24,9 +30,10 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/', { replace: true });
+      navigate(next, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, next]);
+
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
