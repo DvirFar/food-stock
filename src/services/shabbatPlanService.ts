@@ -56,7 +56,7 @@ class ShabbatPlanService {
     const day = d.getDay();
     const diff = day <= 5 ? 5 - day : 5 - day + 7;
     d.setDate(d.getDate() + diff);
-    return d.toISOString().split('T')[0];
+    return new Intl.DateTimeFormat("sv-SE").format(d);
   }
 
   async getOrCreatePlan(weekStart: string): Promise<ShabbatPlan> {
