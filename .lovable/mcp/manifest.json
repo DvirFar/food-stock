@@ -1,0 +1,308 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://khulhorabkxhnydxenik.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "home-stock-manager",
+      "version": "0.1.0",
+      "title": "Home Stock Manager"
+    },
+    "tools": [
+      {
+        "name": "list_products",
+        "title": "List inventory products",
+        "description": "List the signed-in user's food inventory products. Optionally filter by name search, category, location, or only items at or below their minimum quantity.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Case-insensitive product name filter."
+            },
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Exact category name."
+            },
+            "location": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Exact storage location name."
+            },
+            "lowStockOnly": {
+              "type": "boolean",
+              "description": "Only return products at or below their minimum quantity."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Max rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "upsert_product",
+        "title": "Create or update a product",
+        "description": "Create a new inventory product, or update an existing one when productId is given. Only the provided fields are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Existing product id. Omit to create a new product."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Product name (required when creating)."
+            },
+            "category": {
+              "type": "string",
+              "minLength": 1
+            },
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "quantity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minQuantity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "expirationDate": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO date (YYYY-MM-DD) or null to clear."
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_shopping_list",
+        "title": "List shopping list items",
+        "description": "List the signed-in user's shopping list items, optionally only the unchecked ones.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "uncheckedOnly": {
+              "type": "boolean",
+              "description": "Only return items that are not yet checked off."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_shopping_list_item",
+        "title": "Add a shopping list item",
+        "description": "Add an item to the signed-in user's shopping list.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Item name."
+            },
+            "quantity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Quantity to buy (default 1)."
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Unit, e.g. יח׳, ק\"ג."
+            },
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Category used for grouping and sorting."
+            },
+            "productId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Link to an existing inventory product."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recipes",
+        "title": "List recipes",
+        "description": "List the signed-in user's recipes with ingredients and instructions. Optionally filter by name search or tag.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Case-insensitive recipe name filter."
+            },
+            "tag": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Only recipes carrying this tag."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Max rows to return (default 25)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_calendar_events",
+        "title": "List calendar events",
+        "description": "List the signed-in user's monthly calendar events within a date range (inclusive).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Start date, ISO YYYY-MM-DD."
+            },
+            "to": {
+              "type": "string",
+              "minLength": 1,
+              "description": "End date, ISO YYYY-MM-DD."
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_calendar_event",
+        "title": "Add a calendar event",
+        "description": "Add an event or task to a specific day in the signed-in user's monthly calendar.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Event date, ISO YYYY-MM-DD."
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the event is."
+            },
+            "timeDisplay": {
+              "type": "string",
+              "pattern": "^\\d{2}:\\d{2}(-\\d{2}:\\d{2})?$",
+              "description": "Optional time as HH:MM or HH:MM-HH:MM."
+            }
+          },
+          "required": [
+            "date",
+            "description"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
