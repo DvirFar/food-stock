@@ -238,11 +238,11 @@ const Settings = () => {
           <SettingsIcon className="h-8 w-8" />
           הגדרות
         </h1>
-        <p className="text-muted-foreground">ניהול קטגוריות, מיקומים ותגיות</p>
+        <p className="text-muted-foreground">ניהול קטגוריות, מיקומים, תגיות וברירות מחדל לשבת</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 max-w-lg">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="categories" className="flex items-center gap-2">
             <Tag className="h-4 w-4" />
             קטגוריות
@@ -255,7 +255,16 @@ const Settings = () => {
             <Tags className="h-4 w-4" />
             תגיות מוצרים
           </TabsTrigger>
+          <TabsTrigger value="shabbat" className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            ברירות מחדל לשבת
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="shabbat" className="space-y-4">
+          <ShabbatDefaultsSettings />
+        </TabsContent>
+
 
         {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
