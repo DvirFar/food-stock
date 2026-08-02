@@ -199,7 +199,6 @@ export const ShabbatMealCard = ({
               <div className="flex gap-1.5 mt-1" ref={recipeDropdownRef}>
                 <div className="relative flex-1">
                   <Input
-                    ref={recipeInputRef}
                     placeholder="חפש מתכון לפי שם או תגית..."
                     value={recipeSearch}
                     onChange={(e) => {
