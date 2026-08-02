@@ -359,6 +359,88 @@ export type Database = {
         }
         Relationships: []
       }
+      shabbat_default_recipes: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string
+          section_id: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id: string
+          section_id: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          section_id?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shabbat_default_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shabbat_default_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shabbat_default_recipes_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "shabbat_default_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shabbat_default_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slot: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slot: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slot?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shabbat_dish_assignments: {
         Row: {
           created_at: string

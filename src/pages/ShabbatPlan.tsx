@@ -136,6 +136,17 @@ const ShabbatPlan = () => {
     setDishTimers(prev => ({ ...prev, [key]: timer }));
   };
 
+  const handleApplyDefaults = async () => {
+    if (!planId) return;
+    try {
+      await shabbatPlanService.applyDefaultsToPlan(planId);
+      await loadData(currentFriday);
+      toast.success('ברירות המחדל נטענו');
+    } catch {
+      toast.error('שגיאה בטעינת ברירות המחדל');
+    }
+  };
+
   const formatFridayDate = () => {
     const d = new Date(currentFriday + 'T00:00:00');
     const sat = new Date(d);
@@ -180,7 +191,11 @@ const ShabbatPlan = () => {
         <Button variant="ghost" size="sm" onClick={() => setCurrentFriday(shabbatPlanService.getWeekFriday())}>
           השבת הקרובה
         </Button>
+        <Button variant="outline" size="sm" onClick={handleApplyDefaults}>
+          טען ברירות מחדל
+        </Button>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6 order-2 lg:order-1">
