@@ -41,7 +41,6 @@ export const ShabbatMealCard = ({
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
   const [recipeSearch, setRecipeSearch] = useState('');
   const [recipeDropdownOpen, setRecipeDropdownOpen] = useState(false);
-  const recipeInputRef = useRef<HTMLInputElement>(null);
   const recipeDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
