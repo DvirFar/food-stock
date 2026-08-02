@@ -136,6 +136,17 @@ const ShabbatPlan = () => {
     setDishTimers(prev => ({ ...prev, [key]: timer }));
   };
 
+  const handleApplyDefaults = async () => {
+    if (!planId) return;
+    try {
+      await shabbatPlanService.applyDefaultsToPlan(planId);
+      await loadData(currentFriday);
+      toast.success('ברירות המחדל נטענו');
+    } catch {
+      toast.error('שגיאה בטעינת ברירות המחדל');
+    }
+  };
+
   const formatFridayDate = () => {
     const d = new Date(currentFriday + 'T00:00:00');
     const sat = new Date(d);
