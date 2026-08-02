@@ -197,21 +197,67 @@ export const ShabbatMealCard = ({
             )}
 
             {addRecipeForSection === section.id && (
-              <div className="flex gap-1.5 mt-1">
-                <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
-                  <SelectTrigger className="flex-1 h-8 text-xs">
-                    <SelectValue placeholder="בחר מתכון..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allRecipes.map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex gap-1.5 mt-1" ref={recipeDropdownRef}>
+                <div className="relative flex-1">
+                  <Input
+                    ref={recipeInputRef}
+                    placeholder="חפש מתכון לפי שם או תגית..."
+                    value={recipeSearch}
+                    onChange={(e) => {
+                      setRecipeSearch(e.target.value);
+                      setRecipeDropdownOpen(true);
+                      if (selectedRecipeId && e.target.value !== (selectedRecipe?.name || '')) {
+                        setSelectedRecipeId('');
+                      }
+                    }}
+                    onFocus={() => setRecipeDropdownOpen(true)}
+                    className="h-8 text-xs pe-8"
+                    autoFocus
+                  />
+                  <ChevronDown
+                    className="absolute end-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
+                    onClick={() => setRecipeDropdownOpen(!recipeDropdownOpen)}
+                  />
+                  {recipeDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+                      <ScrollArea className="max-h-48">
+                        {filteredRecipes.length === 0 ? (
+                          <div className="p-3 text-xs text-muted-foreground text-center">
+                            לא נמצאו מתכונים
+                          </div>
+                        ) : (
+                          <div className="py-1">
+                            {filteredRecipes.map(recipe => (
+                              <button
+                                key={recipe.id}
+                                type="button"
+                                className={cn(
+                                  'flex w-full items-center justify-between px-3 py-2 text-xs hover:bg-accent hover:text-accent-foreground transition-colors',
+                                  selectedRecipeId === recipe.id && 'bg-accent/50'
+                                )}
+                                onClick={() => handleRecipeSelect(recipe)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  {selectedRecipeId === recipe.id && <Check className="h-3 w-3" />}
+                                  <span>{recipe.name}</span>
+                                </span>
+                                {recipe.tags.length > 0 && (
+                                  <span className="text-xs text-muted-foreground truncate max-w-[50%]">
+                                    {recipe.tags.join(', ')}
+                                  </span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </div>
+                  )}
+                </div>
                 <Button size="sm" className="h-8 text-xs" onClick={() => handleAddRecipe(section.id)} disabled={!selectedRecipeId}>
                   הוסף
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setAddRecipeForSection(null)}>
+                <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setAddRecipeForSection(null); setSelectedRecipeId(''); setRecipeSearch(''); }}>
                   ביטול
                 </Button>
               </div>
