@@ -29,10 +29,12 @@ import {
   Tag,
   MapPin,
   GripVertical,
-  Tags
+  Tags,
+  CalendarDays
 } from 'lucide-react';
 import { settingsService, type Category, type Location, type ProductTag } from '@/services/settingsService';
 import { useSettings } from '@/hooks/useSettings';
+import { ShabbatDefaultsSettings } from '@/components/shabbat/ShabbatDefaultsSettings';
 import { toast } from 'sonner';
 
 type EditMode = 'create' | 'edit';
