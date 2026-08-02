@@ -39,6 +39,46 @@ export const ShabbatMealCard = ({
   const [addingSectionName, setAddingSectionName] = useState('');
   const [addRecipeForSection, setAddRecipeForSection] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
+  const [recipeSearch, setRecipeSearch] = useState('');
+  const [recipeDropdownOpen, setRecipeDropdownOpen] = useState(false);
+  const recipeInputRef = useRef<HTMLInputElement>(null);
+  const recipeDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (addRecipeForSection) {
+      setRecipeSearch('');
+      setRecipeDropdownOpen(true);
+    }
+  }, [addRecipeForSection]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (recipeDropdownRef.current && !recipeDropdownRef.current.contains(e.target as Node)) {
+        setRecipeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const filteredRecipes = useMemo(() => {
+    const q = recipeSearch.trim().toLowerCase();
+    if (!q) return allRecipes;
+    return allRecipes.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }, [allRecipes, recipeSearch]);
+
+  const selectedRecipe = useMemo(() =>
+    allRecipes.find(r => r.id === selectedRecipeId),
+  [allRecipes, selectedRecipeId]);
+
+  const handleRecipeSelect = (recipe: Recipe) => {
+    setSelectedRecipeId(recipe.id);
+    setRecipeSearch(recipe.name);
+    setRecipeDropdownOpen(false);
+  };
 
   const handleAddSection = async () => {
     if (!addingSectionName.trim()) return;
@@ -52,6 +92,7 @@ export const ShabbatMealCard = ({
     const section = sections.find(s => s.id === sectionId);
     await onAddRecipe(sectionId, selectedRecipeId, section?.recipes.length || 0);
     setSelectedRecipeId('');
+    setRecipeSearch('');
     setAddRecipeForSection(null);
   };
 
