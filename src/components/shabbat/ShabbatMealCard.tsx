@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Check } from 'lucide-react';
 import { ShabbatPlanSection } from '@/services/shabbatPlanService';
-import { Recipe, Product, RecipeIngredient } from '@/types';
+import { Recipe, Product } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface ShabbatMealCardProps {
   title: string;
@@ -38,6 +39,45 @@ export const ShabbatMealCard = ({
   const [addingSectionName, setAddingSectionName] = useState('');
   const [addRecipeForSection, setAddRecipeForSection] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
+  const [recipeSearch, setRecipeSearch] = useState('');
+  const [recipeDropdownOpen, setRecipeDropdownOpen] = useState(false);
+  const recipeDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (addRecipeForSection) {
+      setRecipeSearch('');
+      setRecipeDropdownOpen(true);
+    }
+  }, [addRecipeForSection]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (recipeDropdownRef.current && !recipeDropdownRef.current.contains(e.target as Node)) {
+        setRecipeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const filteredRecipes = useMemo(() => {
+    const q = recipeSearch.trim().toLowerCase();
+    if (!q) return allRecipes;
+    return allRecipes.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }, [allRecipes, recipeSearch]);
+
+  const selectedRecipe = useMemo(() =>
+    allRecipes.find(r => r.id === selectedRecipeId),
+  [allRecipes, selectedRecipeId]);
+
+  const handleRecipeSelect = (recipe: Recipe) => {
+    setSelectedRecipeId(recipe.id);
+    setRecipeSearch(recipe.name);
+    setRecipeDropdownOpen(false);
+  };
 
   const handleAddSection = async () => {
     if (!addingSectionName.trim()) return;
@@ -51,6 +91,7 @@ export const ShabbatMealCard = ({
     const section = sections.find(s => s.id === sectionId);
     await onAddRecipe(sectionId, selectedRecipeId, section?.recipes.length || 0);
     setSelectedRecipeId('');
+    setRecipeSearch('');
     setAddRecipeForSection(null);
   };
 
@@ -155,21 +196,66 @@ export const ShabbatMealCard = ({
             )}
 
             {addRecipeForSection === section.id && (
-              <div className="flex gap-1.5 mt-1">
-                <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
-                  <SelectTrigger className="flex-1 h-8 text-xs">
-                    <SelectValue placeholder="בחר מתכון..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allRecipes.map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex gap-1.5 mt-1" ref={recipeDropdownRef}>
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="חפש מתכון לפי שם או תגית..."
+                    value={recipeSearch}
+                    onChange={(e) => {
+                      setRecipeSearch(e.target.value);
+                      setRecipeDropdownOpen(true);
+                      if (selectedRecipeId && e.target.value !== (selectedRecipe?.name || '')) {
+                        setSelectedRecipeId('');
+                      }
+                    }}
+                    onFocus={() => setRecipeDropdownOpen(true)}
+                    className="h-8 text-xs pe-8"
+                    autoFocus
+                  />
+                  <ChevronDown
+                    className="absolute end-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
+                    onClick={() => setRecipeDropdownOpen(!recipeDropdownOpen)}
+                  />
+                  {recipeDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+                      <ScrollArea className="max-h-48">
+                        {filteredRecipes.length === 0 ? (
+                          <div className="p-3 text-xs text-muted-foreground text-center">
+                            לא נמצאו מתכונים
+                          </div>
+                        ) : (
+                          <div className="py-1">
+                            {filteredRecipes.map(recipe => (
+                              <button
+                                key={recipe.id}
+                                type="button"
+                                className={cn(
+                                  'flex w-full items-center justify-between px-3 py-2 text-xs hover:bg-accent hover:text-accent-foreground transition-colors',
+                                  selectedRecipeId === recipe.id && 'bg-accent/50'
+                                )}
+                                onClick={() => handleRecipeSelect(recipe)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  {selectedRecipeId === recipe.id && <Check className="h-3 w-3" />}
+                                  <span>{recipe.name}</span>
+                                </span>
+                                {recipe.tags.length > 0 && (
+                                  <span className="text-xs text-muted-foreground truncate max-w-[50%]">
+                                    {recipe.tags.join(', ')}
+                                  </span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </div>
+                  )}
+                </div>
                 <Button size="sm" className="h-8 text-xs" onClick={() => handleAddRecipe(section.id)} disabled={!selectedRecipeId}>
                   הוסף
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setAddRecipeForSection(null)}>
+                <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setAddRecipeForSection(null); setSelectedRecipeId(''); setRecipeSearch(''); }}>
                   ביטול
                 </Button>
               </div>
