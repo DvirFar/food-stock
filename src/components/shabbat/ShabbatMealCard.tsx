@@ -35,6 +35,8 @@ export const ShabbatMealCard = ({
   onAddRecipe,
   onRemoveRecipe,
   onUpdateRecipe,
+  onReorderSections,
+  onReorderRecipes,
   onPreview,
 }: ShabbatMealCardProps) => {
   const [showAddSection, setShowAddSection] = useState(false);
@@ -44,6 +46,38 @@ export const ShabbatMealCard = ({
   const [recipeSearch, setRecipeSearch] = useState('');
   const [recipeDropdownOpen, setRecipeDropdownOpen] = useState(false);
   const recipeDropdownRef = useRef<HTMLDivElement>(null);
+  const [dragSectionId, setDragSectionId] = useState<string | null>(null);
+  const [overSectionId, setOverSectionId] = useState<string | null>(null);
+  const [dragRecipe, setDragRecipe] = useState<{ sectionId: string; id: string } | null>(null);
+  const [overRecipeId, setOverRecipeId] = useState<string | null>(null);
+
+  const moveItem = <T,>(arr: T[], from: number, to: number) => {
+    const next = [...arr];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    return next;
+  };
+
+  const handleSectionDrop = (targetId: string) => {
+    const fromIdx = sections.findIndex(s => s.id === dragSectionId);
+    const toIdx = sections.findIndex(s => s.id === targetId);
+    setDragSectionId(null);
+    setOverSectionId(null);
+    if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
+    onReorderSections(moveItem(sections, fromIdx, toIdx).map(s => s.id));
+  };
+
+  const handleRecipeDrop = (sectionId: string, targetId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    setOverRecipeId(null);
+    if (!section || !dragRecipe || dragRecipe.sectionId !== sectionId) { setDragRecipe(null); return; }
+    const fromIdx = section.recipes.findIndex(r => r.id === dragRecipe.id);
+    const toIdx = section.recipes.findIndex(r => r.id === targetId);
+    setDragRecipe(null);
+    if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
+    onReorderRecipes(sectionId, moveItem(section.recipes, fromIdx, toIdx).map(r => r.id));
+  };
+
 
   useEffect(() => {
     if (addRecipeForSection) {
