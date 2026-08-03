@@ -124,6 +124,16 @@ const ShabbatPlan = () => {
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
+  const handleUpdateExtraRecipe = async (id: string, updates: { is_done?: boolean; assigned_to?: string }) => {
+    setExtraRecipes(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+    try {
+      await shabbatPlanService.updateExtraRecipe(id, updates);
+    } catch {
+      toast.error('שגיאה בעדכון מתכון');
+      if (planId) setExtraRecipes(await shabbatPlanService.getExtraRecipes(planId));
+    }
+  };
+
   const handleDishChange = (round: string, sink: number, person: string) => {
     const key = `${round}-${sink}`;
     setDishAssignments(prev => ({ ...prev, [key]: person }));
@@ -204,6 +214,7 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             onAdd={handleAddExtraRecipe}
             onRemove={handleRemoveExtraRecipe}
+            onUpdate={handleUpdateExtraRecipe}
           />
           <DishWashingTable assignments={dishAssignments} onChange={handleDishChange} />
         </div>

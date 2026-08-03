@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChefHat, Plus, X, CakeSlice } from 'lucide-react';
+import { ChefHat, Plus, X, CakeSlice, User } from 'lucide-react';
 import { Recipe } from '@/types';
 import { ShabbatExtraRecipe } from '@/services/shabbatPlanService';
 
@@ -11,9 +13,10 @@ interface ShabbatExtraRecipesProps {
   allRecipes: Recipe[];
   onAdd: (recipeId: string) => void;
   onRemove: (id: string) => void;
+  onUpdate: (id: string, updates: { is_done?: boolean; assigned_to?: string }) => void;
 }
 
-export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove }: ShabbatExtraRecipesProps) => {
+export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove, onUpdate }: ShabbatExtraRecipesProps) => {
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
 
   const getRecipeName = (recipeId: string) => allRecipes.find(r => r.id === recipeId)?.name || 'מתכון לא נמצא';
@@ -61,13 +64,30 @@ export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove 
             {extraRecipes.map(er => (
               <div
                 key={er.id}
-                className="flex items-center justify-between bg-muted/50 rounded-md px-3 py-2 text-sm"
+                className="flex items-center gap-1.5 bg-muted/50 rounded-md px-3 py-2 text-sm"
               >
-                <div className="flex items-center gap-2">
-                  <ChefHat className="h-4 w-4 text-muted-foreground" />
-                  <span>{getRecipeName(er.recipe_id)}</span>
+                <Checkbox
+                  checked={er.is_done}
+                  onCheckedChange={(checked) => onUpdate(er.id, { is_done: !!checked })}
+                  className="h-3.5 w-3.5"
+                />
+                <ChefHat className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className={`flex-1 truncate ${er.is_done ? 'line-through text-muted-foreground' : ''}`}>
+                  {getRecipeName(er.recipe_id)}
+                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <User className="h-3 w-3 text-muted-foreground" />
+                  <Input
+                    defaultValue={er.assigned_to}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (v !== er.assigned_to) onUpdate(er.id, { assigned_to: v });
+                    }}
+                    placeholder="מי?"
+                    className="h-6 w-16 text-xs px-1.5"
+                  />
                 </div>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemove(er.id)}>
+                <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => onRemove(er.id)}>
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
