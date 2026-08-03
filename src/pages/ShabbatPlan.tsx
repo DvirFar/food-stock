@@ -261,6 +261,8 @@ const ShabbatPlan = () => {
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('friday')}
           />
           <ShabbatMealCard
@@ -273,6 +275,8 @@ const ShabbatPlan = () => {
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
           />
         </div>
