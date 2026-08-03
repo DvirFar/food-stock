@@ -35,6 +35,8 @@ export interface ShabbatExtraRecipe {
   plan_id: string;
   recipe_id: string;
   sort_order: number;
+  is_done: boolean;
+  assigned_to: string;
   created_at: string;
 }
 
@@ -336,6 +338,14 @@ class ShabbatPlanService {
     const { error } = await supabase
       .from('shabbat_extra_recipes')
       .insert({ plan_id: planId, recipe_id: recipeId, sort_order: sortOrder } as any);
+    if (error) throw error;
+  }
+
+  async updateExtraRecipe(id: string, updates: { is_done?: boolean; assigned_to?: string }): Promise<void> {
+    const { error } = await supabase
+      .from('shabbat_extra_recipes')
+      .update(updates as any)
+      .eq('id', id);
     if (error) throw error;
   }
 
