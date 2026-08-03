@@ -107,6 +107,37 @@ const ShabbatPlan = () => {
     }
   };
 
+  const handleReorderSections = async (sectionIds: string[]) => {
+    setSections(prev => {
+      const map = new Map(prev.map(s => [s.id, s]));
+      const reordered = sectionIds.map(id => map.get(id)!).filter(Boolean);
+      const rest = prev.filter(s => !sectionIds.includes(s.id));
+      return [...reordered, ...rest].map((s, i) =>
+        sectionIds.includes(s.id) ? { ...s, sort_order: sectionIds.indexOf(s.id) } : s
+      ).sort((a, b) => a.sort_order - b.sort_order);
+    });
+    try {
+      await shabbatPlanService.reorderSections(sectionIds);
+      await loadData(currentFriday);
+    } catch {
+      toast.error('שגיאה בשינוי הסדר');
+      await loadData(currentFriday);
+    }
+  };
+
+  const handleReorderRecipes = async (sectionId: string, recipeEntryIds: string[]) => {
+    setSections(prev => prev.map(s => s.id !== sectionId ? s : {
+      ...s,
+      recipes: recipeEntryIds.map(id => s.recipes.find(r => r.id === id)!).filter(Boolean),
+    }));
+    try {
+      await shabbatPlanService.reorderSectionRecipes(recipeEntryIds);
+    } catch {
+      toast.error('שגיאה בשינוי הסדר');
+      await loadData(currentFriday);
+    }
+  };
+
   const handleAddExtraRecipe = async (recipeId: string) => {
     if (!planId) return;
     try {
@@ -230,6 +261,8 @@ const ShabbatPlan = () => {
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('friday')}
           />
           <ShabbatMealCard
@@ -242,6 +275,8 @@ const ShabbatPlan = () => {
             onAddRecipe={handleAddRecipe}
             onRemoveRecipe={handleRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
           />
         </div>

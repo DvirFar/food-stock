@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Check } from 'lucide-react';
+import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Check, GripVertical } from 'lucide-react';
 import { ShabbatPlanSection } from '@/services/shabbatPlanService';
 import { Recipe, Product } from '@/types';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,8 @@ interface ShabbatMealCardProps {
   onAddRecipe: (sectionId: string, recipeId: string, sortOrder: number) => Promise<void>;
   onRemoveRecipe: (recipeEntryId: string) => Promise<void>;
   onUpdateRecipe: (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => Promise<void>;
+  onReorderSections: (sectionIds: string[]) => Promise<void>;
+  onReorderRecipes: (sectionId: string, recipeEntryIds: string[]) => Promise<void>;
   onPreview?: () => void;
 }
 
@@ -33,6 +35,8 @@ export const ShabbatMealCard = ({
   onAddRecipe,
   onRemoveRecipe,
   onUpdateRecipe,
+  onReorderSections,
+  onReorderRecipes,
   onPreview,
 }: ShabbatMealCardProps) => {
   const [showAddSection, setShowAddSection] = useState(false);
@@ -42,6 +46,38 @@ export const ShabbatMealCard = ({
   const [recipeSearch, setRecipeSearch] = useState('');
   const [recipeDropdownOpen, setRecipeDropdownOpen] = useState(false);
   const recipeDropdownRef = useRef<HTMLDivElement>(null);
+  const [dragSectionId, setDragSectionId] = useState<string | null>(null);
+  const [overSectionId, setOverSectionId] = useState<string | null>(null);
+  const [dragRecipe, setDragRecipe] = useState<{ sectionId: string; id: string } | null>(null);
+  const [overRecipeId, setOverRecipeId] = useState<string | null>(null);
+
+  const moveItem = <T,>(arr: T[], from: number, to: number) => {
+    const next = [...arr];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    return next;
+  };
+
+  const handleSectionDrop = (targetId: string) => {
+    const fromIdx = sections.findIndex(s => s.id === dragSectionId);
+    const toIdx = sections.findIndex(s => s.id === targetId);
+    setDragSectionId(null);
+    setOverSectionId(null);
+    if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
+    onReorderSections(moveItem(sections, fromIdx, toIdx).map(s => s.id));
+  };
+
+  const handleRecipeDrop = (sectionId: string, targetId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    setOverRecipeId(null);
+    if (!section || !dragRecipe || dragRecipe.sectionId !== sectionId) { setDragRecipe(null); return; }
+    const fromIdx = section.recipes.findIndex(r => r.id === dragRecipe.id);
+    const toIdx = section.recipes.findIndex(r => r.id === targetId);
+    setDragRecipe(null);
+    if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
+    onReorderRecipes(sectionId, moveItem(section.recipes, fromIdx, toIdx).map(r => r.id));
+  };
+
 
   useEffect(() => {
     if (addRecipeForSection) {
@@ -115,9 +151,30 @@ export const ShabbatMealCard = ({
       </CardHeader>
       <CardContent className="space-y-2">
         {sections.map(section => (
-          <div key={section.id} className="border rounded-lg p-2 space-y-1.5">
+          <div
+            key={section.id}
+            className={cn(
+              'border rounded-lg p-2 space-y-1.5 transition-colors',
+              dragSectionId === section.id && 'opacity-50',
+              overSectionId === section.id && dragSectionId !== section.id && 'border-primary bg-accent/40'
+            )}
+            onDragOver={(e) => { if (dragSectionId) { e.preventDefault(); setOverSectionId(section.id); } }}
+            onDragLeave={() => setOverSectionId(prev => (prev === section.id ? null : prev))}
+            onDrop={(e) => { if (dragSectionId) { e.preventDefault(); handleSectionDrop(section.id); } }}
+          >
             <div className="flex items-center justify-between">
-              <h4 className="font-medium text-xs">{section.name}</h4>
+              <div className="flex items-center gap-1">
+                <span
+                  draggable
+                  onDragStart={() => setDragSectionId(section.id)}
+                  onDragEnd={() => { setDragSectionId(null); setOverSectionId(null); }}
+                  className="cursor-grab active:cursor-grabbing text-muted-foreground"
+                  title="גרור לשינוי סדר"
+                >
+                  <GripVertical className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="font-medium text-xs">{section.name}</h4>
+              </div>
               <div className="flex items-center gap-0.5">
                 <Button
                   variant="ghost"
@@ -159,8 +216,24 @@ export const ShabbatMealCard = ({
                 {section.recipes.map(sr => (
                   <div
                     key={sr.id}
-                    className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs"
+                    className={cn(
+                      'flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs transition-colors',
+                      dragRecipe?.id === sr.id && 'opacity-50',
+                      overRecipeId === sr.id && dragRecipe?.id !== sr.id && 'ring-1 ring-primary'
+                    )}
+                    onDragOver={(e) => { if (dragRecipe) { e.preventDefault(); e.stopPropagation(); setOverRecipeId(sr.id); } }}
+                    onDragLeave={() => setOverRecipeId(prev => (prev === sr.id ? null : prev))}
+                    onDrop={(e) => { if (dragRecipe) { e.preventDefault(); e.stopPropagation(); handleRecipeDrop(section.id, sr.id); } }}
                   >
+                    <span
+                      draggable
+                      onDragStart={(e) => { e.stopPropagation(); setDragRecipe({ sectionId: section.id, id: sr.id }); }}
+                      onDragEnd={() => { setDragRecipe(null); setOverRecipeId(null); }}
+                      className="cursor-grab active:cursor-grabbing text-muted-foreground shrink-0"
+                      title="גרור לשינוי סדר"
+                    >
+                      <GripVertical className="h-3 w-3" />
+                    </span>
                     <Checkbox
                       checked={sr.is_done}
                       onCheckedChange={(checked) => onUpdateRecipe(sr.id, { is_done: !!checked })}

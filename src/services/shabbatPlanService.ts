@@ -301,6 +301,19 @@ class ShabbatPlanService {
     if (error) throw error;
   }
 
+  async reorderSections(sectionIds: string[]): Promise<void> {
+    await Promise.all(sectionIds.map((id, i) =>
+      supabase.from('shabbat_plan_sections').update({ sort_order: i } as any).eq('id', id)
+    ));
+  }
+
+  async reorderSectionRecipes(recipeEntryIds: string[]): Promise<void> {
+    await Promise.all(recipeEntryIds.map((id, i) =>
+      supabase.from('shabbat_section_recipes').update({ sort_order: i } as any).eq('id', id)
+    ));
+  }
+
+
   async addRecipeToSection(sectionId: string, recipeId: string, sortOrder: number): Promise<void> {
     const { error } = await supabase
       .from('shabbat_section_recipes')
