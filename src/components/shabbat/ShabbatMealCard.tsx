@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Check } from 'lucide-react';
+import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Check, GripVertical } from 'lucide-react';
 import { ShabbatPlanSection } from '@/services/shabbatPlanService';
 import { Recipe, Product } from '@/types';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,8 @@ interface ShabbatMealCardProps {
   onAddRecipe: (sectionId: string, recipeId: string, sortOrder: number) => Promise<void>;
   onRemoveRecipe: (recipeEntryId: string) => Promise<void>;
   onUpdateRecipe: (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => Promise<void>;
+  onReorderSections: (sectionIds: string[]) => Promise<void>;
+  onReorderRecipes: (sectionId: string, recipeEntryIds: string[]) => Promise<void>;
   onPreview?: () => void;
 }
 
