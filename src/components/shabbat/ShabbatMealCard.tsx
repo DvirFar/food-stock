@@ -151,9 +151,30 @@ export const ShabbatMealCard = ({
       </CardHeader>
       <CardContent className="space-y-2">
         {sections.map(section => (
-          <div key={section.id} className="border rounded-lg p-2 space-y-1.5">
+          <div
+            key={section.id}
+            className={cn(
+              'border rounded-lg p-2 space-y-1.5 transition-colors',
+              dragSectionId === section.id && 'opacity-50',
+              overSectionId === section.id && dragSectionId !== section.id && 'border-primary bg-accent/40'
+            )}
+            onDragOver={(e) => { if (dragSectionId) { e.preventDefault(); setOverSectionId(section.id); } }}
+            onDragLeave={() => setOverSectionId(prev => (prev === section.id ? null : prev))}
+            onDrop={(e) => { if (dragSectionId) { e.preventDefault(); handleSectionDrop(section.id); } }}
+          >
             <div className="flex items-center justify-between">
-              <h4 className="font-medium text-xs">{section.name}</h4>
+              <div className="flex items-center gap-1">
+                <span
+                  draggable
+                  onDragStart={() => setDragSectionId(section.id)}
+                  onDragEnd={() => { setDragSectionId(null); setOverSectionId(null); }}
+                  className="cursor-grab active:cursor-grabbing text-muted-foreground"
+                  title="גרור לשינוי סדר"
+                >
+                  <GripVertical className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="font-medium text-xs">{section.name}</h4>
+              </div>
               <div className="flex items-center gap-0.5">
                 <Button
                   variant="ghost"
