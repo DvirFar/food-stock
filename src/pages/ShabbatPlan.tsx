@@ -214,6 +214,7 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             onAdd={handleAddExtraRecipe}
             onRemove={handleRemoveExtraRecipe}
+            onUpdate={handleUpdateExtraRecipe}
           />
           <DishWashingTable assignments={dishAssignments} onChange={handleDishChange} />
         </div>
