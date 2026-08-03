@@ -216,8 +216,24 @@ export const ShabbatMealCard = ({
                 {section.recipes.map(sr => (
                   <div
                     key={sr.id}
-                    className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs"
+                    className={cn(
+                      'flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1.5 text-xs transition-colors',
+                      dragRecipe?.id === sr.id && 'opacity-50',
+                      overRecipeId === sr.id && dragRecipe?.id !== sr.id && 'ring-1 ring-primary'
+                    )}
+                    onDragOver={(e) => { if (dragRecipe) { e.preventDefault(); e.stopPropagation(); setOverRecipeId(sr.id); } }}
+                    onDragLeave={() => setOverRecipeId(prev => (prev === sr.id ? null : prev))}
+                    onDrop={(e) => { if (dragRecipe) { e.preventDefault(); e.stopPropagation(); handleRecipeDrop(section.id, sr.id); } }}
                   >
+                    <span
+                      draggable
+                      onDragStart={(e) => { e.stopPropagation(); setDragRecipe({ sectionId: section.id, id: sr.id }); }}
+                      onDragEnd={() => { setDragRecipe(null); setOverRecipeId(null); }}
+                      className="cursor-grab active:cursor-grabbing text-muted-foreground shrink-0"
+                      title="גרור לשינוי סדר"
+                    >
+                      <GripVertical className="h-3 w-3" />
+                    </span>
                     <Checkbox
                       checked={sr.is_done}
                       onCheckedChange={(checked) => onUpdateRecipe(sr.id, { is_done: !!checked })}
