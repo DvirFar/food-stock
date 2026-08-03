@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChefHat, Plus, X, CakeSlice } from 'lucide-react';
+import { ChefHat, Plus, X, CakeSlice, User } from 'lucide-react';
 import { Recipe } from '@/types';
 import { ShabbatExtraRecipe } from '@/services/shabbatPlanService';
 
@@ -11,9 +13,10 @@ interface ShabbatExtraRecipesProps {
   allRecipes: Recipe[];
   onAdd: (recipeId: string) => void;
   onRemove: (id: string) => void;
+  onUpdate: (id: string, updates: { is_done?: boolean; assigned_to?: string }) => void;
 }
 
-export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove }: ShabbatExtraRecipesProps) => {
+export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove, onUpdate }: ShabbatExtraRecipesProps) => {
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
 
   const getRecipeName = (recipeId: string) => allRecipes.find(r => r.id === recipeId)?.name || 'מתכון לא נמצא';
