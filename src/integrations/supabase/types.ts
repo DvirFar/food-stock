@@ -481,22 +481,28 @@ export type Database = {
       }
       shabbat_extra_recipes: {
         Row: {
+          assigned_to: string
           created_at: string
           id: string
+          is_done: boolean
           plan_id: string
           recipe_id: string
           sort_order: number
         }
         Insert: {
+          assigned_to?: string
           created_at?: string
           id?: string
+          is_done?: boolean
           plan_id: string
           recipe_id: string
           sort_order?: number
         }
         Update: {
+          assigned_to?: string
           created_at?: string
           id?: string
+          is_done?: boolean
           plan_id?: string
           recipe_id?: string
           sort_order?: number
