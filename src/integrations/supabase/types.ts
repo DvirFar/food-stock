@@ -483,28 +483,31 @@ export type Database = {
         Row: {
           assigned_to: string
           created_at: string
+          custom_name: string | null
           id: string
           is_done: boolean
           plan_id: string
-          recipe_id: string
+          recipe_id: string | null
           sort_order: number
         }
         Insert: {
           assigned_to?: string
           created_at?: string
+          custom_name?: string | null
           id?: string
           is_done?: boolean
           plan_id: string
-          recipe_id: string
+          recipe_id?: string | null
           sort_order?: number
         }
         Update: {
           assigned_to?: string
           created_at?: string
+          custom_name?: string | null
           id?: string
           is_done?: boolean
           plan_id?: string
-          recipe_id?: string
+          recipe_id?: string | null
           sort_order?: number
         }
         Relationships: [
@@ -615,27 +618,30 @@ export type Database = {
         Row: {
           assigned_to: string
           created_at: string
+          custom_name: string | null
           id: string
           is_done: boolean
-          recipe_id: string
+          recipe_id: string | null
           section_id: string
           sort_order: number
         }
         Insert: {
           assigned_to?: string
           created_at?: string
+          custom_name?: string | null
           id?: string
           is_done?: boolean
-          recipe_id: string
+          recipe_id?: string | null
           section_id: string
           sort_order?: number
         }
         Update: {
           assigned_to?: string
           created_at?: string
+          custom_name?: string | null
           id?: string
           is_done?: boolean
-          recipe_id?: string
+          recipe_id?: string | null
           section_id?: string
           sort_order?: number
         }
