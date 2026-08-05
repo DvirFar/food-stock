@@ -17,7 +17,7 @@ interface ShabbatMealCardProps {
   products: Product[];
   onAddSection: (name: string, sortOrder: number) => Promise<void>;
   onDeleteSection: (sectionId: string) => Promise<void>;
-  onAddRecipe: (sectionId: string, recipeId: string, sortOrder: number) => Promise<void>;
+  onAddRecipe: (sectionId: string, recipeId: string | null, sortOrder: number, customName?: string) => Promise<void>;
   onRemoveRecipe: (recipeEntryId: string) => Promise<void>;
   onUpdateRecipe: (recipeEntryId: string, updates: { is_done?: boolean; assigned_to?: string }) => Promise<void>;
   onReorderSections: (sectionIds: string[]) => Promise<void>;
@@ -123,9 +123,15 @@ export const ShabbatMealCard = ({
   };
 
   const handleAddRecipe = async (sectionId: string) => {
-    if (!selectedRecipeId) return;
+    const freeText = recipeSearch.trim();
+    if (!selectedRecipeId && !freeText) return;
     const section = sections.find(s => s.id === sectionId);
-    await onAddRecipe(sectionId, selectedRecipeId, section?.recipes.length || 0);
+    await onAddRecipe(
+      sectionId,
+      selectedRecipeId || null,
+      section?.recipes.length || 0,
+      selectedRecipeId ? undefined : freeText,
+    );
     setSelectedRecipeId('');
     setRecipeSearch('');
     setAddRecipeForSection(null);
@@ -241,7 +247,7 @@ export const ShabbatMealCard = ({
                     />
                     <ChefHat className="h-3 w-3 text-muted-foreground shrink-0" />
                     <span className={`flex-1 truncate ${sr.is_done ? 'line-through text-muted-foreground' : ''}`}>
-                      {sr.recipe?.name || 'מתכון לא נמצא'}
+                      {sr.recipe?.name || sr.custom_name || 'מתכון לא נמצא'}
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
                       <User className="h-3 w-3 text-muted-foreground" />
@@ -272,7 +278,7 @@ export const ShabbatMealCard = ({
               <div className="flex gap-1.5 mt-1" ref={recipeDropdownRef}>
                 <div className="relative flex-1">
                   <Input
-                    placeholder="חפש מתכון לפי שם או תגית..."
+                    placeholder="חפש מתכון או כתוב טקסט חופשי..."
                     value={recipeSearch}
                     onChange={(e) => {
                       setRecipeSearch(e.target.value);
@@ -282,6 +288,10 @@ export const ShabbatMealCard = ({
                       }
                     }}
                     onFocus={() => setRecipeDropdownOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') { e.preventDefault(); handleAddRecipe(section.id); }
+                      if (e.key === 'Escape') { setAddRecipeForSection(null); setSelectedRecipeId(''); setRecipeSearch(''); }
+                    }}
                     className="h-8 text-xs pe-8"
                     autoFocus
                   />
@@ -294,7 +304,9 @@ export const ShabbatMealCard = ({
                       <ScrollArea className="max-h-48">
                         {filteredRecipes.length === 0 ? (
                           <div className="p-3 text-xs text-muted-foreground text-center">
-                            לא נמצאו מתכונים
+                            {recipeSearch.trim()
+                              ? `לא נמצאו מתכונים — יתווסף כטקסט חופשי: "${recipeSearch.trim()}"`
+                              : 'לא נמצאו מתכונים'}
                           </div>
                         ) : (
                           <div className="py-1">
@@ -325,7 +337,7 @@ export const ShabbatMealCard = ({
                     </div>
                   )}
                 </div>
-                <Button size="sm" className="h-8 text-xs" onClick={() => handleAddRecipe(section.id)} disabled={!selectedRecipeId}>
+                <Button size="sm" className="h-8 text-xs" onClick={() => handleAddRecipe(section.id)} disabled={!selectedRecipeId && !recipeSearch.trim()}>
                   הוסף
                 </Button>
                 <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setAddRecipeForSection(null); setSelectedRecipeId(''); setRecipeSearch(''); }}>

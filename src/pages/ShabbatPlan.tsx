@@ -80,9 +80,9 @@ const ShabbatPlan = () => {
     } catch { toast.error('שגיאה במחיקת חלק'); }
   };
 
-  const handleAddRecipe = async (sectionId: string, recipeId: string, sortOrder: number) => {
+  const handleAddRecipe = async (sectionId: string, recipeId: string | null, sortOrder: number, customName?: string) => {
     try {
-      await shabbatPlanService.addRecipeToSection(sectionId, recipeId, sortOrder);
+      await shabbatPlanService.addRecipeToSection(sectionId, recipeId, sortOrder, customName);
       await loadData(currentFriday);
     } catch { toast.error('שגיאה בהוספת מתכון'); }
   };
@@ -138,10 +138,10 @@ const ShabbatPlan = () => {
     }
   };
 
-  const handleAddExtraRecipe = async (recipeId: string) => {
+  const handleAddExtraRecipe = async (recipeId: string | null, customName?: string) => {
     if (!planId) return;
     try {
-      await shabbatPlanService.addExtraRecipe(planId, recipeId, extraRecipes.length);
+      await shabbatPlanService.addExtraRecipe(planId, recipeId, extraRecipes.length, customName);
       const updated = await shabbatPlanService.getExtraRecipes(planId);
       setExtraRecipes(updated);
     } catch { toast.error('שגיאה בהוספת מתכון'); }
@@ -199,7 +199,7 @@ const ShabbatPlan = () => {
   // Build preview recipes for SlotPreviewDialog
   const getPreviewRecipes = (slot: 'friday' | 'saturday') => {
     const slotSections = sections.filter(s => s.slot === slot);
-    const recipeIds = slotSections.flatMap(s => s.recipes.map(r => r.recipe_id));
+    const recipeIds = slotSections.flatMap(s => s.recipes.map(r => r.recipe_id).filter(Boolean));
     return allRecipes.filter(r => recipeIds.includes(r.id));
   };
 
