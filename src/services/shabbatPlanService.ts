@@ -22,7 +22,8 @@ export interface ShabbatPlanSection {
 export interface ShabbatSectionRecipe {
   id: string;
   section_id: string;
-  recipe_id: string;
+  recipe_id: string | null;
+  custom_name?: string | null;
   sort_order: number;
   is_done: boolean;
   assigned_to: string;
@@ -33,7 +34,8 @@ export interface ShabbatSectionRecipe {
 export interface ShabbatExtraRecipe {
   id: string;
   plan_id: string;
-  recipe_id: string;
+  recipe_id: string | null;
+  custom_name?: string | null;
   sort_order: number;
   is_done: boolean;
   assigned_to: string;
@@ -265,7 +267,7 @@ class ShabbatPlanService {
     }
 
     // Fetch referenced recipes
-    const recipeIds = [...new Set(sectionRecipes.map(sr => sr.recipe_id))];
+    const recipeIds = [...new Set(sectionRecipes.map(sr => sr.recipe_id).filter(Boolean))];
     let recipesMap: Record<string, Recipe> = {};
     if (recipeIds.length > 0) {
       const { data: recipes } = await supabase
@@ -282,7 +284,7 @@ class ShabbatPlanService {
       slot: section.slot as 'friday' | 'saturday',
       recipes: sectionRecipes
         .filter(sr => sr.section_id === section.id)
-        .map(sr => ({ ...sr, recipe: recipesMap[sr.recipe_id] })),
+        .map(sr => ({ ...sr, recipe: sr.recipe_id ? recipesMap[sr.recipe_id] : undefined })),
     }));
   }
 
@@ -314,10 +316,10 @@ class ShabbatPlanService {
   }
 
 
-  async addRecipeToSection(sectionId: string, recipeId: string, sortOrder: number): Promise<void> {
+  async addRecipeToSection(sectionId: string, recipeId: string | null, sortOrder: number, customName?: string): Promise<void> {
     const { error } = await supabase
       .from('shabbat_section_recipes')
-      .insert({ section_id: sectionId, recipe_id: recipeId, sort_order: sortOrder } as any);
+      .insert({ section_id: sectionId, recipe_id: recipeId, custom_name: recipeId ? null : (customName || '').trim(), sort_order: sortOrder } as any);
     if (error) throw error;
   }
 
@@ -347,10 +349,10 @@ class ShabbatPlanService {
     return (data || []) as ShabbatExtraRecipe[];
   }
 
-  async addExtraRecipe(planId: string, recipeId: string, sortOrder: number): Promise<void> {
+  async addExtraRecipe(planId: string, recipeId: string | null, sortOrder: number, customName?: string): Promise<void> {
     const { error } = await supabase
       .from('shabbat_extra_recipes')
-      .insert({ plan_id: planId, recipe_id: recipeId, sort_order: sortOrder } as any);
+      .insert({ plan_id: planId, recipe_id: recipeId, custom_name: recipeId ? null : (customName || '').trim(), sort_order: sortOrder } as any);
     if (error) throw error;
   }
 
