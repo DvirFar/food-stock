@@ -186,6 +186,7 @@ export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove,
           </div>
         )}
       </CardContent>
+      <RecipeViewDialog recipe={viewRecipe} open={!!viewRecipe} onOpenChange={(o) => !o && setViewRecipe(null)} />
     </Card>
   );
 };

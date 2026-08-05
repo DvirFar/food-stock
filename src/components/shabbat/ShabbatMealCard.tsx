@@ -395,6 +395,7 @@ export const ShabbatMealCard = ({
           </Button>
         )}
       </CardContent>
+      <RecipeViewDialog recipe={viewRecipe} open={!!viewRecipe} onOpenChange={(o) => !o && setViewRecipe(null)} />
     </Card>
   );
 };
