@@ -9,6 +9,7 @@ import { UtensilsCrossed, Plus, Trash2, ChefHat, X, Eye, User, ChevronDown, Chec
 import { ShabbatPlanSection } from '@/services/shabbatPlanService';
 import { Recipe, Product } from '@/types';
 import { cn } from '@/lib/utils';
+import { RecipeViewDialog } from '@/components/RecipeViewDialog';
 
 interface ShabbatMealCardProps {
   title: string;
@@ -39,6 +40,7 @@ export const ShabbatMealCard = ({
   onReorderRecipes,
   onPreview,
 }: ShabbatMealCardProps) => {
+  const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [addingSectionName, setAddingSectionName] = useState('');
   const [addRecipeForSection, setAddRecipeForSection] = useState<string | null>(null);
@@ -246,9 +248,22 @@ export const ShabbatMealCard = ({
                       className="h-3.5 w-3.5"
                     />
                     <ChefHat className="h-3 w-3 text-muted-foreground shrink-0" />
-                    <span className={`flex-1 truncate ${sr.is_done ? 'line-through text-muted-foreground' : ''}`}>
-                      {sr.recipe?.name || sr.custom_name || 'מתכון לא נמצא'}
-                    </span>
+                    {sr.recipe ? (
+                      <button
+                        type="button"
+                        onClick={() => setViewRecipe(sr.recipe as Recipe)}
+                        className={cn(
+                          'flex-1 truncate text-right hover:underline',
+                          sr.is_done && 'line-through text-muted-foreground'
+                        )}
+                      >
+                        {sr.recipe.name}
+                      </button>
+                    ) : (
+                      <span className={`flex-1 truncate ${sr.is_done ? 'line-through text-muted-foreground' : ''}`}>
+                        {sr.custom_name || 'מתכון לא נמצא'}
+                      </span>
+                    )}
                     <div className="flex items-center gap-1 shrink-0">
                       <User className="h-3 w-3 text-muted-foreground" />
                       <Input
