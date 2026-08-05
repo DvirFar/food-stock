@@ -8,6 +8,7 @@ import { ChefHat, Plus, X, CakeSlice, User, ChevronDown, Check } from 'lucide-re
 import { Recipe } from '@/types';
 import { ShabbatExtraRecipe } from '@/services/shabbatPlanService';
 import { cn } from '@/lib/utils';
+import { RecipeViewDialog } from '@/components/RecipeViewDialog';
 
 interface ShabbatExtraRecipesProps {
   extraRecipes: ShabbatExtraRecipe[];
@@ -18,6 +19,7 @@ interface ShabbatExtraRecipesProps {
 }
 
 export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove, onUpdate }: ShabbatExtraRecipesProps) => {
+  const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
@@ -148,9 +150,22 @@ export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove,
                   className="h-3.5 w-3.5"
                 />
                 <ChefHat className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className={`flex-1 truncate ${er.is_done ? 'line-through text-muted-foreground' : ''}`}>
-                  {getName(er)}
-                </span>
+                {er.recipe_id && allRecipes.find(r => r.id === er.recipe_id) ? (
+                  <button
+                    type="button"
+                    onClick={() => setViewRecipe(allRecipes.find(r => r.id === er.recipe_id) || null)}
+                    className={cn(
+                      'flex-1 truncate text-right hover:underline',
+                      er.is_done && 'line-through text-muted-foreground'
+                    )}
+                  >
+                    {getName(er)}
+                  </button>
+                ) : (
+                  <span className={`flex-1 truncate ${er.is_done ? 'line-through text-muted-foreground' : ''}`}>
+                    {getName(er)}
+                  </span>
+                )}
                 <div className="flex items-center gap-1 shrink-0">
                   <User className="h-3 w-3 text-muted-foreground" />
                   <Input
@@ -171,6 +186,7 @@ export const ShabbatExtraRecipes = ({ extraRecipes, allRecipes, onAdd, onRemove,
           </div>
         )}
       </CardContent>
+      <RecipeViewDialog recipe={viewRecipe} open={!!viewRecipe} onOpenChange={(o) => !o && setViewRecipe(null)} />
     </Card>
   );
 };
