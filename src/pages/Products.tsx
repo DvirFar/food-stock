@@ -307,8 +307,17 @@ const Products = () => {
           onProductUpdated={handleProductUpdated}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="מחיקת מוצר"
+        description="האם אתה בטוח שברצונך למחוק את המוצר? פעולה זו אינה ניתנת לביטול."
+      />
     </div>
   );
+
 };
 
 export default Products;
