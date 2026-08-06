@@ -218,20 +218,22 @@ const ShabbatPlan = () => {
         <p className="text-muted-foreground">תכנן את ארוחות השבת, הכנות נוספות וחלוקת כלים</p>
       </div>
 
-      <div className="flex items-center justify-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-lg">{formatFridayDate()}</span>
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-muted-foreground" />
+            <span className="font-medium text-lg">{formatFridayDate()}</span>
+          </div>
+          <Button variant="outline" size="icon" onClick={() => navigateWeek(1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setCurrentFriday(shabbatPlanService.getWeekFriday())}>
+            השבת הקרובה
+          </Button>
         </div>
-        <Button variant="outline" size="icon" onClick={() => navigateWeek(1)}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => setCurrentFriday(shabbatPlanService.getWeekFriday())}>
-          השבת הקרובה
-        </Button>
         <Button variant="outline" size="sm" onClick={handleApplyDefaults}>
           טען ברירות מחדל
         </Button>
