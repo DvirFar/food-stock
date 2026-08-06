@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Clock, Check, Pencil } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import type { CalendarEvent } from '@/services/monthlyCalendarService';
+
 
 interface CalendarEventItemProps {
   event: CalendarEvent;
