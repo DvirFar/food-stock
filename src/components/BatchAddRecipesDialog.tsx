@@ -139,14 +139,19 @@ export const BatchAddRecipesDialog = ({
     confirm: confirmRemoveIngredient,
     cancel: cancelRemoveIngredient,
     isOpen: isOpenRemoveIngredient,
-  } = useConfirmDelete<{ recipeIndex: number; index: number }>(removeIngredient);
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>((target) =>
+    removeIngredient(target.recipeIndex, target.index)
+  );
 
   const {
     requestConfirm: requestRemoveInstruction,
     confirm: confirmRemoveInstruction,
     cancel: cancelRemoveInstruction,
     isOpen: isOpenRemoveInstruction,
-  } = useConfirmDelete<{ recipeIndex: number; index: number }>(removeInstruction);
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>((target) =>
+    removeInstruction(target.recipeIndex, target.index)
+  );
+
 
 
   const resetForm = () => {
