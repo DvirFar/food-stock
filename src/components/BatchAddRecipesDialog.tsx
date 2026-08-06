@@ -454,9 +454,10 @@ export const BatchAddRecipesDialog = ({
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => removeInstruction(recipeIndex, instIndex)}
+                                    onClick={() => requestRemoveInstruction({ recipeIndex, index: instIndex })}
                                     disabled={entry.instructions.length === 1}
                                   >
+
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
