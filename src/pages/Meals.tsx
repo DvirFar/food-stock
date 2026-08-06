@@ -16,7 +16,10 @@ import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
 import { Recipe, Product } from '@/types';
 import { MealPreviewDialog } from '@/components/MealPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const Meals = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
