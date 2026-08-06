@@ -17,6 +17,7 @@ export const CalendarEventItem = ({ event, onUpdate, onDelete }: CalendarEventIt
   const [editing, setEditing] = useState(false);
   const [desc, setDesc] = useState(event.description);
   const [time, setTime] = useState(event.time_display || '');
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(onDelete);
 
   const save = async () => {
     if (!desc.trim()) return;
@@ -62,23 +63,33 @@ export const CalendarEventItem = ({ event, onUpdate, onDelete }: CalendarEventIt
   }
 
   return (
-    <div className="group flex items-start gap-1.5 p-1.5 rounded-md hover:bg-accent/50 transition-colors">
-      <div className="flex-1 min-w-0">
-        {event.time_display && (
-          <span className="text-[10px] font-mono text-primary/80 block leading-tight" dir="ltr">
-            {event.time_display}
-          </span>
-        )}
-        <p className="text-xs leading-tight break-words">{event.description}</p>
+    <>
+      <div className="group flex items-start gap-1.5 p-1.5 rounded-md hover:bg-accent/50 transition-colors">
+        <div className="flex-1 min-w-0">
+          {event.time_display && (
+            <span className="text-[10px] font-mono text-primary/80 block leading-tight" dir="ltr">
+              {event.time_display}
+            </span>
+          )}
+          <p className="text-xs leading-tight break-words">{event.description}</p>
+        </div>
+        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <button onClick={() => setEditing(true)} className="p-0.5 rounded hover:bg-accent">
+            <Pencil className="h-3 w-3 text-muted-foreground" />
+          </button>
+          <button onClick={() => requestConfirm(event.id)} className="p-0.5 rounded hover:bg-destructive/20">
+            <X className="h-3 w-3 text-destructive" />
+          </button>
+        </div>
       </div>
-      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={() => setEditing(true)} className="p-0.5 rounded hover:bg-accent">
-          <Pencil className="h-3 w-3 text-muted-foreground" />
-        </button>
-        <button onClick={() => onDelete(event.id)} className="p-0.5 rounded hover:bg-destructive/20">
-          <X className="h-3 w-3 text-destructive" />
-        </button>
-      </div>
-    </div>
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="מחיקת אירוע"
+        description="האם למחוק את האירוע?"
+      />
+    </>
   );
 };
+
