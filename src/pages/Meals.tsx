@@ -372,8 +372,17 @@ const Meals = () => {
           onOpenChange={(open) => { if (!open) setPreviewMeal(null); }}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="הסרת מתכון מהארוחה"
+        description="האם להסיר את המתכון מהחלק? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
 
 export default Meals;
+
