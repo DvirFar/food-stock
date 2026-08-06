@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 export function useConfirmDelete<T>(onConfirm: (item: T) => void | Promise<void>) {
   const [target, setTarget] = useState<T | null>(null);
 
-  const requestConfirm = useCallback((item: T) => {
+  const requestConfirm = useCallback(async (item: T) => {
     setTarget(item);
   }, []);
 
@@ -26,3 +26,4 @@ export function useConfirmDelete<T>(onConfirm: (item: T) => void | Promise<void>
     isOpen: target !== null,
   };
 }
+
