@@ -33,7 +33,10 @@ import { ProductListView } from '@/components/ProductListView';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { EditProductDialog } from '@/components/EditProductDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const Products = () => {
   const { categories, locations } = useSettings();
