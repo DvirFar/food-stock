@@ -320,8 +320,33 @@ const ShabbatPlan = () => {
           products={products}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpenDeleteSection}
+        onOpenChange={cancelDeleteSection}
+        onConfirm={confirmDeleteSection}
+        title="מחיקת חלק"
+        description="האם למחוק את החלק ואת כל המתכונים בו?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveRecipe}
+        onOpenChange={cancelRemoveRecipe}
+        onConfirm={confirmRemoveRecipe}
+        title="הסרת מתכון מהחלק"
+        description="האם להסיר את המתכון מהחלק? המתכון עצמו לא יימחק."
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveExtraRecipe}
+        onOpenChange={cancelRemoveExtraRecipe}
+        onConfirm={confirmRemoveExtraRecipe}
+        title="הסרת הכנה נוספת"
+        description="האם להסיר את ההכנה הנוספת?"
+      />
     </div>
   );
 };
 
 export default ShabbatPlan;
+
