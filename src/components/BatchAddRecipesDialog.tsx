@@ -18,6 +18,9 @@ import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface BatchRecipeEntry {
   name: string;
