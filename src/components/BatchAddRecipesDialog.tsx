@@ -557,6 +557,31 @@ export const BatchAddRecipesDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת מתכון מהרשימה"
+        description="האם להסיר את המתכון מהרשימה?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveIngredient}
+        onOpenChange={cancelRemoveIngredient}
+        onConfirm={confirmRemoveIngredient}
+        title="הסרת מרכיב"
+        description="האם להסיר את המרכיב מהמתכון?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveInstruction}
+        onOpenChange={cancelRemoveInstruction}
+        onConfirm={confirmRemoveInstruction}
+        title="הסרת שלב הכנה"
+        description="האם להסיר את שלב ההכנה מהמתכון?"
+      />
     </Dialog>
   );
 };
+
