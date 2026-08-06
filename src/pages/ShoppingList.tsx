@@ -369,6 +369,13 @@ const ShoppingList = () => {
       )}
 
       {/* Add Products Dialog */}
+      <ConfirmDeleteDialog
+        open={isOpenRemoveProduct}
+        onOpenChange={cancelRemoveProduct}
+        onConfirm={confirmRemoveProduct}
+        title="הסרת מוצר מהרשימה"
+        description="האם להסיר את המוצר מרשימת הקניות? המוצר עצמו לא יימחק מהמלאי."
+      />
       <AddProductToListDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
@@ -379,6 +386,7 @@ const ShoppingList = () => {
     </div>
   );
 };
+
 
 interface ShoppingEntryRowProps {
   entry: ShoppingEntry;
