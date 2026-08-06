@@ -11,7 +11,10 @@ import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
 import { Recipe, Product } from '@/types';
 import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
 const MEAL_TYPES = [
