@@ -138,6 +138,28 @@ export const RecipeEditorDialog = ({
     setTags(tags.filter(t => t !== tag));
   };
 
+  const {
+    requestConfirm: requestRemoveIngredient,
+    confirm: confirmRemoveIngredient,
+    cancel: cancelRemoveIngredient,
+    isOpen: isOpenRemoveIngredient,
+  } = useConfirmDelete<number>(removeIngredient);
+
+  const {
+    requestConfirm: requestRemoveInstruction,
+    confirm: confirmRemoveInstruction,
+    cancel: cancelRemoveInstruction,
+    isOpen: isOpenRemoveInstruction,
+  } = useConfirmDelete<number>(removeInstruction);
+
+  const {
+    requestConfirm: requestRemoveTag,
+    confirm: confirmRemoveTag,
+    cancel: cancelRemoveTag,
+    isOpen: isOpenRemoveTag,
+  } = useConfirmDelete<string>(removeTag);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
