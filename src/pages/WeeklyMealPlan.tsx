@@ -124,6 +124,9 @@ const WeeklyMealPlan = () => {
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleRemoveRecipe);
+
+
   const handleClearSlot = async (day: number, mealType: 'lunch' | 'dinner') => {
     if (!planId) return;
     try {
