@@ -9,7 +9,10 @@ import { ShabbatMealCard } from '@/components/shabbat/ShabbatMealCard';
 import { ShabbatExtraRecipes } from '@/components/shabbat/ShabbatExtraRecipes';
 import { DishWashingTable } from '@/components/shabbat/DishWashingTable';
 import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const ShabbatPlan = () => {
   const [currentFriday, setCurrentFriday] = useState(() => shabbatPlanService.getWeekFriday());
