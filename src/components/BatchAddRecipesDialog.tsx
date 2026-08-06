@@ -127,6 +127,28 @@ export const BatchAddRecipesDialog = ({
     }
   };
 
+  const {
+    requestConfirm: requestRemoveEntry,
+    confirm: confirmRemoveEntry,
+    cancel: cancelRemoveEntry,
+    isOpen: isOpenRemoveEntry,
+  } = useConfirmDelete<number>(removeEntry);
+
+  const {
+    requestConfirm: requestRemoveIngredient,
+    confirm: confirmRemoveIngredient,
+    cancel: cancelRemoveIngredient,
+    isOpen: isOpenRemoveIngredient,
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>(removeIngredient);
+
+  const {
+    requestConfirm: requestRemoveInstruction,
+    confirm: confirmRemoveInstruction,
+    cancel: cancelRemoveInstruction,
+    isOpen: isOpenRemoveInstruction,
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>(removeInstruction);
+
+
   const resetForm = () => {
     setEntries([createEmptyEntry()]);
     setActiveTab('manual');
