@@ -22,8 +22,10 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
-
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { AddProductToListDialog } from '@/components/AddProductToListDialog';
+
 
 const SYSTEM_TAG = 'low-stock';
 const DEFAULT_TAGS = ['regular', SYSTEM_TAG];
