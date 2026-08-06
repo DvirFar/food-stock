@@ -102,6 +102,14 @@ export const BatchAddProductsDialog = ({
     }
   };
 
+  const {
+    requestConfirm: requestRemoveEntry,
+    confirm: confirmRemoveEntry,
+    cancel: cancelRemoveEntry,
+    isOpen: isOpenRemoveEntry,
+  } = useConfirmDelete<number>(removeEntry);
+
+
   const updateEntry = (index: number, field: keyof BatchProductEntry, value: string) => {
     const updated = [...entries];
     updated[index] = { ...updated[index], [field]: value };
