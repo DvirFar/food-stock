@@ -561,6 +561,15 @@ export const BatchAddShoppingListDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת פריט מהרשימה"
+        description="האם להסיר את הפריט מהרשימה?"
+      />
     </Dialog>
   );
 };
+
