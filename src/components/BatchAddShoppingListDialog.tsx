@@ -471,11 +471,12 @@ export const BatchAddShoppingListDialog = ({
                               variant="ghost"
                               size="icon"
                               className="mt-5"
-                              onClick={() => removeEntry(index)}
+                              onClick={() => requestRemoveEntry(index)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
+
                         </div>
                       </div>
                     </div>
