@@ -264,6 +264,23 @@ export const ShabbatDefaultsSettings = () => {
           );
         })}
       </div>
+
+      <ConfirmDeleteDialog
+        open={isOpenDeleteSection}
+        onOpenChange={cancelDeleteSection}
+        onConfirm={confirmDeleteSection}
+        title="מחיקת חלק ברירת מחדל"
+        description="האם למחוק את החלק ואת כל המתכונים בו?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveRecipe}
+        onOpenChange={cancelRemoveRecipe}
+        onConfirm={confirmRemoveRecipe}
+        title="הסרת מתכון ברירת מחדל"
+        description="האם להסיר את המתכון מרשימת ברירת המחדל? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
+
