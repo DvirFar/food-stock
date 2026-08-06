@@ -330,11 +330,12 @@ export const RecipeEditorDialog = ({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeIngredient(idx)}
+                  onClick={() => requestRemoveIngredient(idx)}
                   disabled={ingredients.length === 1}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
+
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
