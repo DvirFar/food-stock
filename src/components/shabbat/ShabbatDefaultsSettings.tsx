@@ -151,6 +151,21 @@ export const ShabbatDefaultsSettings = () => {
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
+  const {
+    requestConfirm: requestDeleteSection,
+    confirm: confirmDeleteSection,
+    cancel: cancelDeleteSection,
+    isOpen: isOpenDeleteSection,
+  } = useConfirmDelete<string>(handleDeleteSection);
+
+  const {
+    requestConfirm: requestRemoveRecipe,
+    confirm: confirmRemoveRecipe,
+    cancel: cancelRemoveRecipe,
+    isOpen: isOpenRemoveRecipe,
+  } = useConfirmDelete<string>(handleRemoveRecipe);
+
+
   if (loading) {
     return <div className="animate-pulse text-muted-foreground py-8 text-center">טוען...</div>;
   }
