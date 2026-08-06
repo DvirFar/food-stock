@@ -41,6 +41,9 @@ import { shoppingListService } from '@/services/shoppingListService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface BatchShoppingEntry {
   name: string;
