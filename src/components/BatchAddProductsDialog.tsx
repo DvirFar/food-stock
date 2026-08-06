@@ -226,10 +226,11 @@ export const BatchAddProductsDialog = ({
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
                         {entries.length > 1 && (
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => requestRemoveEntry(index)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
+
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
