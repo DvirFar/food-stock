@@ -280,10 +280,11 @@ const WeeklyMealPlan = () => {
                           return (
                             <div key={sr.id} className="flex items-center justify-between text-xs bg-muted/50 rounded px-1.5 py-1">
                               <span className="truncate">{recipe?.name || 'לא נמצא'}</span>
-                              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => handleRemoveRecipe(sr.id)}>
+                              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => requestConfirm(sr.id)}>
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
+
                           );
                         })}
                       </div>
