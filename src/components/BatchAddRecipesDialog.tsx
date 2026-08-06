@@ -321,10 +321,11 @@ export const BatchAddRecipesDialog = ({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeEntry(recipeIndex);
-                                }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                requestRemoveEntry(recipeIndex);
+                              }}
+
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
