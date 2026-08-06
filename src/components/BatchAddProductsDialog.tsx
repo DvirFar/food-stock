@@ -360,6 +360,14 @@ export const BatchAddProductsDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת מוצר מהרשימה"
+        description="האם להסיר את המוצר מהרשימה?"
+      />
     </Dialog>
   );
 };
