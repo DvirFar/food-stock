@@ -16,6 +16,9 @@ import { Recipe, RecipeIngredient, Product } from '@/types';
 import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
 import { ProductIngredientPicker } from '@/components/ProductIngredientPicker';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface RecipeEditorDialogProps {
   recipe?: Recipe | null;
