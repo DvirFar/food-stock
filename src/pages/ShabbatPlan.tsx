@@ -284,9 +284,9 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             products={products}
             onAddSection={(name, order) => handleAddSection('friday', name, order)}
-            onDeleteSection={handleDeleteSection}
+            onDeleteSection={requestDeleteSection}
             onAddRecipe={handleAddRecipe}
-            onRemoveRecipe={handleRemoveRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onReorderSections={handleReorderSections}
             onReorderRecipes={handleReorderRecipes}
@@ -298,14 +298,15 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             products={products}
             onAddSection={(name, order) => handleAddSection('saturday', name, order)}
-            onDeleteSection={handleDeleteSection}
+            onDeleteSection={requestDeleteSection}
             onAddRecipe={handleAddRecipe}
-            onRemoveRecipe={handleRemoveRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onReorderSections={handleReorderSections}
             onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
           />
+
         </div>
       </div>
 
