@@ -420,7 +420,32 @@ export const RecipeEditorDialog = ({
             </Button>
           </DialogFooter>
         </form>
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveIngredient}
+          onOpenChange={cancelRemoveIngredient}
+          onConfirm={confirmRemoveIngredient}
+          title="הסרת מרכיב"
+          description="האם להסיר את המרכיב מהמתכון?"
+        />
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveInstruction}
+          onOpenChange={cancelRemoveInstruction}
+          onConfirm={confirmRemoveInstruction}
+          title="הסרת שלב הכנה"
+          description="האם להסיר את שלב ההכנה מהמתכון?"
+        />
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveTag}
+          onOpenChange={cancelRemoveTag}
+          onConfirm={confirmRemoveTag}
+          title="הסרת תגית"
+          description="האם להסיר את התגית מהמתכון?"
+        />
       </DialogContent>
     </Dialog>
   );
 };
+
