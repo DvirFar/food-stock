@@ -121,6 +121,9 @@ const Products = () => {
     }
   };
 
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleDelete);
+
+
   const handleProductUpdated = (updated: Product) => {
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
