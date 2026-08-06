@@ -148,6 +148,14 @@ const ShoppingList = () => {
     setHiddenProducts(prev => new Set(prev).add(productId));
   }, []);
 
+  const {
+    requestConfirm: requestRemoveProduct,
+    confirm: confirmRemoveProduct,
+    cancel: cancelRemoveProduct,
+    isOpen: isOpenRemoveProduct,
+  } = useConfirmDelete<string>(handleRemoveProduct);
+
+
   const toggleTag = useCallback((tag: string) => {
     setActiveTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
