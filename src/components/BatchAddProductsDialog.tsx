@@ -18,6 +18,9 @@ import { productService } from '@/services/productService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 // Helper function to normalize text for matching
 const normalizeText = (text: string): string => {
@@ -98,6 +101,14 @@ export const BatchAddProductsDialog = ({
       setEntries(entries.filter((_, i) => i !== index));
     }
   };
+
+  const {
+    requestConfirm: requestRemoveEntry,
+    confirm: confirmRemoveEntry,
+    cancel: cancelRemoveEntry,
+    isOpen: isOpenRemoveEntry,
+  } = useConfirmDelete<number>(removeEntry);
+
 
   const updateEntry = (index: number, field: keyof BatchProductEntry, value: string) => {
     const updated = [...entries];
@@ -215,10 +226,11 @@ export const BatchAddProductsDialog = ({
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">מוצר {index + 1}</span>
                         {entries.length > 1 && (
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(index)}>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => requestRemoveEntry(index)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
+
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -348,6 +360,14 @@ export const BatchAddProductsDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת מוצר מהרשימה"
+        description="האם להסיר את המוצר מהרשימה?"
+      />
     </Dialog>
   );
 };

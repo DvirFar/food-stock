@@ -16,6 +16,9 @@ import { Recipe, RecipeIngredient, Product } from '@/types';
 import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
 import { ProductIngredientPicker } from '@/components/ProductIngredientPicker';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface RecipeEditorDialogProps {
   recipe?: Recipe | null;
@@ -134,6 +137,28 @@ export const RecipeEditorDialog = ({
   const removeTag = (tag: string) => {
     setTags(tags.filter(t => t !== tag));
   };
+
+  const {
+    requestConfirm: requestRemoveIngredient,
+    confirm: confirmRemoveIngredient,
+    cancel: cancelRemoveIngredient,
+    isOpen: isOpenRemoveIngredient,
+  } = useConfirmDelete<number>(removeIngredient);
+
+  const {
+    requestConfirm: requestRemoveInstruction,
+    confirm: confirmRemoveInstruction,
+    cancel: cancelRemoveInstruction,
+    isOpen: isOpenRemoveInstruction,
+  } = useConfirmDelete<number>(removeInstruction);
+
+  const {
+    requestConfirm: requestRemoveTag,
+    confirm: confirmRemoveTag,
+    cancel: cancelRemoveTag,
+    isOpen: isOpenRemoveTag,
+  } = useConfirmDelete<string>(removeTag);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,11 +330,12 @@ export const RecipeEditorDialog = ({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeIngredient(idx)}
+                  onClick={() => requestRemoveIngredient(idx)}
                   disabled={ingredients.length === 1}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
+
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
@@ -336,11 +362,12 @@ export const RecipeEditorDialog = ({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeInstruction(idx)}
+                  onClick={() => requestRemoveInstruction(idx)}
                   disabled={instructions.length === 1}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
+
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addInstruction}>
@@ -375,8 +402,9 @@ export const RecipeEditorDialog = ({
                     {tag}
                     <X
                       className="h-3 w-3 cursor-pointer"
-                      onClick={() => removeTag(tag)}
+                      onClick={() => requestRemoveTag(tag)}
                     />
+
                   </Badge>
                 ))}
               </div>
@@ -392,7 +420,32 @@ export const RecipeEditorDialog = ({
             </Button>
           </DialogFooter>
         </form>
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveIngredient}
+          onOpenChange={cancelRemoveIngredient}
+          onConfirm={confirmRemoveIngredient}
+          title="הסרת מרכיב"
+          description="האם להסיר את המרכיב מהמתכון?"
+        />
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveInstruction}
+          onOpenChange={cancelRemoveInstruction}
+          onConfirm={confirmRemoveInstruction}
+          title="הסרת שלב הכנה"
+          description="האם להסיר את שלב ההכנה מהמתכון?"
+        />
+
+        <ConfirmDeleteDialog
+          open={isOpenRemoveTag}
+          onOpenChange={cancelRemoveTag}
+          onConfirm={confirmRemoveTag}
+          title="הסרת תגית"
+          description="האם להסיר את התגית מהמתכון?"
+        />
       </DialogContent>
     </Dialog>
   );
 };
+

@@ -22,8 +22,10 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
-
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { AddProductToListDialog } from '@/components/AddProductToListDialog';
+
 
 const SYSTEM_TAG = 'low-stock';
 const DEFAULT_TAGS = ['regular', SYSTEM_TAG];
@@ -145,6 +147,14 @@ const ShoppingList = () => {
   const handleRemoveProduct = useCallback((productId: string) => {
     setHiddenProducts(prev => new Set(prev).add(productId));
   }, []);
+
+  const {
+    requestConfirm: requestRemoveProduct,
+    confirm: confirmRemoveProduct,
+    cancel: cancelRemoveProduct,
+    isOpen: isOpenRemoveProduct,
+  } = useConfirmDelete<string>(handleRemoveProduct);
+
 
   const toggleTag = useCallback((tag: string) => {
     setActiveTags(prev =>
@@ -331,8 +341,9 @@ const ShoppingList = () => {
                       entry={entry}
                       isShoppingMode={isShoppingMode}
                       onAmountChange={handleAmountChange}
-                      onRemove={handleRemoveProduct}
+                      onRemove={requestRemoveProduct}
                     />
+
                   ))}
                 </CardContent>
               </Card>
@@ -358,6 +369,13 @@ const ShoppingList = () => {
       )}
 
       {/* Add Products Dialog */}
+      <ConfirmDeleteDialog
+        open={isOpenRemoveProduct}
+        onOpenChange={cancelRemoveProduct}
+        onConfirm={confirmRemoveProduct}
+        title="הסרת מוצר מהרשימה"
+        description="האם להסיר את המוצר מרשימת הקניות? המוצר עצמו לא יימחק מהמלאי."
+      />
       <AddProductToListDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
@@ -368,6 +386,7 @@ const ShoppingList = () => {
     </div>
   );
 };
+
 
 interface ShoppingEntryRowProps {
   entry: ShoppingEntry;

@@ -8,7 +8,10 @@ import { shabbatPlanService, type ShabbatDefaultSection } from '@/services/shabb
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { cn } from '@/lib/utils';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const SLOTS: { key: 'friday' | 'saturday'; label: string }[] = [
   { key: 'friday', label: 'ערב שבת' },
@@ -148,6 +151,21 @@ export const ShabbatDefaultsSettings = () => {
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
 
+  const {
+    requestConfirm: requestDeleteSection,
+    confirm: confirmDeleteSection,
+    cancel: cancelDeleteSection,
+    isOpen: isOpenDeleteSection,
+  } = useConfirmDelete<string>(handleDeleteSection);
+
+  const {
+    requestConfirm: requestRemoveRecipe,
+    confirm: confirmRemoveRecipe,
+    cancel: cancelRemoveRecipe,
+    isOpen: isOpenRemoveRecipe,
+  } = useConfirmDelete<string>(handleRemoveRecipe);
+
+
   if (loading) {
     return <div className="animate-pulse text-muted-foreground py-8 text-center">טוען...</div>;
   }
@@ -210,7 +228,7 @@ export const ShabbatDefaultsSettings = () => {
                         <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setAddRecipeFor(section.id)}>
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => handleDeleteSection(section.id)}>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => requestDeleteSection(section.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -226,7 +244,7 @@ export const ShabbatDefaultsSettings = () => {
                             <button
                               type="button"
                               className="text-muted-foreground hover:text-destructive"
-                              onClick={() => handleRemoveRecipe(r.id)}
+                              onClick={() => requestRemoveRecipe(r.id)}
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>
@@ -234,6 +252,7 @@ export const ShabbatDefaultsSettings = () => {
                         ))}
                       </ul>
                     )}
+
 
                     {addRecipeFor === section.id && (
                       <RecipePicker recipes={recipes} onSelect={(r) => handleAddRecipe(section, r)} />
@@ -245,6 +264,23 @@ export const ShabbatDefaultsSettings = () => {
           );
         })}
       </div>
+
+      <ConfirmDeleteDialog
+        open={isOpenDeleteSection}
+        onOpenChange={cancelDeleteSection}
+        onConfirm={confirmDeleteSection}
+        title="מחיקת חלק ברירת מחדל"
+        description="האם למחוק את החלק ואת כל המתכונים בו?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveRecipe}
+        onOpenChange={cancelRemoveRecipe}
+        onConfirm={confirmRemoveRecipe}
+        title="הסרת מתכון ברירת מחדל"
+        description="האם להסיר את המתכון מרשימת ברירת המחדל? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
+

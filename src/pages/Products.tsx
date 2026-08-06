@@ -33,7 +33,10 @@ import { ProductListView } from '@/components/ProductListView';
 import { AddProductDialog } from '@/components/AddProductDialog';
 import { BatchAddProductsDialog } from '@/components/BatchAddProductsDialog';
 import { EditProductDialog } from '@/components/EditProductDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const Products = () => {
   const { categories, locations } = useSettings();
@@ -117,6 +120,9 @@ const Products = () => {
       toast.error('שגיאה במחיקת מוצר');
     }
   };
+
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleDelete);
+
 
   const handleProductUpdated = (updated: Product) => {
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
@@ -254,7 +260,7 @@ const Products = () => {
           onProductUpdated={handleProductUpdated}
           onProductsUpdated={handleBulkProductsUpdated}
           onQuantityChange={handleQuantityChange}
-          onDelete={handleDelete}
+          onDelete={requestConfirm}
           onEdit={setEditingProduct}
         />
       ) : (
@@ -264,7 +270,7 @@ const Products = () => {
               key={product.id}
               product={product}
               onQuantityChange={handleQuantityChange}
-              onDelete={handleDelete}
+              onDelete={requestConfirm}
               onEdit={setEditingProduct}
               showLowStock
               showExpiration
@@ -272,6 +278,7 @@ const Products = () => {
           ))}
         </div>
       )}
+
 
       {/* Results count */}
       {filteredProducts.length > 0 && (
@@ -300,8 +307,17 @@ const Products = () => {
           onProductUpdated={handleProductUpdated}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="מחיקת מוצר"
+        description="האם אתה בטוח שברצונך למחוק את המוצר? פעולה זו אינה ניתנת לביטול."
+      />
     </div>
   );
+
 };
 
 export default Products;

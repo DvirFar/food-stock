@@ -11,7 +11,10 @@ import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
 import { Recipe, Product } from '@/types';
 import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
 const MEAL_TYPES = [
@@ -120,6 +123,9 @@ const WeeklyMealPlan = () => {
       setSlotRecipes(updated);
     } catch { toast.error('שגיאה בהסרת מתכון'); }
   };
+
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleRemoveRecipe);
+
 
   const handleClearSlot = async (day: number, mealType: 'lunch' | 'dinner') => {
     if (!planId) return;
@@ -274,10 +280,11 @@ const WeeklyMealPlan = () => {
                           return (
                             <div key={sr.id} className="flex items-center justify-between text-xs bg-muted/50 rounded px-1.5 py-1">
                               <span className="truncate">{recipe?.name || 'לא נמצא'}</span>
-                              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => handleRemoveRecipe(sr.id)}>
+                              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => requestConfirm(sr.id)}>
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
+
                           );
                         })}
                       </div>
@@ -332,8 +339,17 @@ const WeeklyMealPlan = () => {
           onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="הסרת מתכון מהתכנון השבועי"
+        description="האם להסיר את המתכון מהארוחה? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
 
 export default WeeklyMealPlan;
+

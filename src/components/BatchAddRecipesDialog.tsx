@@ -18,6 +18,9 @@ import { recipeService } from '@/services/recipeService';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface BatchRecipeEntry {
   name: string;
@@ -123,6 +126,33 @@ export const BatchAddRecipesDialog = ({
       setEntries(updated);
     }
   };
+
+  const {
+    requestConfirm: requestRemoveEntry,
+    confirm: confirmRemoveEntry,
+    cancel: cancelRemoveEntry,
+    isOpen: isOpenRemoveEntry,
+  } = useConfirmDelete<number>(removeEntry);
+
+  const {
+    requestConfirm: requestRemoveIngredient,
+    confirm: confirmRemoveIngredient,
+    cancel: cancelRemoveIngredient,
+    isOpen: isOpenRemoveIngredient,
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>((target) =>
+    removeIngredient(target.recipeIndex, target.index)
+  );
+
+  const {
+    requestConfirm: requestRemoveInstruction,
+    confirm: confirmRemoveInstruction,
+    cancel: cancelRemoveInstruction,
+    isOpen: isOpenRemoveInstruction,
+  } = useConfirmDelete<{ recipeIndex: number; index: number }>((target) =>
+    removeInstruction(target.recipeIndex, target.index)
+  );
+
+
 
   const resetForm = () => {
     setEntries([createEmptyEntry()]);
@@ -291,10 +321,11 @@ export const BatchAddRecipesDialog = ({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeEntry(recipeIndex);
-                                }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                requestRemoveEntry(recipeIndex);
+                              }}
+
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -387,9 +418,10 @@ export const BatchAddRecipesDialog = ({
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => removeIngredient(recipeIndex, ingIndex)}
+                                    onClick={() => requestRemoveIngredient({ recipeIndex, index: ingIndex })}
                                     disabled={entry.ingredients.length === 1}
                                   >
+
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -422,9 +454,10 @@ export const BatchAddRecipesDialog = ({
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => removeInstruction(recipeIndex, instIndex)}
+                                    onClick={() => requestRemoveInstruction({ recipeIndex, index: instIndex })}
                                     disabled={entry.instructions.length === 1}
                                   >
+
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -524,6 +557,31 @@ export const BatchAddRecipesDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת מתכון מהרשימה"
+        description="האם להסיר את המתכון מהרשימה?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveIngredient}
+        onOpenChange={cancelRemoveIngredient}
+        onConfirm={confirmRemoveIngredient}
+        title="הסרת מרכיב"
+        description="האם להסיר את המרכיב מהמתכון?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveInstruction}
+        onOpenChange={cancelRemoveInstruction}
+        onConfirm={confirmRemoveInstruction}
+        title="הסרת שלב הכנה"
+        description="האם להסיר את שלב ההכנה מהמתכון?"
+      />
     </Dialog>
   );
 };
+

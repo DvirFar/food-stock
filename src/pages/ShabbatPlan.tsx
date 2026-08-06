@@ -9,7 +9,10 @@ import { ShabbatMealCard } from '@/components/shabbat/ShabbatMealCard';
 import { ShabbatExtraRecipes } from '@/components/shabbat/ShabbatExtraRecipes';
 import { DishWashingTable } from '@/components/shabbat/DishWashingTable';
 import { SlotPreviewDialog } from '@/components/SlotPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const ShabbatPlan = () => {
   const [currentFriday, setCurrentFriday] = useState(() => shabbatPlanService.getWeekFriday());
@@ -165,6 +168,28 @@ const ShabbatPlan = () => {
     }
   };
 
+  const {
+    requestConfirm: requestDeleteSection,
+    confirm: confirmDeleteSection,
+    cancel: cancelDeleteSection,
+    isOpen: isOpenDeleteSection,
+  } = useConfirmDelete<string>(handleDeleteSection);
+
+  const {
+    requestConfirm: requestRemoveRecipe,
+    confirm: confirmRemoveRecipe,
+    cancel: cancelRemoveRecipe,
+    isOpen: isOpenRemoveRecipe,
+  } = useConfirmDelete<string>(handleRemoveRecipe);
+
+  const {
+    requestConfirm: requestRemoveExtraRecipe,
+    confirm: confirmRemoveExtraRecipe,
+    cancel: cancelRemoveExtraRecipe,
+    isOpen: isOpenRemoveExtraRecipe,
+  } = useConfirmDelete<string>(handleRemoveExtraRecipe);
+
+
   const handleDishChange = (round: string, sink: number, person: string) => {
     const key = `${round}-${sink}`;
     setDishAssignments(prev => ({ ...prev, [key]: person }));
@@ -246,9 +271,10 @@ const ShabbatPlan = () => {
             extraRecipes={extraRecipes}
             allRecipes={allRecipes}
             onAdd={handleAddExtraRecipe}
-            onRemove={handleRemoveExtraRecipe}
+            onRemove={requestRemoveExtraRecipe}
             onUpdate={handleUpdateExtraRecipe}
           />
+
           <DishWashingTable assignments={dishAssignments} onChange={handleDishChange} />
         </div>
 
@@ -259,9 +285,9 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             products={products}
             onAddSection={(name, order) => handleAddSection('friday', name, order)}
-            onDeleteSection={handleDeleteSection}
+            onDeleteSection={requestDeleteSection}
             onAddRecipe={handleAddRecipe}
-            onRemoveRecipe={handleRemoveRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onReorderSections={handleReorderSections}
             onReorderRecipes={handleReorderRecipes}
@@ -273,14 +299,15 @@ const ShabbatPlan = () => {
             allRecipes={allRecipes}
             products={products}
             onAddSection={(name, order) => handleAddSection('saturday', name, order)}
-            onDeleteSection={handleDeleteSection}
+            onDeleteSection={requestDeleteSection}
             onAddRecipe={handleAddRecipe}
-            onRemoveRecipe={handleRemoveRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onReorderSections={handleReorderSections}
             onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
           />
+
         </div>
       </div>
 
@@ -293,8 +320,33 @@ const ShabbatPlan = () => {
           products={products}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpenDeleteSection}
+        onOpenChange={cancelDeleteSection}
+        onConfirm={confirmDeleteSection}
+        title="מחיקת חלק"
+        description="האם למחוק את החלק ואת כל המתכונים בו?"
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveRecipe}
+        onOpenChange={cancelRemoveRecipe}
+        onConfirm={confirmRemoveRecipe}
+        title="הסרת מתכון מהחלק"
+        description="האם להסיר את המתכון מהחלק? המתכון עצמו לא יימחק."
+      />
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveExtraRecipe}
+        onOpenChange={cancelRemoveExtraRecipe}
+        onConfirm={confirmRemoveExtraRecipe}
+        title="הסרת הכנה נוספת"
+        description="האם להסיר את ההכנה הנוספת?"
+      />
     </div>
   );
 };
 
 export default ShabbatPlan;
+

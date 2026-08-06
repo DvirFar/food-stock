@@ -16,7 +16,10 @@ import { recipeService } from '@/services/recipeService';
 import { productService } from '@/services/productService';
 import { Recipe, Product } from '@/types';
 import { MealPreviewDialog } from '@/components/MealPreviewDialog';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const Meals = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
@@ -126,6 +129,9 @@ const Meals = () => {
       toast.error('שגיאה בהסרת מתכון');
     }
   };
+
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleRemoveRecipe);
+
 
   if (loading) {
     return (
@@ -282,11 +288,12 @@ const Meals = () => {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={() => handleRemoveRecipe(sr.id)}
+                              onClick={() => requestConfirm(sr.id)}
                             >
                               <X className="h-3.5 w-3.5" />
                             </Button>
                           </div>
+
                         ))}
                       </div>
                     )}
@@ -365,8 +372,17 @@ const Meals = () => {
           onOpenChange={(open) => { if (!open) setPreviewMeal(null); }}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="הסרת מתכון מהארוחה"
+        description="האם להסיר את המתכון מהחלק? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
 
 export default Meals;
+

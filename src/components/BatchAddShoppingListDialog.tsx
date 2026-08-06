@@ -41,6 +41,9 @@ import { shoppingListService } from '@/services/shoppingListService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 interface BatchShoppingEntry {
   name: string;
@@ -143,6 +146,14 @@ export const BatchAddShoppingListDialog = ({
       setEntries(entries.filter((_, i) => i !== index));
     }
   };
+
+  const {
+    requestConfirm: requestRemoveEntry,
+    confirm: confirmRemoveEntry,
+    cancel: cancelRemoveEntry,
+    isOpen: isOpenRemoveEntry,
+  } = useConfirmDelete<number>(removeEntry);
+
 
   const updateEntry = (index: number, field: keyof BatchShoppingEntry, value: string) => {
     const updated = [...entries];
@@ -460,11 +471,12 @@ export const BatchAddShoppingListDialog = ({
                               variant="ghost"
                               size="icon"
                               className="mt-5"
-                              onClick={() => removeEntry(index)}
+                              onClick={() => requestRemoveEntry(index)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
+
                         </div>
                       </div>
                     </div>
@@ -549,6 +561,15 @@ export const BatchAddShoppingListDialog = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <ConfirmDeleteDialog
+        open={isOpenRemoveEntry}
+        onOpenChange={cancelRemoveEntry}
+        onConfirm={confirmRemoveEntry}
+        title="הסרת פריט מהרשימה"
+        description="האם להסיר את הפריט מהרשימה?"
+      />
     </Dialog>
   );
 };
+
