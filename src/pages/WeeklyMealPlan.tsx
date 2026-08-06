@@ -339,8 +339,17 @@ const WeeklyMealPlan = () => {
           onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
         />
       )}
+
+      <ConfirmDeleteDialog
+        open={isOpen}
+        onOpenChange={cancel}
+        onConfirm={confirm}
+        title="הסרת מתכון מהתכנון השבועי"
+        description="האם להסיר את המתכון מהארוחה? המתכון עצמו לא יימחק."
+      />
     </div>
   );
 };
 
 export default WeeklyMealPlan;
+
