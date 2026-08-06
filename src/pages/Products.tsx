@@ -260,7 +260,7 @@ const Products = () => {
           onProductUpdated={handleProductUpdated}
           onProductsUpdated={handleBulkProductsUpdated}
           onQuantityChange={handleQuantityChange}
-          onDelete={handleDelete}
+          onDelete={requestConfirm}
           onEdit={setEditingProduct}
         />
       ) : (
@@ -270,7 +270,7 @@ const Products = () => {
               key={product.id}
               product={product}
               onQuantityChange={handleQuantityChange}
-              onDelete={handleDelete}
+              onDelete={requestConfirm}
               onEdit={setEditingProduct}
               showLowStock
               showExpiration
@@ -278,6 +278,7 @@ const Products = () => {
           ))}
         </div>
       )}
+
 
       {/* Results count */}
       {filteredProducts.length > 0 && (
