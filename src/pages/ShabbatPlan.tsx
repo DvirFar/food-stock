@@ -168,6 +168,28 @@ const ShabbatPlan = () => {
     }
   };
 
+  const {
+    requestConfirm: requestDeleteSection,
+    confirm: confirmDeleteSection,
+    cancel: cancelDeleteSection,
+    isOpen: isOpenDeleteSection,
+  } = useConfirmDelete<string>(handleDeleteSection);
+
+  const {
+    requestConfirm: requestRemoveRecipe,
+    confirm: confirmRemoveRecipe,
+    cancel: cancelRemoveRecipe,
+    isOpen: isOpenRemoveRecipe,
+  } = useConfirmDelete<string>(handleRemoveRecipe);
+
+  const {
+    requestConfirm: requestRemoveExtraRecipe,
+    confirm: confirmRemoveExtraRecipe,
+    cancel: cancelRemoveExtraRecipe,
+    isOpen: isOpenRemoveExtraRecipe,
+  } = useConfirmDelete<string>(handleRemoveExtraRecipe);
+
+
   const handleDishChange = (round: string, sink: number, person: string) => {
     const key = `${round}-${sink}`;
     setDishAssignments(prev => ({ ...prev, [key]: person }));
