@@ -18,6 +18,9 @@ import { productService } from '@/services/productService';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+
 
 // Helper function to normalize text for matching
 const normalizeText = (text: string): string => {
