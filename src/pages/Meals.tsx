@@ -130,6 +130,9 @@ const Meals = () => {
     }
   };
 
+  const { requestConfirm, confirm, cancel, isOpen } = useConfirmDelete<string>(handleRemoveRecipe);
+
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
