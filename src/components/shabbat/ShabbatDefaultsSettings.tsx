@@ -8,7 +8,10 @@ import { shabbatPlanService, type ShabbatDefaultSection } from '@/services/shabb
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { cn } from '@/lib/utils';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
+
 
 const SLOTS: { key: 'friday' | 'saturday'; label: string }[] = [
   { key: 'friday', label: 'ערב שבת' },
