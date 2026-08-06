@@ -402,8 +402,9 @@ export const RecipeEditorDialog = ({
                     {tag}
                     <X
                       className="h-3 w-3 cursor-pointer"
-                      onClick={() => removeTag(tag)}
+                      onClick={() => requestRemoveTag(tag)}
                     />
+
                   </Badge>
                 ))}
               </div>
