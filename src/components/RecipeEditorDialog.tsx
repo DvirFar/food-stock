@@ -284,7 +284,14 @@ export const RecipeEditorDialog = ({
                   min={0}
                   step="0.1"
                   value={ing.quantity ?? ''}
-                  onChange={(e) => updateIngredient(idx, 'quantity', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    updateIngredient(idx, 'quantity', raw === '' ? '' : raw);
+                  }}
+                  onBlur={(e) => {
+                    const parsed = parseFloat(e.target.value);
+                    updateIngredient(idx, 'quantity', isNaN(parsed) ? '' : parsed);
+                  }}
                   className="w-20"
                   dir="rtl"
                 />
