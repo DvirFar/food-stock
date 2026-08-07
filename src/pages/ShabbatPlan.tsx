@@ -223,7 +223,7 @@ const ShabbatPlan = () => {
   };
 
   // Build preview recipes for SlotPreviewDialog
-  const getPreviewRecipes = (slot: 'friday' | 'saturday') => {
+  const getPreviewRecipes = (slot: 'friday' | 'saturday' | 'seudah_shlishit') => {
     const slotSections = sections.filter(s => s.slot === slot);
     const recipeIds = slotSections.flatMap(s => s.recipes.map(r => r.recipe_id).filter(Boolean));
     return allRecipes.filter(r => recipeIds.includes(r.id));
@@ -307,6 +307,20 @@ const ShabbatPlan = () => {
             onReorderSections={handleReorderSections}
             onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
+          />
+          <ShabbatMealCard
+            title="סעודה שלישית"
+            sections={seudahShlishitSections}
+            allRecipes={allRecipes}
+            products={products}
+            onAddSection={(name, order) => handleAddSection('seudah_shlishit', name, order)}
+            onDeleteSection={requestDeleteSection}
+            onAddRecipe={handleAddRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
+            onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
+            onPreview={() => setPreviewSlot('seudah_shlishit')}
           />
 
         </div>
