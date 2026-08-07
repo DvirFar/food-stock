@@ -24,10 +24,11 @@ const ShabbatPlan = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dishTimers, setDishTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [previewSlot, setPreviewSlot] = useState<'friday' | 'saturday' | null>(null);
+  const [previewSlot, setPreviewSlot] = useState<'friday' | 'saturday' | 'seudah_shlishit' | null>(null);
 
   const fridaySections = useMemo(() => sections.filter(s => s.slot === 'friday'), [sections]);
   const saturdaySections = useMemo(() => sections.filter(s => s.slot === 'saturday'), [sections]);
+  const seudahShlishitSections = useMemo(() => sections.filter(s => s.slot === 'seudah_shlishit'), [sections]);
 
   const loadData = useCallback(async (friday: string) => {
     setLoading(true);
