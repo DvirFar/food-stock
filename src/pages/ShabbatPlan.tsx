@@ -24,10 +24,11 @@ const ShabbatPlan = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dishTimers, setDishTimers] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [previewSlot, setPreviewSlot] = useState<'friday' | 'saturday' | null>(null);
+  const [previewSlot, setPreviewSlot] = useState<'friday' | 'saturday' | 'seudah_shlishit' | null>(null);
 
   const fridaySections = useMemo(() => sections.filter(s => s.slot === 'friday'), [sections]);
   const saturdaySections = useMemo(() => sections.filter(s => s.slot === 'saturday'), [sections]);
+  const seudahShlishitSections = useMemo(() => sections.filter(s => s.slot === 'seudah_shlishit'), [sections]);
 
   const loadData = useCallback(async (friday: string) => {
     setLoading(true);
@@ -222,7 +223,7 @@ const ShabbatPlan = () => {
   };
 
   // Build preview recipes for SlotPreviewDialog
-  const getPreviewRecipes = (slot: 'friday' | 'saturday') => {
+  const getPreviewRecipes = (slot: 'friday' | 'saturday' | 'seudah_shlishit') => {
     const slotSections = sections.filter(s => s.slot === slot);
     const recipeIds = slotSections.flatMap(s => s.recipes.map(r => r.recipe_id).filter(Boolean));
     return allRecipes.filter(r => recipeIds.includes(r.id));
@@ -307,6 +308,20 @@ const ShabbatPlan = () => {
             onReorderRecipes={handleReorderRecipes}
             onPreview={() => setPreviewSlot('saturday')}
           />
+          <ShabbatMealCard
+            title="סעודה שלישית"
+            sections={seudahShlishitSections}
+            allRecipes={allRecipes}
+            products={products}
+            onAddSection={(name, order) => handleAddSection('seudah_shlishit', name, order)}
+            onDeleteSection={requestDeleteSection}
+            onAddRecipe={handleAddRecipe}
+            onRemoveRecipe={requestRemoveRecipe}
+            onUpdateRecipe={handleUpdateRecipe}
+            onReorderSections={handleReorderSections}
+            onReorderRecipes={handleReorderRecipes}
+            onPreview={() => setPreviewSlot('seudah_shlishit')}
+          />
 
         </div>
       </div>
@@ -315,7 +330,7 @@ const ShabbatPlan = () => {
         <SlotPreviewDialog
           open={!!previewSlot}
           onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
-          title={previewSlot === 'friday' ? 'ערב שבת' : 'שבת בוקר'}
+          title={previewSlot === 'friday' ? 'ערב שבת' : previewSlot === 'saturday' ? 'שבת בוקר' : 'סעודה שלישית'}
           recipes={getPreviewRecipes(previewSlot)}
           products={products}
         />

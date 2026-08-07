@@ -13,9 +13,10 @@ import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import { toast } from 'sonner';
 
 
-const SLOTS: { key: 'friday' | 'saturday'; label: string }[] = [
+const SLOTS: { key: 'friday' | 'saturday' | 'seudah_shlishit'; label: string }[] = [
   { key: 'friday', label: 'ערב שבת' },
   { key: 'saturday', label: 'שבת בוקר' },
+  { key: 'seudah_shlishit', label: 'סעודה שלישית' },
 ];
 
 const RecipePicker = ({ recipes, onSelect }: { recipes: Recipe[]; onSelect: (r: Recipe) => void }) => {

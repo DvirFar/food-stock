@@ -12,7 +12,7 @@ export interface ShabbatPlan {
 export interface ShabbatPlanSection {
   id: string;
   plan_id: string;
-  slot: 'friday' | 'saturday';
+  slot: 'friday' | 'saturday' | 'seudah_shlishit';
   name: string;
   sort_order: number;
   created_at: string;
@@ -55,7 +55,7 @@ export interface ShabbatDishAssignment {
 export interface ShabbatDefaultSection {
   id: string;
   user_id: string;
-  slot: 'friday' | 'saturday';
+  slot: 'friday' | 'saturday' | 'seudah_shlishit';
   name: string;
   sort_order: number;
   recipes: ShabbatDefaultRecipe[];
@@ -125,7 +125,7 @@ class ShabbatPlanService {
         await supabase.from('shabbat_section_recipes').insert(recipeRows as any);
       }
     } else {
-      const sectionsToInsert = ['friday', 'saturday'].flatMap(slot =>
+      const sectionsToInsert = ['friday', 'saturday', 'seudah_shlishit'].flatMap(slot =>
         DEFAULT_SECTIONS.map((name, i) => ({
           plan_id: data.id,
           slot,
@@ -169,7 +169,7 @@ class ShabbatPlanService {
 
     return (sections || []).map(s => ({
       ...(s as any),
-      slot: (s as any).slot as 'friday' | 'saturday',
+      slot: (s as any).slot as 'friday' | 'saturday' | 'seudah_shlishit',
       recipes: rows
         .filter(r => r.section_id === s.id)
         .map(r => ({ ...r, recipe: recipesMap[r.recipe_id] })),
@@ -179,7 +179,7 @@ class ShabbatPlanService {
   async createDefaultSectionsFromBuiltIn(): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-    const rows = ['friday', 'saturday'].flatMap(slot =>
+    const rows = ['friday', 'saturday', 'seudah_shlishit'].flatMap(slot =>
       DEFAULT_SECTIONS.map((name, i) => ({ user_id: user.id, slot, name, sort_order: i }))
     );
     const { error } = await supabase.from('shabbat_default_sections').insert(rows as any);
@@ -281,7 +281,7 @@ class ShabbatPlanService {
 
     return (sections || []).map(section => ({
       ...section,
-      slot: section.slot as 'friday' | 'saturday',
+      slot: section.slot as 'friday' | 'saturday' | 'seudah_shlishit',
       recipes: sectionRecipes
         .filter(sr => sr.section_id === section.id)
         .map(sr => ({ ...sr, recipe: sr.recipe_id ? recipesMap[sr.recipe_id] : undefined })),
