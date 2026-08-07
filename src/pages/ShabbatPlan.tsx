@@ -330,7 +330,7 @@ const ShabbatPlan = () => {
         <SlotPreviewDialog
           open={!!previewSlot}
           onOpenChange={(open) => { if (!open) setPreviewSlot(null); }}
-          title={previewSlot === 'friday' ? 'ערב שבת' : 'שבת בוקר'}
+          title={previewSlot === 'friday' ? 'ערב שבת' : previewSlot === 'saturday' ? 'שבת בוקר' : 'סעודה שלישית'}
           recipes={getPreviewRecipes(previewSlot)}
           products={products}
         />
